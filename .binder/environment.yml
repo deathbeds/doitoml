@@ -1,0 +1,36 @@
+channels:
+  - conda-forge
+  - nodefaults
+dependencies:
+  # run
+  - doit
+  - jinja2
+  - python >=3.8,<3.12
+  - tomli
+  # optional
+  - orjson
+  - pysimdjson
+  # build
+  - flit >=3.8
+  - pip
+  - python-build
+  - twine
+  # lint
+  - black
+  - mypy
+  - pyproject-fmt
+  - ruff
+  # test
+  - hypothesis-jsonschema
+  - pytest
+  - pytest-console-scripts
+  - pytest-cov
+  - pytest-html
+  - pytest-json-report
+  - pytest-xdist
+  # demo
+  - ipyforcegraph
+  - ipyelk
+  - ipywidgets >=8
+  - jupyterlab >=3.6.1,<4
+  - jupyterlab-deck

@@ -1,0 +1,65 @@
+[build-system]
+build-backend = "flit_core.buildapi"
+requires = [
+  "flit_core<4,>=3.7.1",
+]
+
+[project]
+name = "example-web"
+version = "0.1.0"
+description = "an example web application"
+readme = "README.md"
+authors = [
+    { name = "doitoml contributors", email = "deathbeds@googlegroups.com" },
+]
+requires-python = ">=3.8"
+classifiers = [
+  "License :: OSI Approved :: BSD License",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3",
+]
+dependencies = [
+  "fastapi",
+]
+[project.urls]
+"Source" = "https://github.com/deathbeds/doitoml/tree/main/examples/py-js-web"
+
+[tool.doit]
+default_tasks = ["backend:dist:wheel"]
+verbosity = 2
+par_type = "thread"
+backend = "sqlite3"
+
+[tool.doit.commands.list]
+status = true
+subtasks = true
+
+[tool.doitoml]
+prefix = "backend"
+config_paths = ["./package.json"]
+
+[tool.doitoml.env]
+EXAMPLE_PY_VERSION = ":get::toml::pyproject.toml::project::version"
+
+[tool.doitoml.paths]
+whl = ["dist/example_web-${EXAMPLE_PY_VERSION}-py3-none-any.whl"]
+py_src = [":rglob::src::*.py"]
+readme = ["./README.md"]
+license = ["./LICENSE"]
+ppt = ["./pyproject.toml"]
+env_yml = ["./environment.yml"]
+venv = ["./.venv"]
+venv_history = ["./.venv/conda-meta/history"]
+
+[tool.doitoml.cmd]
+conda_run = ["conda", "run", "--live-stream", "--prefix", "::venv"]
+
+[tool.doitoml.tasks.setup.env]
+file_dep = ["::env_yml"]
+targets = ["::venv_history"]
+actions = [["mamba", "env", "update", "--file", "::env_yml", "--prefix", "::venv"]]
+
+[tool.doitoml.tasks.dist.wheel]
+file_dep = ["::venv_history", "::readme", "::license", "::ppt", "::py_src", "::frontend::dist_html"]
+targets = ["::whl"]
+actions = [["::conda_run", "pyproject-build", "--no-isolation"]]

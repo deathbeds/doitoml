@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "composite": true,
+    "rootDir": "../",
+    "outDir": "../lib",
+    "module": "esnext",
+    "target": "es2018",
+    "strict": true,
+    "sourceMap": true,
+    "tsBuildInfoFile": "../build/tsconfig.tsbuildinfo"
+  },
+  "include": ["./**/*.ts"]
+}

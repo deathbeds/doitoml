@@ -1,0 +1,139 @@
+{
+  "name": "@deathbeds/example-frontend",
+  "version": "0.0.0",
+  "scripts": {
+    "build:lib": "tsc -b js",
+    "build:dist": "webpack",
+    "dist:pack": "npm pack .."
+  },
+  "main": "lib/js/index.js",
+  "devDependencies": {
+    "html-webpack-plugin": "^5.5.0",
+    "typescript": "~5.0.0",
+    "webpack": "^5.76.3",
+    "webpack-cli": "^5.0.1"
+  },
+  "doitoml": {
+    "env": {
+      "EXAMPLE_JS_VERSION": ":get::json::package.json::version",
+      "EXAMPLE_JS_DIST": "deathbeds-example-frontend-${EXAMPLE_JS_VERSION}.tgz"
+    },
+    "prefix": "frontend",
+    "paths": {
+      "pj": [
+        "package.json"
+      ],
+      "ts_src": [
+        ":rglob::js::*.ts"
+      ],
+      "ts_cfg": [
+        "js/tsconfig.json"
+      ],
+      "ts_buildinfo": [
+        "build/tsconfig.tsbuildinfo"
+      ],
+      "y_lock": [
+        "yarn.lock"
+      ],
+      "y_install_state": [
+        ".yarn/install-state.gz"
+      ],
+      "w_cfg": [
+        "webpack.config.js"
+      ],
+      "dist_html": [
+        "src/example_web/static/index.html"
+      ],
+      "all_style": [
+        ":rglob::style::*.*"
+      ],
+      "dist_tgz": [
+        "dist/${EXAMPLE_JS_DIST}"
+      ],
+      "dist": [
+        "dist"
+      ],
+      "all_lib": [
+        ":rglob::js::*.ts::/s/::.ts$::.js::/s/::/js/::/lib/js/",
+        ":rglob::js::*.ts::/s/::.ts$::.js.map::/s/::/js/::/lib/js/",
+        ":rglob::js::*.ts::/s/::.ts$::.d.ts::/s/::/js/::/lib/js/"
+      ]
+    },
+    "tasks": {
+      "install": {
+        "file_dep": [
+          "::backend::venv_history",
+          "::y_lock",
+          "::pj"
+        ],
+        "targets": [
+          "::y_install_state"
+        ],
+        "actions": [
+          [
+            "::backend::conda_run",
+            "yarn"
+          ]
+        ]
+      },
+      "build": {
+        "lib": {
+          "file_dep": [
+            "::y_install_state",
+            "::ts_cfg",
+            "::ts_src"
+          ],
+          "targets": [
+            "::ts_buildinfo",
+            "::all_lib"
+          ],
+          "actions": [
+            [
+              "::backend::conda_run",
+              "yarn",
+              "build:lib"
+            ]
+          ]
+        },
+        "html": {
+          "file_dep": [
+            "::y_install_state",
+            "::ts_buildinfo",
+            "::w_cfg",
+            "::all_style"
+          ],
+          "targets": [
+            "::dist_html"
+          ],
+          "actions": [
+            [
+              "::backend::conda_run",
+              "yarn",
+              "build:dist"
+            ]
+          ]
+        },
+        "pack": {
+          "file_dep": [
+            "::pj",
+            "::ts_buildinfo",
+            "::w_cfg",
+            "::all_style"
+          ],
+          "targets": [
+            "::dist_tgz"
+          ],
+          "actions": [
+            [
+              "::backend::conda_run",
+              "npm",
+              "pack",
+              ".."
+            ]
+          ],
+          "cwd": "dist"
+        }
+      }
+    }
+  }
+}

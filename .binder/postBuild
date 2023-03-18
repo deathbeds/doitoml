@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+set -eux
+
+# bootstrap the package
+doit
+doit list
+doit preflight

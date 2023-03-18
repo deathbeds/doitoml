@@ -1,0 +1,10 @@
+__pycache__
+.doit*
+.pnp*
+.venv
+.yarn
+build
+dist
+lib
+node_modules
+static

@@ -1,0 +1,20 @@
+channels:
+  - conda-forge
+dependencies:
+  # runtimes
+  - python >=3.11,<3.12
+  - nodejs >=18,<19
+  # run
+  - fastapi
+  - uvicorn-standard
+  # build
+  - flit
+  - python-build
+  - yarn >=3,<4
+  # test
+  - pytest-cov
+  - pytest-html
+  # atest
+  - robotframework-seleniumlibrary
+  - geckodriver
+  - firefox
