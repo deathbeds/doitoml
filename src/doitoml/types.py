@@ -71,6 +71,7 @@ TaskGenerator = Generator[Task, None, None]
 TaskOrTaskGenerator = Union[Task, TaskGenerator]
 TaskFunction = Callable[[], TaskOrTaskGenerator]
 
+
 PrefixedTaskGenerator = Generator[Tuple[Tuple[str, ...], Task], None, None]
 
 PrefixedTasks = Dict[Tuple[str, ...], Task]

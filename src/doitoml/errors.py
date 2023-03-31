@@ -11,6 +11,16 @@ class ConfigError(DoitomlError):
     """An error related to configuration."""
 
 
+class UnresolvedError(ConfigError):
+
+    """A config error related to unresolved values."""
+
+
+class PrefixError(ConfigError):
+
+    """A config error related to prefixes of configuration files."""
+
+
 class DslError(ConfigError):
 
     """An error related to a domain-specific language plugin during configuration."""

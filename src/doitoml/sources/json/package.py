@@ -6,12 +6,11 @@ from typing import Any, Dict
 from doitoml.constants import NAME
 from doitoml.errors import ParseError
 from doitoml.sources._config import ConfigParser, ConfigSource
-from doitoml.sources._source import DictSource
 
 from ._json import JsonSource
 
 
-class PackageJson(JsonSource, DictSource, ConfigSource):
+class PackageJson(JsonSource, ConfigSource):
 
     """An npm-compatible ``package.json``."""
 

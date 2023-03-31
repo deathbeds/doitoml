@@ -2,27 +2,19 @@
 
 import json
 from pathlib import Path
-from typing import Any, List
+from typing import Any
 
-from doitoml.errors import DoitomlError, ParseError
-from doitoml.sources._source import Parser, Source
+from doitoml.errors import ParseError
+from doitoml.sources._source import JsonLikeSource, Parser
 
 
-class JsonSource(Source):
+class JsonSource(JsonLikeSource):
     def parse(self) -> Any:
-        return json.loads(self.read())
-
-    def get(self, bits: List[Any]) -> Any:
-        """Get a named value from the source."""
         try:
-            current = self.parse()
-        except DoitomlError as err:
-            message = f"{self.__class__.__name__} failed to parse {self.path}: {err}"
+            return json.loads(self.read())
+        except json.JSONDecodeError as err:
+            message = f"Failed to even parse {self.path}"
             raise ParseError(message) from err
-        for bit in bits:
-            if isinstance(current, (dict, list, tuple, str)):
-                current = current[bit]
-        return current
 
 
 class JsonParser(Parser):

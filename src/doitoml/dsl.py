@@ -1,6 +1,7 @@
 """Domain-specific language for declarative doit task generation."""
 
 import abc
+import json
 import re
 from pathlib import Path
 from typing import TYPE_CHECKING, List, Tuple, cast
@@ -134,8 +135,10 @@ class Globber(DSL):
 
         for path in new_value:
             as_posix = path.as_posix()
-            if any(ex.match(as_posix) for ex in excludes):
-                continue
+            if excludes:
+                as_posix_rel = str(path.relative_to(source.path.parent).as_posix())
+                if as_posix_rel and any(ex.search(as_posix_rel) for ex in excludes):
+                    continue
             for pattern, repl_value in replacers:
                 as_posix = pattern.sub(repl_value, as_posix)
             final_value += [Path(as_posix)]
@@ -180,7 +183,7 @@ class Getter(DSL):
         parser_name: str = groups["parser"]
         parser = self.doitoml.entry_points.parsers.get(parser_name)
 
-        if parser is None:
+        if parser is None:  # pragma: no cover
             message = f"parser {parser} is not supported"
             raise DslError(message)
 
@@ -197,7 +200,7 @@ class Getter(DSL):
         if isinstance(new_value, str):
             return [new_value]
 
-        if isinstance(new_value, (tuple, list, set)):
-            return [str(x) for x in new_value]
+        if isinstance(new_value, dict):
+            return [json.dumps(new_value)]
 
-        return [str(new_value)]
+        return [x if isinstance(x, str) else json.dumps(x) for x in new_value]

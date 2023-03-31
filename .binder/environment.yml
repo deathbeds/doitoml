@@ -28,6 +28,7 @@ dependencies:
   - pytest-html
   - pytest-json-report
   - pytest-xdist
+  - tomli-w
   # demo
   - ipyforcegraph
   - ipyelk

@@ -36,13 +36,16 @@ def test_example_config_ok(an_example_project: Path) -> None:
 
 def test_example_task_counts(an_example_project: Path, script_runner: Any) -> None:
     """Test task counts are as expected."""
-    list_all = script_runner.run("doit", "list", "--all", "--template", "{name}")
+    list_all = script_runner.run("doit", "list", "--all", "--template", "TASK: {name}")
     assert list_all.success
-    tasks = list_all.stdout.strip().splitlines()
+    tasks = [t for t in list_all.stdout.strip().splitlines() if t.startswith("TASK:")]
     assert len(tasks) == EXAMPLE_TASK_COUNTS[an_example_project.name]
 
 
-def test_example_doit_default(an_example_project: Path, script_runner: Any) -> None:
+def test_example_slow_doit_default(
+    an_example_project: Path,
+    script_runner: Any,
+) -> None:
     """A full end-to-end test of an example project."""
     r_list = script_runner.run("doit", "list")
     assert r_list.success

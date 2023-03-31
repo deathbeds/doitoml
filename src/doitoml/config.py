@@ -13,13 +13,23 @@ from typing import (
     Union,
     cast,
 )
-from warnings import warn
 
 if TYPE_CHECKING:  # pragma: no cover
     from doitoml.doitoml import DoiTOML
 
 
-from doitoml.errors import ConfigError
+from doitoml.constants import (
+    DOIT_ACTIONS,
+    DOIT_PATH_RELATIVE_LISTS,
+    DOITOML_FAIL_QUIETLY,
+    DOITOML_UPDATE_ENV,
+)
+from doitoml.errors import (
+    ConfigError,
+    DoitomlError,
+    PrefixError,
+    UnresolvedError,
+)
 from doitoml.types import (
     Action,
     PathOrStrings,
@@ -43,9 +53,6 @@ ConfigParsers = Dict[Tuple[str], Type[ConfigSource]]
 ConfigSources = Dict[str, ConfigSource]
 EnvDict = Dict[str, str]
 
-DOIT_PATH_RELATIVE_LISTS = ["file_dep", "targets"]
-
-ACTIONS = "actions"
 
 RETRIES = 11
 
@@ -61,11 +68,16 @@ class Config:
     env: EnvDict
     paths: PrefixedPaths
     cmd: PrefixedStringsOrPaths
+    update_env: Optional[bool]
+    fail_quietly: Optional[bool]
 
     def __init__(
         self,
         doitoml: "DoiTOML",
         config_paths: Paths,
+        *,
+        update_env: Optional[bool] = None,
+        fail_quietly: Optional[bool] = None,
     ) -> None:
         """Create empty configuration and discover sources."""
         self.doitoml = doitoml
@@ -75,30 +87,39 @@ class Config:
         self.paths = {}
         self.env = {}
         self.cmd = {}
+        self.update_env = update_env
+        self.fail_quietly = fail_quietly
 
     def initialize(self) -> None:
         """Perform a few passes to configure everything."""
         # first find the env
         self.sources = self.find_config_sources(self.config_paths)
+
+        top_config = [*self.sources.values()][0]
+
         unresolved_env = self.init_env({}, RETRIES)
         if unresolved_env:
             message = (
-                "Failed to resolve all environment variables:"
-                f"{pformat(unresolved_env)}"
+                f"Failed to resolve environment variables: {pformat(unresolved_env)}"
             )
-            raise ConfigError(message)
+            raise UnresolvedError(message)
+
+        # load other top-level config values from the first config
+        for key in [DOITOML_UPDATE_ENV, DOITOML_FAIL_QUIETLY]:
+            if getattr(self, key, None) is None:
+                setattr(self, key, top_config.raw_config.get(key, True))
 
         # ...then find the paths
         unresolved_paths = self.init_paths({}, RETRIES)
         if unresolved_paths:
-            message = f"Failed to resolve all paths: {pformat(unresolved_paths)}"
-            raise ConfigError(message)
+            message = f"Failed to resolve paths: {pformat(unresolved_paths)}"
+            raise UnresolvedError(message)
 
         # ...then find the commands
         unresolved_commands = self.init_commands({}, RETRIES)
         if unresolved_commands:
-            message = f"Failed to resolve all commands: {pformat(unresolved_commands)}"
-            raise ConfigError(message)
+            message = f"Failed to resolve commands: {pformat(unresolved_commands)}"
+            raise UnresolvedError(message)
 
         # .. then find the tasks
         self.init_tasks()
@@ -113,13 +134,10 @@ class Config:
             config_path = unchecked.pop(0)
             checked += [config_path]
             source = self.load_config_source(Path(config_path))
-            if source is None or source in sources.values():
+            if source in sources.values():
                 continue
 
-            did_claim_prefix = self.claim_prefix(source, sources)
-
-            if not did_claim_prefix:
-                continue
+            self.claim_prefix(source, sources)
 
             for extra_path in source.extra_config_paths:
                 if extra_path not in checked and extra_path not in unchecked:
@@ -127,25 +145,26 @@ class Config:
 
         return sources
 
-    def claim_prefix(self, source: ConfigSource, sources: ConfigSources) -> bool:
+    def claim_prefix(self, source: ConfigSource, sources: ConfigSources) -> None:
         """Claim a prefix for a source."""
         prefix = source.prefix
         prefix_claimed_by = sources.get(prefix)
         if prefix_claimed_by:
-            message = f"{source} cannot claim prefix: {prefix_claimed_by}"
-            warn(message, stacklevel=1)
-            return False
+            message = f"{source} cannot claim prefix '{prefix}': {prefix_claimed_by}"
+            raise PrefixError(message)
         sources[prefix] = source
-        return True
 
-    def load_config_source(self, config_path: Path) -> Optional[ConfigSource]:
+    def load_config_source(self, config_path: Path) -> ConfigSource:
         """Maybe load a configuration source."""
         config_parsers = self.doitoml.entry_points.config_parsers
+        tried = []
         for config_parser in config_parsers.values():
             if config_parser.pattern.search(config_path.name):
                 source = config_parser(config_path)
                 return source
-        return None
+            tried += [config_parser.pattern.pattern]
+        message = f"Cannot load {config_path}: expected one of {tried}"
+        raise ConfigError(message)
 
     def init_env(self, unresolved_env: EnvDict, retries: int) -> EnvDict:
         """Initialize the global environment variable."""
@@ -179,7 +198,10 @@ class Config:
         for dsl in self.doitoml.entry_points.dsl.values():
             match = dsl.pattern.search(env_value)
             if match is not None:
-                return str(dsl.transform_token(source, match, env_value)[0])
+                try:
+                    return str(dsl.transform_token(source, match, env_value)[0])
+                except DoitomlError:
+                    return None
         return env_value
 
     def init_paths(
@@ -315,7 +337,8 @@ class Config:
                 raw_tasks,
             ):
                 claimed_prefix = self.tasks.get(task_prefix)
-                if claimed_prefix:
+                if claimed_prefix:  # pragma: no cover
+                    # not sure how we'd get here
                     pfx = ":".join(task_prefix)
                     message = f"""{source} cannot claim {pfx}: {claimed_prefix}"""
                     raise ConfigError(message)
@@ -331,7 +354,7 @@ class Config:
         if not isinstance(task_or_group, dict):
             message = f"{source} task {prefixes} is not a dict: {task_or_group}"
             raise ConfigError(message)
-        maybe_old_actions = task_or_group.get(ACTIONS, [])
+        maybe_old_actions = task_or_group.get(DOIT_ACTIONS, [])
         if maybe_old_actions:
             task = cast(Task, task_or_group)
             yield from self.resolve_one_task(source, prefixes, task)
@@ -353,7 +376,7 @@ class Config:
         task: Task,
     ) -> PrefixedTaskGenerator:
         """Resolve a single simple task."""
-        old_actions = cast(List[Action], task[ACTIONS])  # type: ignore
+        old_actions = cast(List[Action], task[DOIT_ACTIONS])  # type: ignore
         new_task = deepcopy(task)
         all_unresolved_specs: List[str] = []
         new_actions: List[Action] = []
@@ -380,7 +403,7 @@ class Config:
                 f"{source} task {prefixes} had unresolved paths:"
                 f" {all_unresolved_specs}"
             )
-            raise ConfigError(message)
+            raise UnresolvedError(message)
 
         yield prefixes, new_task
 
@@ -403,8 +426,6 @@ class Config:
                 str(token),
                 source_relative=False,
             )
-            if isinstance(token_tokens, str):
-                raise Exception([action, token, token_tokens])
             if token_tokens:
                 new_tokens += token_tokens
             else:

@@ -1,4 +1,5 @@
 """Tests of ``doitoml`` DSL."""
+import logging
 import os
 from pathlib import Path
 from typing import Any, Generator, Type
@@ -6,7 +7,11 @@ from unittest import mock
 
 import pytest
 from doitoml.doitoml import DoiTOML
-from doitoml.errors import EnvVarError
+from doitoml.errors import DslError, EnvVarError, ParseError
+
+GET = "doitoml-colon-get"
+GLOB = "doitoml-colon-glob"
+ENV = "doitoml-dollar-env"
 
 
 @pytest.fixture()
@@ -22,10 +27,16 @@ def empty_doitoml(tmp_path: Path) -> Generator[DoiTOML, None, None]:
         """
     [doitoml]
     prefix = ""
+    log_level = "DEBUG"
+    update_env = false
     """,
     )
 
-    doitoml = DoiTOML()
+    (tmp_path / "foo.txt").touch()
+    (tmp_path / "bar.txt").touch()
+    (tmp_path / "baz.json").write_text("""{"foo": ["bar", {"1": 2}, [false, null]]}""")
+
+    doitoml = DoiTOML(log_level=logging.DEBUG)
 
     yield doitoml
 
@@ -34,7 +45,13 @@ def empty_doitoml(tmp_path: Path) -> Generator[DoiTOML, None, None]:
 
 @pytest.mark.parametrize(
     ("key", "raw_token", "expected"),
-    [("doitoml-dollar-env", "foo-${BAR}", EnvVarError)],
+    [
+        (ENV, "foo-${BAR}", EnvVarError),
+        (GET, ":get::json::baz.json::0", ParseError),
+        (GET, ":get::json::nope.json::0", DslError),
+        (GET, ":get::json::foo.txt::0", ParseError),
+        (GET, ":get::json::baz.json::foo::2::1::0", ParseError),
+    ],
 )
 def test_dsl_fail(
     key: str,
@@ -53,7 +70,15 @@ def test_dsl_fail(
 
 @pytest.mark.parametrize(
     ("key", "raw_token", "expected"),
-    [("doitoml-dollar-env", "foo-${BAR}", ["foo-bar"])],
+    [
+        (ENV, "foo-${BAR}", ["foo-bar"]),
+        (GLOB, ":glob::.::*.txt::!bar.*", ["foo.txt"]),
+        (GET, ":get::json::baz.json::foo::0", ["bar"]),
+        (GET, ":get::json::baz.json::foo::0::0", ["b"]),
+        (GET, ":get::json::baz.json::foo", ["bar", '{"1": 2}', "[false, null]"]),
+        (GET, ":get::json::baz.json::foo::1", ['{"1": 2}']),
+        (GET, ":get::json::baz.json::foo::2", ["false", "null"]),
+    ],
 )
 @mock.patch.dict(os.environ, {"BAR": "bar"})
 def test_dsl_success(
@@ -61,11 +86,15 @@ def test_dsl_success(
     raw_token: str,
     expected: Any,
     empty_doitoml: DoiTOML,
+    tmp_path: Path,
 ) -> None:
     """Parse some happy days."""
     source = empty_doitoml.config.sources[""]
     dsl = empty_doitoml.entry_points.dsl[key]
     match = dsl.pattern.search(raw_token)
     assert match is not None
-    observed = dsl.transform_token(source, match, raw_token)
+    observed = [
+        str(t.relative_to(tmp_path)) if isinstance(t, Path) else t
+        for t in dsl.transform_token(source, match, raw_token)
+    ]
     assert observed == expected

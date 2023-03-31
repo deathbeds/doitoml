@@ -60,15 +60,16 @@ addopts = [
     "--json-report-file=build/reports/pytest.json",
     # xdist
     "-n=auto",
+    "--dist=worksteal",
     # cov
     "--cov=doitoml",
     "--cov-branch",
     "--cov-context=test",
-    "--cov-fail-under=83",
-    "--no-cov-on-fail",
+    "--cov-fail-under=96",
     # misc
     "-vv",
     "--ff",
+    "--tb=long",
 
 ]
 
@@ -236,7 +237,13 @@ doc = "Check python types with `mypy`"
 file_dep = ["::ppt", "::all_py"]
 actions = [["mypy", "::all_py"]]
 
-[tool.doitoml.tasks.test.pytest]
-doc = "Run tests with pytest"
+[tool.doitoml.tasks.test.pytest.fast]
+doc = "Run fast tests with pytest"
 file_dep = ["::ppt", "::all_py", "::all_py_test", "::all_examples"]
+actions = [["pytest", "-k", "not slow", "--cov-fail-under=0"]]
+
+[tool.doitoml.tasks.test.pytest.full]
+doc = "Run fast tests with pytest"
+file_dep = ["::ppt", "::all_py", "::all_py_test", "::all_examples"]
+task_dep = ["test:pytest:fast"]
 actions = [["pytest"]]

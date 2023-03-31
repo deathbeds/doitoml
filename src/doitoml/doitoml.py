@@ -9,7 +9,7 @@ import doit.action
 import doit.tools
 
 from .config import Config
-from .constants import ACTIONS, DEFAULT_CONFIG_PATH
+from .constants import DEFAULT_CONFIG_PATH, DOIT_ACTIONS
 from .entry_points import EntryPoints
 from .errors import DoitomlError, EnvVarError, TaskError
 from .types import (
@@ -28,7 +28,6 @@ class DoiTOML:
 
     """An opinionated pyproject.toml-based doit task generator."""
 
-    fail_quietly: bool = False
     config: Config
     log: logging.Logger
     entry_points: EntryPoints
@@ -44,23 +43,29 @@ class DoiTOML:
         log_level: MaybeLogLevel = None,
     ) -> None:
         """Initialize a ``doitoml`` task generator."""
-        self.fail_quietly = False if fail_quietly is None else fail_quietly
-
         try:
             self.log = self.init_log(log, log_level)
             self.entry_points = EntryPoints(self)
-            self.config = self.init_config(config_paths or [], cwd=cwd)
+            self.config = self.init_config(
+                config_paths or [],
+                cwd=cwd,
+                update_env=update_env,
+                fail_quietly=fail_quietly,
+            )
             # initialize late for ``entry_points`` that reference ``self.entry_points``
             self.entry_points.initialize()
             self.config.initialize()
-            if update_env:
-                self.update_env()
         except DoitomlError as err:
-            if self.fail_quietly:
+            if fail_quietly or (
+                fail_quietly is None and self.config and self.config.fail_quietly
+            ):
                 self.log.error(err)
                 sys.exit(1)
             else:
                 raise err
+
+        if self.config.update_env:
+            self.update_env()
 
     def init_log(
         self,
@@ -77,13 +82,15 @@ class DoiTOML:
         self,
         config_paths: PathOrStrings,
         cwd: Optional[Path] = None,
+        update_env: Optional[bool] = None,
+        fail_quietly: Optional[bool] = None,
     ) -> Config:
         """Initialize configuration."""
         cwd = cwd or Path.cwd()
         paths = [
             (cwd / path).resolve() for path in config_paths or [DEFAULT_CONFIG_PATH]
         ]
-        return Config(self, paths)
+        return Config(self, paths, update_env=update_env, fail_quietly=fail_quietly)
 
     def tasks(self) -> Dict[str, TaskFunction]:
         """Generate functions compatible with the default ``doit`` loader style."""
@@ -111,10 +118,8 @@ class DoiTOML:
 
     def get_env(self, key: str, default: Optional[str] = None) -> str:
         """Get an environment variable from the real (or in-progress) environment."""
-        value = os.environ.get(key, self.config.env.get(key))
+        value = os.environ.get(key, self.config.env.get(key, default))
         if value is None:
-            if default is not None:
-                return default
             message = f"{key} was not found in any environment, no default given"
             raise EnvVarError(message)
         return value
@@ -132,11 +137,11 @@ class DoiTOML:
 
         def task() -> TaskGenerator:
             for subtask_name, subtask in subtasks.items():
-                if ACTIONS in subtask:
+                if DOIT_ACTIONS in subtask:
                     yield self.build_subtask(subtask_name, subtask)
-                else:
-                    message = f"Unepxected subtasks {prefix} {subtask}"
-                    raise DoitomlError(message)
+                else:  # pragma: no cover
+                    message = "Expected a task in {subtask_name} {subtask}"
+                    raise TaskError(message)
 
         task.__name__ = f"task_{prefix}"
         task.__doc__ = f"... {len(subtasks)} {prefix} tasks"
@@ -150,17 +155,11 @@ class DoiTOML:
         new_actions: List[Any] = []
         if cwd:
             new_actions += [(doit.tools.create_folder, [cwd])]
-            for i, action in enumerate(task["actions"]):
-                if not isinstance(action, (str, list)):
-                    message = f"Cannot run task {task_name} action {i} in {cwd}"
-                    raise TaskError(message)
-                new_actions += [
-                    doit.tools.CmdAction(
-                        action,
-                        cwd=str(cwd),
-                        shell=False,
-                    ),
-                ]
+            for action in task["actions"]:
+                shell = isinstance(action, str)
+                cmd_action = doit.tools.CmdAction(action, cwd=str(cwd), shell=shell)
+
+                new_actions += [cmd_action]
 
             task["actions"] = new_actions
         return cast(Task, task)

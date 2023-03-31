@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Any, Dict
 
 from doitoml.errors import ParseError
-from doitoml.sources._source import DictSource, Parser
+from doitoml.sources._source import JsonLikeSource, Parser
 
 try:  # pragma: no cover
     import tomllib
@@ -11,7 +11,7 @@ except ImportError:  # pragma: no cover
     import tomli as tomllib
 
 
-class TomlSource(DictSource):
+class TomlSource(JsonLikeSource):
 
     """A source of configuration in TOML."""
 
