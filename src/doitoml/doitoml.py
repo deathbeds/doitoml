@@ -37,6 +37,7 @@ class DoiTOML:
         self,
         config_paths: Optional[PathOrStrings] = None,
         *,
+        cwd: Optional[Path] = None,
         update_env: Optional[bool] = None,
         fail_quietly: Optional[bool] = None,
         log: Optional[logging.Logger] = None,
@@ -48,7 +49,7 @@ class DoiTOML:
         try:
             self.log = self.init_log(log, log_level)
             self.entry_points = EntryPoints(self)
-            self.config = self.init_config(config_paths or [])
+            self.config = self.init_config(config_paths or [], cwd=cwd)
             # initialize late for ``entry_points`` that reference ``self.entry_points``
             self.entry_points.initialize()
             self.config.initialize()
@@ -72,9 +73,16 @@ class DoiTOML:
             log.setLevel(log_level)
         return log
 
-    def init_config(self, config_paths: PathOrStrings) -> Config:
+    def init_config(
+        self,
+        config_paths: PathOrStrings,
+        cwd: Optional[Path] = None,
+    ) -> Config:
         """Initialize configuration."""
-        paths = [Path(path).resolve() for path in config_paths or [DEFAULT_CONFIG_PATH]]
+        cwd = cwd or Path.cwd()
+        paths = [
+            (cwd / path).resolve() for path in config_paths or [DEFAULT_CONFIG_PATH]
+        ]
         return Config(self, paths)
 
     def tasks(self) -> Dict[str, TaskFunction]:

@@ -44,6 +44,38 @@
 6. run `doit` again
    - only **do what _needs_ to be done**
 
+
+## The Simplest Example
+
+> The minimum footprint for a `doitoml` project.
+
+The simplest way to use `doitoml` requires only a `pyproject.toml`, which `doit`
+will already check for configuration data.
+
+<!-- toml examples/no-dodo -->
+```toml
+[tool.doit]
+loader = "doitoml-pyproject"
+verbosity = 2
+
+[tool.doitoml.tasks.hello]
+actions = ['echo "Hello World!"']
+```
+<!-- toml examples/no-dodo -->
+
+Running:
+
+```bash
+doit
+```
+
+Will print out:
+
+```bash
+.  hello:
+Hello World!
+```
+
 ## A Full Example
 
 > A team is building a Python web application, shipped as a `.whl`. `nodejs` is used for a build step.
@@ -51,12 +83,11 @@
 While _every_ project is different, we'll assume this team uses some fairly standard
 opinions:
 
-<!-- tree examples/py-js-web -->
-
 <details>
 
 <summary><i>Explore the file tree...</i></summary>
 
+<!-- tree examples/py-js-web -->
 ```
   README.md
   LICENSE
@@ -76,10 +107,10 @@ opinions:
     style/
       index.css
 ```
+<!-- tree examples/py-js-web -->
 
 </details>
 
-<!-- tree examples/py-js-web -->
 
 ### `dodo.py`
 
@@ -87,21 +118,20 @@ While it's _yet another file_ in the root of a repo, having a top-level `dodo.py
 easier to tell that `doit` is used, and allows for fine-grained customization not
 covered by `doitoml`.
 
-<!-- py examples/py-js-web/dodo.py -->
-
 <details>
 
 <summary><i>Explore <code>dodo.py</code>...</i></summary>
 
+<!-- py examples/py-js-web/dodo.py -->
 ```py
 from doitoml import DoiTOML
 doitoml = DoiTOML()
 globals().update(doitoml.tasks())
 ```
+<!-- py examples/py-js-web/dodo.py -->
 
 </details>
 
-<!-- py examples/py-js-web/dodo.py -->
 
 ### `pyproject.toml`
 
@@ -110,11 +140,11 @@ well-known file `pyproject.toml`, under the `tool.doit` key.
 
 `tool.doitoml` can further affect this behavior.
 
-<!-- toml examples/py-js-web/pyproject.toml -->
 <details>
 
 <summary><i>Explore <code>pyproject.toml</code>...</i></summary>
 
+<!-- toml examples/py-js-web/pyproject.toml -->
 ```toml
 [tool.doit]
 default_tasks = ["backend:build"]
@@ -138,22 +168,21 @@ file_dep = ["::readme", "::license", "::ppt", "::py_src", "::frontend::dist"]
 targets = ["::whl"]
 actions = [["pyproject-build"]]
 ```
+<!-- toml examples/py-js-web/pyproject.toml -->
 
 </details>
 
-<!-- toml examples/py-js-web/pyproject.toml -->
 
 ### `package.json`
 
 Based on the `pyproject.toml`, the `js/package.json` will be loaded, and run
 tasks inside that folder.
 
-<!-- json examples/py-js-web/js/package.json -->
-
 <details>
 
 <summary><i>Explore <code>package.json</code>...</i></summary>
 
+<!-- json examples/py-js-web/js/package.json -->
 ```json
 {
   "name": "foo",
@@ -193,16 +222,14 @@ tasks inside that folder.
   }
 }
 ```
+<!-- json examples/py-js-web/js/package.json -->
 
 </details>
 
-<!-- json examples/py-js-web/js/package.json -->
 
 ### Build the Wheel
 
 Running `doit` would run, in the following order:
-
-<!-- doit backend examples/py-js-web -->
 
 - `cd js`
   - `yarn --frozen-lockfile`
@@ -210,8 +237,6 @@ Running `doit` would run, in the following order:
   - `yarn build:dist`
 - `cd ..`
   - `python-build`
-
-<!-- doit backend examples/py-js-web -->
 
 ... leaving an up-to-date `.whl` file in `dist`. **Hooray!**
 

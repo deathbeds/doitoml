@@ -1,0 +1,6 @@
+[tool.doit]
+loader = "doitoml-pyproject-toml"
+verbosity = 2
+
+[tool.doitoml.tasks.hello]
+actions = ['echo "hello world"']

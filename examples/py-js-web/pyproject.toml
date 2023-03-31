@@ -29,6 +29,7 @@ default_tasks = ["backend:dist:wheel"]
 verbosity = 2
 par_type = "thread"
 backend = "sqlite3"
+loader = "doitoml-dodo-pyproject-toml"
 
 [tool.doit.commands.list]
 status = true

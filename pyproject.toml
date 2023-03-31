@@ -29,6 +29,10 @@ dependencies = [
 "Changelog" = "https://github.com/deathbeds/doitoml/blob/main/CHANGELOG.md"
 "Documentation" = "https://doitoml.rtfd.io"
 "Source" = "https://github.com/deathbeds/doitoml"
+[project.entry-points."doit.LOADER"]
+doitoml-dodo-pyproject-toml = "doitoml.loaders:DodoPyprojectLoader"
+doitoml-pyproject-toml = "doitoml.loaders:PyprojectTomlLoader"
+doitoml-package-json = "doitoml.loaders:PackageJsonLoader"
 [project.entry-points."doitoml.config-parser.v0"]
 doitoml-package-json = "doitoml.sources.json.package:PackageJsonParser"
 doitoml-pyproject-toml = "doitoml.sources.toml.pyproject:PyprojectTomlParser"
@@ -186,11 +190,13 @@ all_py = ["dodo.py", "::py_src", "::all_py_test"]
 py_src = [":rglob::src::*.py"]
 all_py_test = [":rglob::test::*.py"]
 ppt = ["pyproject.toml"]
+all_ppt = [":glob::examples::*/pyproject.toml"]
 all_py_dist = ["::ppt", "::py_src", "README.md", "LICENSE.txt"]
 all_examples = [
   ":glob::examples/py-js-web::*.json::*.toml::*.yml::*.py::*.js",
   ":rglob::examples/py-js-web/src::*.*",
-  ":rglob::examples/py-js-web/js::*.*"
+  ":rglob::examples/py-js-web/js::*.*",
+  "::all_ppt"
 ]
 
 [tool.doitoml.tasks.build.pypi]
@@ -212,8 +218,8 @@ actions = [["ruff", "--fix", "::all_py"]]
 
 [tool.doitoml.tasks.fix.pyproject-fmt]
 doc = "Format pyproject.toml with pyproject-fmt"
-file_dep = ["::ppt"]
-actions = [["pyproject-fmt", "::ppt"]]
+file_dep = ["::all_ppt"]
+actions = [["pyproject-fmt", "::all_ppt"]]
 
 [tool.doitoml.tasks.lint.black]
 doc = "Check python formatting with `black`"

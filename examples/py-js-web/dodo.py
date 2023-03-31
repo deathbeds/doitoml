@@ -1,3 +1,5 @@
-from doitoml import DoiTOML
-doitoml = DoiTOML()
-globals().update(doitoml.tasks())
+# this uses the doitoml-dodo-pyproject loader
+def task_hello():
+    return dict(
+        actions=[lambda: print("hello world")]
+    )

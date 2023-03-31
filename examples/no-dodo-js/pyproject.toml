@@ -1,0 +1,6 @@
+[tool.doit]
+loader = "doitoml-package-json"
+verbosity = 2
+
+[tool.doitoml.tasks.nope]
+actions = ['not going to find this']

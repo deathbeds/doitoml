@@ -14,16 +14,26 @@ SELF_PPT = ROOT / "pyproject.toml"
 
 EXAMPLES = ROOT / "examples"
 WEB_EXAMPLE = EXAMPLES / "py-js-web"
-EXAMPLES = [WEB_EXAMPLE]
+NO_DODO_EXAMPLE = EXAMPLES / "no-dodo"
+NO_DODO_JS_EXAMPLE = EXAMPLES / "no-dodo-js"
+EXAMPLES = [WEB_EXAMPLE, NO_DODO_EXAMPLE, NO_DODO_JS_EXAMPLE]
 EXAMPLE_INPUT_FILE_COUNTS = {
+    # just ``pyproject.toml`` and ``.gitignore```
+    NO_DODO_EXAMPLE.name: 2,
+    # also a package.json
+    NO_DODO_JS_EXAMPLE.name: 3,
+    # a whole mess of stuff
     WEB_EXAMPLE.name: 14,
 }
+EXAMPLE_TASK_COUNTS = {
+    NO_DODO_EXAMPLE.name: 2,
+    NO_DODO_JS_EXAMPLE.name: 2,
+    WEB_EXAMPLE.name: 9,
+}
 EXAMPLE_DEFAULT_OUTPUTS = {
-    WEB_EXAMPLE.name: {
-        "dist/*.whl": 1,
-        "dist/*.tar.gz": 1,
-        "dist/*.tgz": 1,
-    },
+    WEB_EXAMPLE.name: {"dist/*.whl": 1, "dist/*.tar.gz": 1, "dist/*.tgz": 1},
+    NO_DODO_EXAMPLE.name: {"*": 5, "*doit*": 3},
+    NO_DODO_JS_EXAMPLE.name: {"*": 6, "*doit*": 3},
 }
 
 EXAMPLE_IGNORES = {
