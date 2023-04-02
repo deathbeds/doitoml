@@ -19,7 +19,7 @@ if TYPE_CHECKING:  # pragma: no cover
 
 class EntryPoints:
 
-    """A collection of named entry_points."""
+    """A collection of named ``entry_points``."""
 
     doitoml: "DoiTOML"
     dsl: Dict[str, "DSL"]
@@ -27,7 +27,7 @@ class EntryPoints:
     config_parsers: Dict[str, "ConfigParser"]
 
     def __init__(self, doitoml: "DoiTOML") -> None:
-        """Create a new collection of loaded entry_points."""
+        """Create a new collection of loaded ``entry_points``."""
         self.doitoml = doitoml
 
     def initialize(self) -> None:
@@ -49,9 +49,9 @@ class EntryPoints:
                 message = f"{group} {entry_point.name} failed to load: {err}"
                 raise EntryPointError(message) from err
 
-        return dict(sorted(eps.items(), key=self.priority_key))
+        return dict(sorted(eps.items(), key=self.rank_key))
 
-    def priority_key(self, key_ep: Tuple[str, Any]) -> Tuple[Union[int, float], str]:
-        """Return a sort key based on the ``entry_point``'s ``priority`` and key."""
+    def rank_key(self, key_ep: Tuple[str, Any]) -> Tuple[Union[int, float], str]:
+        """Return a sort key based on the ``entry_point``'s ``rank`` and key."""
         key, ep = key_ep
-        return (getattr(ep, "priority", 100), key.lower())
+        return (getattr(ep, "rank", 100), key.lower())

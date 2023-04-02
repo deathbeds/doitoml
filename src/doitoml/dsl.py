@@ -1,4 +1,4 @@
-"""Domain-specific language for declarative doit task generation."""
+"""Domain-specific language for declarative ``doit`` task generation."""
 
 import abc
 import json
@@ -21,8 +21,8 @@ class DSL:
     #: a reference to the parent
     doitoml: "DoiTOML"
 
-    #: the priority of the DSL
-    priority = 100
+    #: the rank of the DSL
+    rank = 100
 
     def __init__(self, doitoml: "DoiTOML") -> None:
         """Create a DSL and remember its parent."""
@@ -46,7 +46,8 @@ class PathRef(DSL):
 
     """Look for previously-found paths."""
 
-    priority = 80
+    #: paths go before all other built-in DSL
+    rank = 80
 
     pattern = re.compile(r"^::((?P<prefix>[^:]+)::)?(?P<ref>[^:]+)$")
 
@@ -72,7 +73,8 @@ class EnvReplacer(DSL):
 
     pattern = re.compile(r"\$\{([^\}]+)\}")
 
-    priority = 90
+    #: paths go before most other built-in DSL
+    rank = 90
 
     def _replacer(self, match: re.Match) -> str:
         """Fetch an environment variable from the parent object."""
@@ -100,13 +102,13 @@ class Globber(DSL):
         match: re.Match[str],
         raw_token: str,
     ) -> PathOrStrings:
-        """Expand a token to zero or more ~class:`pathlib.Path`s based on (r)glob(s).
+        """Expand a token to zero or more :class:`pathlib.Path` based on (r)glob(s).
 
         Each glob may be a matcher or have a prefix, which will be applied
         _after_ all matches occur.
 
-        !: treated as a regular expression pattern which will exclude all matched items
-        /s/: replace all occurances of each pattern with the given value
+        - ``!``: treated as a :class:`re.Pattern` which will exclude all matched items
+        - ``/s/``: replace all occurances of each pattern with the given value
         """
         groups = match.groupdict()
         kind = cast(str, groups["kind"])

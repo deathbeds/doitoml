@@ -36,3 +36,11 @@ dependencies:
   - ipywidgets >=8
   - jupyterlab >=3.6.1,<4
   - jupyterlab-deck
+  # docs
+  - docutils >=0.19
+  - myst-nb
+  - pydata-sphinx-theme
+  - sphinx-autodoc-typehints
+  - sphinx-copybutton
+  # check
+  - pytest-check-links

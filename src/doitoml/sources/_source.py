@@ -72,7 +72,8 @@ class Parser:
 
     doitoml: "DoiTOML"
 
-    priority = 100
+    #: the order in which parsers are checked (lowest-first)
+    rank = 100
 
     def __init__(self, doitoml: "DoiTOML") -> None:
         self.doitoml = doitoml

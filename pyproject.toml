@@ -10,7 +10,7 @@ version = "0.1.0"
 description = "declarative tasks for doit"
 readme = "README.md"
 authors = [
-    { name = "doitoml contributors", email = "deathbeds@googlegroups.com" },
+  { name = "doitoml contributors", email = "deathbeds@googlegroups.com" },
 ]
 requires-python = ">=3.8"
 classifiers = [
@@ -28,7 +28,8 @@ dependencies = [
 "Bug Tracker" = "https://github.com/deathbeds/doitoml/issues"
 "Changelog" = "https://github.com/deathbeds/doitoml/blob/main/CHANGELOG.md"
 "Documentation" = "https://doitoml.rtfd.io"
-"Source" = "https://github.com/deathbeds/doitoml"
+"Source" = "https://github.com/deathbeds/doitoml/tree/main"
+"PyPI" = "https://pypi.org/project/doitoml"
 [project.entry-points."doit.LOADER"]
 doitoml-dodo-pyproject-toml = "doitoml.loaders:DodoPyprojectLoader"
 doitoml-pyproject-toml = "doitoml.loaders:PyprojectTomlLoader"
@@ -49,28 +50,27 @@ toml = "doitoml.sources.toml._toml:TomlParser"
 cache_dir = "build/.cache/pytest"
 script_launch_mode = "subprocess"
 addopts = [
-    # for humans
-    "--html=build/reports/pytest.html",
-    "--self-contained-html",
-    "--cov-report=html:build/reports/htmlcov",
-    "--cov-report=term-missing:skip-covered",
-    "--color=yes",
-    # for robots
-    "--json-report",
-    "--json-report-file=build/reports/pytest.json",
-    # xdist
-    "-n=auto",
-    "--dist=worksteal",
-    # cov
-    "--cov=doitoml",
-    "--cov-branch",
-    "--cov-context=test",
-    "--cov-fail-under=96",
-    # misc
-    "-vv",
-    "--ff",
-    "--tb=long",
-
+  # for humans
+  "--html=build/reports/pytest.html",
+  "--self-contained-html",
+  "--cov-report=html:build/reports/htmlcov",
+  "--cov-report=term-missing:skip-covered",
+  "--color=yes",
+  # for robots
+  "--json-report",
+  "--json-report-file=build/reports/pytest.json",
+  # xdist
+  "-n=auto",
+  "--dist=worksteal",
+  # cov
+  "--cov=doitoml",
+  "--cov-branch",
+  "--cov-context=test",
+  "--cov-fail-under=100",
+  # misc
+  "-vv",
+  "--ff",
+  "--tb=long",
 ]
 
 [tool.coverage.html]
@@ -119,52 +119,52 @@ ignore = [
 ]
 cache-dir = "build/.cache/ruff"
 select = [
-    "A",
-    "ANN",
-    "ARG",
-    "B",
-    "BLE",
-    "C4",
-    "C90",
-    "COM",
-    "D",
-    "DJ",
-    "DTZ",
-    "E",
-    "EM",
-    "ERA",
-    "EXE",
-    "F",
-    # "FBT",
-    "G",
-    "I",
-    "ICN",
-    "INP",
-    "ISC",
-    "N",
-    "NPY",
-    "PD",
-    "PGH",
-    "PIE",
-    "PL",
-    "PT",
-    "PTH",
-    "PYI",
-    "Q",
-    "RET",
-    "RSE",
-    "RUF",
-    "S",
-    "SIM",
-    "SLF",
-    "T10",
-    "T20",
-    "TCH",
-    "TID",
-    # "TRY",
-    "UP",
-    "W",
-    "YTT",
+  "A",
+  "ANN",
+  "ARG",
+  "B",
+  "BLE",
+  "C4",
+  "C90",
+  "COM",
+  "D",
+  "DJ",
+  "DTZ",
+  "E",
+  "EM",
+  "ERA",
+  "EXE",
+  "F",
+  # "FBT",
+  "G",
+  "I",
+  "ICN",
+  "INP",
+  "ISC",
+  "N",
+  "NPY",
+  "PD",
+  "PGH",
+  "PIE",
+  "PL",
+  "PT",
+  "PTH",
+  "PYI",
+  "Q",
+  "RET",
+  "RSE",
+  "RUF",
+  "S",
+  "SIM",
+  "SLF",
+  "T10",
+  "T20",
+  "TCH",
+  "TID",
+  # "TRY",
+  "UP",
+  "W",
+  "YTT",
 ]
 [tool.ruff.per-file-ignores]
 "_config.py" = ["PLR0912", "C901", "PLR0913"]
@@ -173,6 +173,7 @@ select = [
 "entry_points.py" = ["BLE001"]
 "dodo.py" = ["BLE001"]
 "_source.py" = ["BLE001"]
+"docs/conf.py" = ["INP001", "A001"]
 
 [tool.doitoml]
 prefix = ""
@@ -187,7 +188,8 @@ DOITOML_SDIST = "doitoml-${DOITOML_VERSION}.tar.gz"
 [tool.doitoml.paths]
 whl = ["dist/${DOITOML_WHEEL}"]
 sdist = ["dist/${DOITOML_SDIST}"]
-all_py = ["dodo.py", "::py_src", "::all_py_test"]
+docs_py = ["docs/conf.py"]
+all_py = ["dodo.py", "::py_src", "::all_py_test", "::docs_py"]
 py_src = [":rglob::src::*.py"]
 all_py_test = [":rglob::test::*.py"]
 ppt = ["pyproject.toml"]
@@ -199,6 +201,11 @@ all_examples = [
   ":rglob::examples/py-js-web/js::*.*",
   "::all_ppt"
 ]
+all_md = [
+  ":glob::.::*.md",
+  ":rglob::docs::*.md",
+]
+docs_buildinfo = ["build/docs/.buildinfo"]
 
 [tool.doitoml.tasks.build.pypi]
 doc = "Build distributions for PyPI"
@@ -253,3 +260,25 @@ doc = "Run fast tests with pytest"
 file_dep = ["::ppt", "::all_py", "::all_py_test", "::all_examples"]
 task_dep = ["test:pytest:fast"]
 actions = [["pytest"]]
+
+[tool.doitoml.tasks.docs.sphinx]
+doc = "Build documentation with `sphinx`"
+file_dep = ["::py_src", "::ppt", "::all_md", "::docs_py"]
+actions = [["sphinx-build", "-W", "-b", "html", "docs", "build/docs"]]
+targets = ["::docs_buildinfo"]
+
+[tool.doitoml.tasks.docs.check.links]
+doc = "Check documentation with `pytest-check-links`"
+file_dep = ["::docs_buildinfo", "::ppt"]
+actions = [[
+    "pytest-check-links",
+    "build/docs",
+    "--check-links-ignore=https://",
+    "--no-cov",
+    "--check-anchors",
+    "--html=build/reports/pytest-check-links.html",
+    "-p",
+    "no:importnb",
+    "--json-report-file=build/reports/pytest-check-links.json",
+    "--tb=no",
+]]
