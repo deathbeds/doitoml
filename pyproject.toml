@@ -206,9 +206,15 @@ file_dep = ["::all_py_dist"]
 targets = ["::whl"]
 actions = [["pyproject-build", "-nx"]]
 
+[tool.doitoml.tasks.fix.ssort]
+doc = "Predictably order python source with `ssort`"
+file_dep = ["::ppt", "::all_py"]
+actions = [["ssort", "::all_py"]]
+
 [tool.doitoml.tasks.fix.black]
 doc = "Format python source with `black`"
 file_dep = ["::ppt", "::all_py"]
+task_dep = ["fix:ssort"]
 actions = [["black", "--quiet", "::all_py"]]
 
 [tool.doitoml.tasks.fix.ruff]

@@ -74,6 +74,10 @@ class EnvReplacer(DSL):
 
     priority = 90
 
+    def _replacer(self, match: re.Match) -> str:
+        """Fetch an environment variable from the parent object."""
+        return self.doitoml.get_env(match[1])
+
     def transform_token(
         self,
         source: "ConfigSource",
@@ -82,10 +86,6 @@ class EnvReplacer(DSL):
     ) -> PathOrStrings:
         """Replace all environment variable with their value in ``os.environ``."""
         return [self.pattern.sub(self._replacer, raw_token)]
-
-    def _replacer(self, match: re.Match) -> str:
-        """Fetch an environment variable from the parent object."""
-        return self.doitoml.get_env(match[1])
 
 
 class Globber(DSL):

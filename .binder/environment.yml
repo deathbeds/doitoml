@@ -20,6 +20,7 @@ dependencies:
   - mypy
   - pyproject-fmt
   - ruff
+  - ssort
   # test
   - hypothesis-jsonschema
   - pytest

@@ -42,10 +42,10 @@ class ConfigSource(Source):
 
 
 class ConfigParser(Parser):
-    @abc.abstractmethod
-    def __call__(self, path: Path) -> ConfigSource:  # pragma: no cover
-        """Load a path as a config source."""
-
     @abc.abstractproperty
     def pattern(self) -> re.Pattern[str]:
         """Provide pattern of well-known file names this parser can load."""
+
+    @abc.abstractmethod
+    def __call__(self, path: Path) -> ConfigSource:  # pragma: no cover
+        """Load a path as a config source."""

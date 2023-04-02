@@ -1,4 +1,4 @@
-"""The ``doit`` configuration for ``doitoml``."""
+"""The bootstrap ``doit`` configuration for ``doitoml``."""
 import sys
 from typing import TYPE_CHECKING
 from warnings import warn
