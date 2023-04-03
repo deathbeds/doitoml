@@ -184,12 +184,16 @@ BLACK_CACHE_DIR = "./build/.cache/black"
 DOITOML_WHEEL = "doitoml-${DOITOML_VERSION}-py3-none-any.whl"
 DOITOML_SDIST = "doitoml-${DOITOML_VERSION}.tar.gz"
 
+[tool.doitoml.cmd]
+sphinx_opts = ["-b", "html", "docs", "build/docs"]
+
 [tool.doitoml.paths]
 whl = ["dist/${DOITOML_WHEEL}"]
 sdist = ["dist/${DOITOML_SDIST}"]
 docs_py = ["docs/conf.py"]
 all_py = ["dodo.py", "::py_src", "::all_py_test", "::docs_py"]
 py_src = [":rglob::src::*.py"]
+all_ipynb = [":rglob::docs::*.ipynb::!ipynb_checkpoints"]
 all_py_test = [":rglob::test::*.py"]
 ppt = ["pyproject.toml"]
 all_ppt = [":glob::examples::*/pyproject.toml"]
@@ -262,8 +266,8 @@ actions = [["pytest"]]
 
 [tool.doitoml.tasks.docs.sphinx]
 doc = "Build documentation with `sphinx`"
-file_dep = ["::py_src", "::ppt", "::all_md", "::docs_py"]
-actions = [["sphinx-build", "-W", "-b", "html", "docs", "build/docs"]]
+file_dep = ["::py_src", "::ppt", "::all_md", "::all_ipynb", "::docs_py"]
+actions = [["sphinx-build", "-W", "::sphinx_opts"]]
 targets = ["::docs_buildinfo"]
 
 [tool.doitoml.tasks.docs.check.links]
@@ -285,6 +289,4 @@ actions = [[
 [tool.doitoml.tasks.watch.docs]
 doc = "Watch docs, rebuild on changes"
 file_dep = ["::docs_buildinfo"]
-actions = [
-  ["sphinx-autobuild", "-b", "html", "docs", "build/docs", "--no-initial", "--watch=src"]
-]
+actions = [["sphinx-autobuild", "::sphinx_opts", "--no-initial", "--watch=src"]]
