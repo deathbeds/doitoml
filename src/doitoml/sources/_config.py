@@ -2,10 +2,7 @@
 import abc
 import re
 from pathlib import Path
-from typing import (
-    Any,
-    Dict,
-)
+from typing import Any, Dict, Tuple
 
 from doitoml.constants import DOITOML_CONFIG_PATHS
 from doitoml.types import Paths
@@ -27,7 +24,10 @@ class ConfigSource(Source):
 
     @property
     def extra_config_paths(self) -> Paths:
-        return [Path(p) for p in self.raw_config.get(DOITOML_CONFIG_PATHS, [])]
+        return [
+            (self.path.parent / path).resolve()
+            for path in self.raw_config.get(DOITOML_CONFIG_PATHS, [])
+        ]
 
     @abc.abstractproperty
     def raw_config(self) -> Dict[str, Any]:
@@ -45,6 +45,10 @@ class ConfigParser(Parser):
     @abc.abstractproperty
     def pattern(self) -> re.Pattern[str]:
         """Provide pattern of well-known file names this parser can load."""
+
+    @abc.abstractproperty
+    def well_known(self) -> Tuple[str, ...]:
+        """Provide concrete, well-known relative file names this parser can load."""
 
     @abc.abstractmethod
     def __call__(self, path: Path) -> ConfigSource:  # pragma: no cover

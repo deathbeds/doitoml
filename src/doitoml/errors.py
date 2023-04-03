@@ -11,6 +11,11 @@ class ConfigError(DoitomlError):
     """An error related to configuration."""
 
 
+class NoConfigError(ConfigError):
+
+    """An error when no configuration at all is found."""
+
+
 class UnresolvedError(ConfigError):
 
     """A config error related to unresolved values."""

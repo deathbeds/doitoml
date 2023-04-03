@@ -22,7 +22,13 @@
 
 ## Usage
 
-1. Add `doitoml` to your `dodo.py`
+1. Enable `doitoml`
+  - in `pyproject.toml`...
+   ```toml
+   [tool.doit]
+   loader = "doitoml"
+   ```
+  - or in a `dodo.py`...
    ```py
    # dodo.py
    from doitoml import DoiTOML
@@ -30,7 +36,8 @@
    globals().update(d.tasks())
    ```
 2. add `[tool.doitoml]` to your `pyproject.toml`
-   - _optionally_, add more sources like `package.json` or nested `pyproject.toml`
+   - _optionally_, add more sources like `package.json`
+    - or nested `pyproject.toml`
 3. run `doit`
    - get shippable, reproducible software artifacts
      - and/or docs, test reports, linter findings, or anything else your project builds
@@ -55,7 +62,7 @@ will already check for configuration data.
 <!-- toml examples/no-dodo -->
 ```toml
 [tool.doit]
-loader = "doitoml-pyproject"
+loader = "doitoml"
 verbosity = 2
 
 [tool.doitoml.tasks.hello]
@@ -261,4 +268,4 @@ your team do everything _The Hard Way_:
 
 `doitoml` is licensed under the [BSD-3-Clause] License.
 
-[bsd-3-clause]: https://github.com/deathbeds/doitoml/tree/main/README.md
+[bsd-3-clause]: https://github.com/deathbeds/doitoml/tree/main/LICENSE.txt

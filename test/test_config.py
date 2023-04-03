@@ -11,6 +11,7 @@ from doitoml.doitoml import DoiTOML
 from doitoml.errors import (
     ConfigError,
     DoitomlError,
+    NoConfigError,
     PrefixError,
     UnresolvedError,
 )
@@ -120,3 +121,19 @@ def test_fail_quietly(a_pyproject_with: TPyprojectMaker) -> None:
 
     with pytest.raises(SystemExit):
         DoiTOML([ppt], fail_quietly=True)
+
+
+def test_no_config(a_pyproject_with: TPyprojectMaker) -> None:
+    """Test quick fail when no config is found."""
+    ppt = a_pyproject_with({})
+    ppt.unlink()
+
+    with pytest.raises(NoConfigError):
+        DoiTOML(discover_config_paths=False)
+
+
+def test_fallback_config(a_pyproject_with: TPyprojectMaker) -> None:
+    """Test... something with an empty config."""
+    a_pyproject_with({"prefix": ""})
+
+    DoiTOML(discover_config_paths=False)

@@ -1,5 +1,5 @@
 [tool.doit]
-loader = "doitoml-pyproject-toml"
+loader = "doitoml"
 verbosity = 2
 
 [tool.doitoml.tasks.hello]

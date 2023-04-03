@@ -31,9 +31,7 @@ dependencies = [
 "Source" = "https://github.com/deathbeds/doitoml/tree/main"
 "PyPI" = "https://pypi.org/project/doitoml"
 [project.entry-points."doit.LOADER"]
-doitoml-dodo-pyproject-toml = "doitoml.loaders:DodoPyprojectLoader"
-doitoml-pyproject-toml = "doitoml.loaders:PyprojectTomlLoader"
-doitoml-package-json = "doitoml.loaders:PackageJsonLoader"
+doitoml = "doitoml.loaders:DoitomlLoader"
 [project.entry-points."doitoml.config-parser.v0"]
 doitoml-package-json = "doitoml.sources.json.package:PackageJsonParser"
 doitoml-pyproject-toml = "doitoml.sources.toml.pyproject:PyprojectTomlParser"
@@ -67,6 +65,7 @@ addopts = [
   "--cov-branch",
   "--cov-context=test",
   "--cov-fail-under=100",
+  "--no-cov-on-fail",
   # misc
   "-vv",
   "--ff",
@@ -203,7 +202,7 @@ all_examples = [
 ]
 all_md = [
   ":glob::.::*.md",
-  ":rglob::docs::*.md",
+  ":rglob::docs::*.md::!ipynb_checkpoints",
 ]
 docs_buildinfo = ["build/docs/.buildinfo"]
 
@@ -282,3 +281,10 @@ actions = [[
     "--json-report-file=build/reports/pytest-check-links.json",
     "--tb=no",
 ]]
+
+[tool.doitoml.tasks.watch.docs]
+doc = "Watch docs, rebuild on changes"
+file_dep = ["::docs_buildinfo"]
+actions = [
+  ["sphinx-autobuild", "-b", "html", "docs", "build/docs", "--no-initial", "--watch=src"]
+]

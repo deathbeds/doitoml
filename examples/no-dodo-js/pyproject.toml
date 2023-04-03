@@ -1,6 +1,3 @@
 [tool.doit]
-loader = "doitoml-package-json"
+loader = "doitoml"
 verbosity = 2
-
-[tool.doitoml.tasks.nope]
-actions = ['not going to find this']

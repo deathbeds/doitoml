@@ -1,4 +1,5 @@
 """Custom loaders for doit tasks."""
+from pathlib import Path
 from typing import Any, Dict
 
 from doit.cmd_base import DodoTaskLoader
@@ -8,37 +9,22 @@ from .doitoml import DoiTOML
 
 class DoitomlLoader(DodoTaskLoader):
 
-    """A `doit` task loader with a ``DoiTOML``."""
+    """A loader that looks for all known config files."""
 
     doitoml: DoiTOML
 
-
-class PyprojectTomlLoader(DoitomlLoader):
-
-    """A loader that only discovers tasks in `pyproject.toml`."""
-
     def setup(self, opt_values: Dict[str, Any]) -> None:
-        """Discover tasks in ``pyproject.toml``."""
-        self.doitoml = DoiTOML(cwd=opt_values["cwdPath"])
-        self.namespace = self.doitoml.tasks()
+        """Discover tasks in all config files."""
+        cwd = Path(opt_values["cwdPath"]) if opt_values["cwdPath"] else Path.cwd()
 
+        self.doitoml = DoiTOML(cwd=opt_values["cwdPath"], discover_config_paths=True)
 
-class PackageJsonLoader(DoitomlLoader):
+        if (cwd / "dodo.py").exists():
+            super().setup(opt_values)
 
-    """A loader that only discovers tasks in `package.json`."""
+        tasks = self.doitoml.tasks()
 
-    def setup(self, opt_values: Dict[str, Any]) -> None:
-        """Discover tasks in ``package.json.toml``."""
-        self.doitoml = DoiTOML(["package.json"], cwd=opt_values["cwdPath"])
-        self.namespace = self.doitoml.tasks()
-
-
-class DodoPyprojectLoader(DoitomlLoader):
-
-    """A loader that discovers tasks in ``dodo.py`` and then ``pyproject.toml``."""
-
-    def setup(self, opt_values: Dict[str, Any]) -> None:
-        """Discover tasks in ``dodo.py``, then in ``pyproject.toml``."""
-        super().setup(opt_values)
-        self.doitoml = DoiTOML(["pyproject.toml"], cwd=opt_values["cwdPath"])
-        self.namespace.update(self.doitoml.tasks())
+        if getattr(self, "namespace", None):
+            self.namespace.update(tasks)  # type: ignore
+        else:
+            self.namespace = tasks

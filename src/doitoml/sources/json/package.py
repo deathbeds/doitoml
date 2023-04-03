@@ -34,6 +34,7 @@ class PackageJsonParser(ConfigParser):
     """Entry point for parsing configuration from ``pyproject.toml``."""
 
     pattern = re.compile(r"package.json$")
+    well_known = ("./package.json",)
 
     def __call__(self, path: Path) -> PackageJson:
         """Parse a ``doitoml`` configuration from ``pyproject.toml``."""

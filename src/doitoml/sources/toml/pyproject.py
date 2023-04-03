@@ -32,6 +32,7 @@ class PyprojectTomlParser(ConfigParser):
     """Entry point for parsing configuration from ``pyproject.toml``."""
 
     pattern = re.compile(r"pyproject.toml$")
+    well_known = ("./pyproject.toml",)
 
     def __call__(self, path: Path) -> PyprojectToml:
         """Parse a ``doitoml`` configuration from ``pyproject.toml``."""

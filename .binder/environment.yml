@@ -40,7 +40,9 @@ dependencies:
   - docutils >=0.19
   - myst-nb
   - pydata-sphinx-theme
+  - sphinx-autobuild
   - sphinx-autodoc-typehints
   - sphinx-copybutton
+  - sphinx-design
   # check
   - pytest-check-links

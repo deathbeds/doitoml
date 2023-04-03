@@ -9,7 +9,7 @@ import doit.action
 import doit.tools
 
 from .config import Config
-from .constants import DEFAULT_CONFIG_PATH, DOIT_ACTIONS
+from .constants import DOIT_ACTIONS
 from .entry_points import EntryPoints
 from .errors import DoitomlError, EnvVarError, TaskError
 from .types import (
@@ -31,6 +31,7 @@ class DoiTOML:
     config: Config
     log: logging.Logger
     entry_points: EntryPoints
+    cwd: Path
 
     def __init__(
         self,
@@ -41,16 +42,18 @@ class DoiTOML:
         fail_quietly: Optional[bool] = None,
         log: Optional[logging.Logger] = None,
         log_level: MaybeLogLevel = None,
+        discover_config_paths: Optional[bool] = None,
     ) -> None:
         """Initialize a ``doitoml`` task generator."""
+        self.cwd = Path(cwd) if cwd else Path.cwd()
         try:
             self.log = self.init_log(log, log_level)
             self.entry_points = EntryPoints(self)
             self.config = self.init_config(
                 config_paths or [],
-                cwd=cwd,
                 update_env=update_env,
                 fail_quietly=fail_quietly,
+                discover_config_paths=discover_config_paths,
             )
             # initialize late for ``entry_points`` that reference ``self.entry_points``
             self.entry_points.initialize()
@@ -81,16 +84,18 @@ class DoiTOML:
     def init_config(
         self,
         config_paths: PathOrStrings,
-        cwd: Optional[Path] = None,
         update_env: Optional[bool] = None,
         fail_quietly: Optional[bool] = None,
+        discover_config_paths: Optional[bool] = None,
     ) -> Config:
         """Initialize configuration."""
-        cwd = cwd or Path.cwd()
-        paths = [
-            (cwd / path).resolve() for path in config_paths or [DEFAULT_CONFIG_PATH]
-        ]
-        return Config(self, paths, update_env=update_env, fail_quietly=fail_quietly)
+        return Config(
+            self,
+            [(self.cwd / path).resolve() for path in config_paths],
+            update_env=update_env,
+            fail_quietly=fail_quietly,
+            discover_config_paths=discover_config_paths,
+        )
 
     def tasks(self) -> Dict[str, TaskFunction]:
         """Generate functions compatible with the default ``doit`` loader style."""

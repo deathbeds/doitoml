@@ -19,6 +19,7 @@ if TYPE_CHECKING:  # pragma: no cover
 
 
 from doitoml.constants import (
+    DEFAULT_CONFIG_PATH,
     DOIT_ACTIONS,
     DOIT_PATH_RELATIVE_LISTS,
     DOITOML_FAIL_QUIETLY,
@@ -27,6 +28,7 @@ from doitoml.constants import (
 from doitoml.errors import (
     ConfigError,
     DoitomlError,
+    NoConfigError,
     PrefixError,
     UnresolvedError,
 )
@@ -70,6 +72,7 @@ class Config:
     cmd: PrefixedStringsOrPaths
     update_env: Optional[bool]
     fail_quietly: Optional[bool]
+    discover_config_paths: Optional[bool]
 
     def __init__(
         self,
@@ -78,6 +81,7 @@ class Config:
         *,
         update_env: Optional[bool] = None,
         fail_quietly: Optional[bool] = None,
+        discover_config_paths: Optional[bool] = None,
     ) -> None:
         """Create empty configuration and discover sources."""
         self.doitoml = doitoml
@@ -89,11 +93,12 @@ class Config:
         self.cmd = {}
         self.update_env = update_env
         self.fail_quietly = fail_quietly
+        self.discover_config_paths = discover_config_paths
 
     def initialize(self) -> None:
         """Perform a few passes to configure everything."""
         # first find the env
-        self.sources = self.find_config_sources(self.config_paths)
+        self.sources = self.find_config_sources()
 
         top_config = [*self.sources.values()][0]
 
@@ -124,17 +129,26 @@ class Config:
         # .. then find the tasks
         self.init_tasks()
 
-    def find_config_sources(self, config_paths: Paths) -> ConfigSources:
+    def find_config_sources(self) -> ConfigSources:
         """Find all directly and referenced configuration sources."""
         sources: ConfigSources = {}
-        unchecked = [*config_paths]
+        unchecked = [*self.config_paths]
+
+        if not unchecked:
+            unchecked += self.find_fallback_config_sources()
+
+        if not unchecked:
+            path = self.doitoml.cwd / DEFAULT_CONFIG_PATH
+            if path.exists():
+                unchecked += [path]
+
         checked = []
 
         while unchecked:
             config_path = unchecked.pop(0)
             checked += [config_path]
             source = self.load_config_source(Path(config_path))
-            if source in sources.values():
+            if source in sources.values() or not source.raw_config:
                 continue
 
             self.claim_prefix(source, sources)
@@ -143,7 +157,28 @@ class Config:
                 if extra_path not in checked and extra_path not in unchecked:
                     unchecked.append(extra_path)
 
+        if not sources:
+            message = "No config found in any of: " + (
+                "\n".join(
+                    [""] + [f"- {p}" for p in checked],
+                )
+            )
+            raise NoConfigError(message)
+
         return sources
+
+    def find_fallback_config_sources(self) -> Paths:
+        """Find sources."""
+        unchecked = []
+
+        if self.discover_config_paths is not False:
+            for parser in self.doitoml.entry_points.config_parsers.values():
+                for well_known in parser.well_known:
+                    path = self.doitoml.cwd / well_known
+                    if path.exists():
+                        unchecked += [path]
+
+        return unchecked
 
     def claim_prefix(self, source: ConfigSource, sources: ConfigSources) -> None:
         """Claim a prefix for a source."""

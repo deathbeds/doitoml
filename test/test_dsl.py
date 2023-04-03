@@ -25,18 +25,17 @@ def empty_doitoml(tmp_path: Path) -> Generator[DoiTOML, None, None]:
 
     ppt.write_text(
         """
-    [doitoml]
-    prefix = ""
-    log_level = "DEBUG"
-    update_env = false
-    """,
+        [tool.doitoml]
+        log_level = "DEBUG"
+        update_env = false
+        """,
     )
 
     (tmp_path / "foo.txt").touch()
     (tmp_path / "bar.txt").touch()
     (tmp_path / "baz.json").write_text("""{"foo": ["bar", {"1": 2}, [false, null]]}""")
 
-    doitoml = DoiTOML(log_level=logging.DEBUG)
+    doitoml = DoiTOML([ppt], log_level=logging.DEBUG, discover_config_paths=False)
 
     yield doitoml
 
