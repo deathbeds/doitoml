@@ -1,10 +1,17 @@
 """Test configuration and fixtures for ``doitoml``."""
+import logging
 import os
 import shutil
 from pathlib import Path
-from typing import Any, Generator
+from typing import TYPE_CHECKING, Any, Callable, Dict, Generator
 
 import pytest
+import tomli_w
+
+if TYPE_CHECKING:  # pragma: no cover
+    from doitoml import DoiTOML
+
+TPyprojectMaker = Callable[[Any], Path]
 
 HERE = Path(__file__).parent
 ROOT = HERE.parent
@@ -23,15 +30,20 @@ EXAMPLE_INPUT_FILE_COUNTS = {
     # also a package.json
     NO_DODO_JS_EXAMPLE.name: 3,
     # a whole mess of stuff
-    WEB_EXAMPLE.name: 14,
+    WEB_EXAMPLE.name: 15,
 }
 EXAMPLE_TASK_COUNTS = {
     NO_DODO_EXAMPLE.name: 2,
     NO_DODO_JS_EXAMPLE.name: 2,
-    WEB_EXAMPLE.name: 9,
+    WEB_EXAMPLE.name: 10,
 }
 EXAMPLE_DEFAULT_OUTPUTS = {
-    WEB_EXAMPLE.name: {"dist/*.whl": 1, "dist/*.tar.gz": 1, "dist/*.tgz": 1},
+    WEB_EXAMPLE.name: {
+        "dist/*.whl": 1,
+        "dist/*.tar.gz": 1,
+        "dist/*.tgz": 1,
+        "dist/SHA256SUMS": 1,
+    },
     NO_DODO_EXAMPLE.name: {"*": 5, "*doit*": 3},
     NO_DODO_JS_EXAMPLE.name: {"*": 6, "*doit*": 3},
 }
@@ -69,3 +81,49 @@ def a_self_test_skeleton(tmp_path: Path) -> Generator[Path, None, None]:
     yield dest
     os.chdir(str(old_cwd))
     shutil.rmtree(dest)
+
+
+@pytest.fixture()
+def empty_doitoml(tmp_path: Path) -> Generator["DoiTOML", None, None]:
+    """Provide an empty doitoml."""
+    from doitoml import DoiTOML
+
+    old_cwd = Path.cwd()
+
+    os.chdir(str(tmp_path))
+
+    ppt = tmp_path / "pyproject.toml"
+
+    ppt.write_text(
+        """
+        [tool.doitoml]
+        log_level = "DEBUG"
+        update_env = false
+        """,
+    )
+
+    (tmp_path / "foo.txt").touch()
+    (tmp_path / "bar.txt").touch()
+    (tmp_path / "baz.json").write_text("""{"foo": ["bar", {"1": 2}, [false, null]]}""")
+
+    doitoml = DoiTOML([ppt], log_level=logging.DEBUG, discover_config_paths=False)
+
+    yield doitoml
+
+    os.chdir(old_cwd)
+
+
+@pytest.fixture()
+def a_pyproject_with(tmp_path: Path) -> Generator[TPyprojectMaker, None, None]:
+    """Make a broken ``pyproject.toml``."""
+    ppt = tmp_path / "pyproject.toml"
+
+    def make_pyproject_toml(dotoml_cfg: Dict[str, Any]) -> Path:
+        ppt_text = tomli_w.dumps({"tool": {"doitoml": dotoml_cfg}})
+        ppt.write_text(ppt_text, encoding="utf-8")
+        return ppt
+
+    old_cwd = Path.cwd()
+    os.chdir(str(tmp_path))
+    yield make_pyproject_toml
+    os.chdir(str(old_cwd))

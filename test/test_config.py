@@ -1,14 +1,13 @@
 """Test of (bad) ``doitoml`` configuration."""
 import json
-import os
 import shutil
 from pathlib import Path
-from typing import Any, Callable, Dict, Generator, Type
+from typing import Any, Dict, Type
 
 import pytest
-import tomli_w
 from doitoml.doitoml import DoiTOML
 from doitoml.errors import (
+    ActionError,
     ConfigError,
     DoitomlError,
     NoConfigError,
@@ -16,23 +15,7 @@ from doitoml.errors import (
     UnresolvedError,
 )
 
-TPyprojectMaker = Callable[[Any], Path]
-
-
-@pytest.fixture()
-def a_pyproject_with(tmp_path: Path) -> Generator[TPyprojectMaker, None, None]:
-    """Make a broken ``pyproject.toml``."""
-    ppt = tmp_path / "pyproject.toml"
-
-    def make_pyproject_toml(dotoml_cfg: Dict[str, Any]) -> Path:
-        ppt_text = tomli_w.dumps({"tool": {"doitoml": dotoml_cfg}})
-        ppt.write_text(ppt_text, encoding="utf-8")
-        return ppt
-
-    old_cwd = Path.cwd()
-    os.chdir(str(tmp_path))
-    yield make_pyproject_toml
-    os.chdir(str(old_cwd))
+from .conftest import TPyprojectMaker
 
 
 @pytest.mark.parametrize(
@@ -137,3 +120,11 @@ def test_fallback_config(a_pyproject_with: TPyprojectMaker) -> None:
     a_pyproject_with({"prefix": ""})
 
     DoiTOML(discover_config_paths=False)
+
+
+def test_bad_action(a_pyproject_with: TPyprojectMaker) -> None:
+    """Test a bad action."""
+    a_pyproject_with({"tasks": {"a": {"actions": [0]}}})
+
+    with pytest.raises(ActionError):
+        DoiTOML(fail_quietly=False)

@@ -2,7 +2,12 @@
 import sys
 from typing import TYPE_CHECKING, Any, Dict, Tuple, Union
 
-from .constants import ENTRY_POINT_CONFIG, ENTRY_POINT_DSL, ENTRY_POINT_PARSER
+from .constants import (
+    ENTRY_POINT_ACTOR,
+    ENTRY_POINT_CONFIG,
+    ENTRY_POINT_DSL,
+    ENTRY_POINT_PARSER,
+)
 from .errors import EntryPointError
 
 if sys.version_info < (3, 10):  # pragma: no cover
@@ -11,6 +16,7 @@ else:  # pragma: no cover
     from importlib.metadata import entry_points
 
 if TYPE_CHECKING:  # pragma: no cover
+    from .actors import Actor
     from .doitoml import DoiTOML
     from .dsl import DSL
     from .sources._config import ConfigParser
@@ -25,6 +31,7 @@ class EntryPoints:
     dsl: Dict[str, "DSL"]
     parsers: Dict[str, "Parser"]
     config_parsers: Dict[str, "ConfigParser"]
+    actors: Dict[str, "Actor"]
 
     def __init__(self, doitoml: "DoiTOML") -> None:
         """Create a new collection of loaded ``entry_points``."""
@@ -37,6 +44,7 @@ class EntryPoints:
         self.parsers = self.load_entry_point_group(ENTRY_POINT_PARSER)
         # load DSL, which might reference parsers
         self.dsl = self.load_entry_point_group(ENTRY_POINT_DSL)
+        self.actors = self.load_entry_point_group(ENTRY_POINT_ACTOR)
 
     def load_entry_point_group(self, group: str) -> Dict[str, Any]:
         """Find and load ``entry_points`` from installed packages."""

@@ -1,8 +1,7 @@
 """Tests of ``doitoml`` DSL."""
-import logging
 import os
 from pathlib import Path
-from typing import Any, Generator, Type
+from typing import Any, Type
 from unittest import mock
 
 import pytest
@@ -12,34 +11,6 @@ from doitoml.errors import DslError, EnvVarError, ParseError
 GET = "doitoml-colon-get"
 GLOB = "doitoml-colon-glob"
 ENV = "doitoml-dollar-env"
-
-
-@pytest.fixture()
-def empty_doitoml(tmp_path: Path) -> Generator[DoiTOML, None, None]:
-    """Provide an empty doitoml."""
-    old_cwd = Path.cwd()
-
-    os.chdir(str(tmp_path))
-
-    ppt = tmp_path / "pyproject.toml"
-
-    ppt.write_text(
-        """
-        [tool.doitoml]
-        log_level = "DEBUG"
-        update_env = false
-        """,
-    )
-
-    (tmp_path / "foo.txt").touch()
-    (tmp_path / "bar.txt").touch()
-    (tmp_path / "baz.json").write_text("""{"foo": ["bar", {"1": 2}, [false, null]]}""")
-
-    doitoml = DoiTOML([ppt], log_level=logging.DEBUG, discover_config_paths=False)
-
-    yield doitoml
-
-    os.chdir(old_cwd)
 
 
 @pytest.mark.parametrize(

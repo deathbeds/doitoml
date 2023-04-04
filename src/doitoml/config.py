@@ -26,8 +26,10 @@ from doitoml.constants import (
     DOITOML_UPDATE_ENV,
 )
 from doitoml.errors import (
+    ActionError,
     ConfigError,
     DoitomlError,
+    NoActorError,
     NoConfigError,
     PrefixError,
     UnresolvedError,
@@ -284,18 +286,11 @@ class Config:
         raw_config = source.raw_config
         path_key: str
         for path_key, path_specs in raw_config.get("paths", {}).items():
-            found_paths: PathOrStrings = []
-            unresolved_specs: List[str] = []
-            for spec in path_specs:
-                spec_paths = self.resolve_one_path_spec(
-                    source,
-                    spec,
-                    source_relative=True,
-                )
-                if spec_paths:
-                    found_paths += spec_paths
-                else:
-                    unresolved_specs += [spec]
+            found_paths, unresolved_specs = self.resolve_some_path_specs(
+                source,
+                path_specs,
+                source_relative=True,
+            )
 
             if unresolved_specs:
                 unresolved_paths[source.prefix, path_key] = unresolved_specs
@@ -314,18 +309,11 @@ class Config:
         raw_config = source.raw_config
         path_key: str
         for path_key, path_specs in raw_config.get("cmd", {}).items():
-            found_cmds: PathOrStrings = []
-            unresolved_specs: List[str] = []
-            for spec in path_specs:
-                spec_paths = self.resolve_one_path_spec(
-                    source,
-                    spec,
-                    source_relative=False,
-                )
-                if spec_paths:
-                    found_cmds += spec_paths
-                else:
-                    unresolved_specs += [spec]
+            found_cmds, unresolved_specs = self.resolve_some_path_specs(
+                source,
+                path_specs,
+                source_relative=False,
+            )
 
             if unresolved_specs:
                 unresolved_commands[source.prefix, path_key] = unresolved_specs
@@ -452,9 +440,23 @@ class Config:
             # leave raw strings to doit
             return [action], []
 
+        if isinstance(action, list):
+            return self.resolve_one_token_action(source, action)
+
+        if isinstance(action, dict):
+            return self.resolve_one_dict_action(source, action)
+
+        message = f"Unexpected {action} in {source}"
+        raise ActionError(message)
+
+    def resolve_one_token_action(
+        self,
+        source: ConfigSource,
+        action: Any,
+    ) -> Tuple[List[Any], Strings]:
+        """Resolve an action made of shell tokens."""
         unresolved_specs: Strings = []
         new_tokens: PathOrStrings = []
-
         for token in action:
             token_tokens = self.resolve_one_path_spec(
                 source,
@@ -468,20 +470,44 @@ class Config:
 
         return [new_tokens], unresolved_specs
 
+    def resolve_one_dict_action(
+        self,
+        source: ConfigSource,
+        action: Any,
+    ) -> Tuple[List[Any], Strings]:
+        """Resolve an action by an actor."""
+        tried = []
+        for actor_name, actor in self.doitoml.entry_points.actors.items():
+            if actor.knows(action):
+                actor_action = actor.transform_action(source, action)
+                return actor_action, []
+            tried += [actor_name]
+
+        message = f"No actor knew how to perform {action}, tried: {tried}"
+        raise NoActorError(message)
+
     def resolve_one_task_field(
         self,
         source: ConfigSource,
         specs: List[str],
     ) -> Tuple[PathOrStrings, Strings]:
         """Expand the members of a single field."""
+        return self.resolve_some_path_specs(source, specs, source_relative=True)
+
+    def resolve_some_path_specs(
+        self,
+        source: ConfigSource,
+        specs: List[str],
+        source_relative: bool,
+    ) -> Tuple[List[Any], Strings]:
+        """Resolve a list of path specs."""
         new_paths: PathOrStrings = []
         unresolved_specs = []
-
         for spec in specs:
             spec_paths = self.resolve_one_path_spec(
                 source,
                 spec,
-                source_relative=True,
+                source_relative=source_relative,
             )
             if not spec_paths:
                 unresolved_specs += [spec]

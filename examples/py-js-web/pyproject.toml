@@ -25,7 +25,7 @@ dependencies = [
 "Source" = "https://github.com/deathbeds/doitoml/tree/main/examples/py-js-web"
 
 [tool.doit]
-default_tasks = ["backend:dist:wheel"]
+default_tasks = ["backend:dist"]
 verbosity = 2
 par_type = "thread"
 backend = "sqlite3"
@@ -44,7 +44,11 @@ EXAMPLE_PY_VERSION = ":get::toml::pyproject.toml::project::version"
 
 [tool.doitoml.paths]
 whl = ["dist/example_web-${EXAMPLE_PY_VERSION}-py3-none-any.whl"]
+sdist = ["dist/example-web-${EXAMPLE_PY_VERSION}.tar.gz"]
+dist_tgz = ["dist/${EXAMPLE_JS_DIST}"]
+dist_hash = ["dist/SHA256SUMS"]
 py_src = [":rglob::src::*.py"]
+all_dist = ["::whl", "::sdist", "::dist_tgz"]
 readme = ["./README.md"]
 license = ["./LICENSE"]
 ppt = ["./pyproject.toml"]
@@ -64,3 +68,15 @@ actions = [["mamba", "env", "update", "--file", "::env_yml", "--prefix", "::venv
 file_dep = ["::venv_history", "::readme", "::license", "::ppt", "::py_src", "::frontend::dist_html"]
 targets = ["::whl"]
 actions = [["::conda_run", "pyproject-build", "--no-isolation"]]
+
+[tool.doitoml.task.dist.js]
+file_dep = ["::js::dist_tgz"]
+targets = ["::dist_tgz"]
+actions = [{py="shutil:copy2", args=["::js::dist_tgz", "::dist_tgz"]}]
+
+[tool.doitoml.tasks.build.hashfile]
+file_dep = ["::all_dist"]
+targets = ["::dist_hash"]
+actions = [
+  {py="_actions:hash_files", args={hashfile=["::dist_hash"], files=["::all_dist"]}}
+]

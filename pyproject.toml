@@ -43,6 +43,8 @@ doitoml-dollar-env = "doitoml.dsl:EnvReplacer"
 [project.entry-points."doitoml.parser.v0"]
 json = "doitoml.sources.json._json:JsonParser"
 toml = "doitoml.sources.toml._toml:TomlParser"
+[project.entry-points."doitoml.actor.v0"]
+py = "doitoml.actors:PyActor"
 
 [tool.pytest.ini_options]
 cache_dir = "build/.cache/pytest"
@@ -190,6 +192,8 @@ sphinx_opts = ["-b", "html", "docs", "build/docs"]
 [tool.doitoml.paths]
 whl = ["dist/${DOITOML_WHEEL}"]
 sdist = ["dist/${DOITOML_SDIST}"]
+all_dist = ["::whl", "::sdist"]
+dist_hash = ["dist/SHA256SUMS"]
 docs_py = ["docs/conf.py"]
 all_py = ["dodo.py", "::py_src", "::all_py_test", "::docs_py"]
 py_src = [":rglob::src::*.py"]
@@ -198,6 +202,8 @@ all_py_test = [":rglob::test::*.py"]
 ppt = ["pyproject.toml"]
 all_ppt = [":glob::examples::*/pyproject.toml"]
 all_py_dist = ["::ppt", "::py_src", "README.md", "LICENSE.txt"]
+_actions = ["_actions.py"]
+_ex_actions = ["examples/py-js-web/_actions.py"]
 all_examples = [
   ":glob::examples/py-js-web::*.json::*.toml::*.yml::*.py::*.js",
   ":rglob::examples/py-js-web/src::*.*",
@@ -213,8 +219,16 @@ docs_buildinfo = ["build/docs/.buildinfo"]
 [tool.doitoml.tasks.build.pypi]
 doc = "Build distributions for PyPI"
 file_dep = ["::all_py_dist"]
-targets = ["::whl"]
+targets = ["::whl", "::sdist"]
 actions = [["pyproject-build", "-nx"]]
+
+[tool.doitoml.tasks.build.hashfile]
+doc = "Generate a hashfile"
+file_dep = ["::whl", "::sdist"]
+targets = ["::dist_hash"]
+actions = [
+  {py="_actions:hash_files", args={hashfile="::dist_hash", files="::all_dist"}}
+]
 
 [tool.doitoml.tasks.fix.ssort]
 doc = "Predictably order python source with `ssort`"
@@ -252,6 +266,11 @@ actions = [["ruff", "::all_py"]]
 doc = "Check python types with `mypy`"
 file_dep = ["::ppt", "::all_py"]
 actions = [["mypy", "::all_py"]]
+
+[tool.doitoml.tasks.test.preflight]
+doc = "Prepare for testing"
+file_dep = ["::_actions"]
+actions = [{py="shutil:copy2", args=["::_actions", "::_ex_actions"]}]
 
 [tool.doitoml.tasks.test.pytest.fast]
 doc = "Run fast tests with pytest"

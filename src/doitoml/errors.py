@@ -49,3 +49,18 @@ class ParseError(DoitomlError):
 class TaskError(DoitomlError):
 
     """An error related to generating valid tasks."""
+
+
+class ActionError(TaskError):
+
+    """An error related to task actions."""
+
+
+class ActorError(ActionError):
+
+    """An error related to custom actor actions."""
+
+
+class NoActorError(ActorError):
+
+    """An error related to a missing actor."""

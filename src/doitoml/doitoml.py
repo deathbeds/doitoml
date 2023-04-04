@@ -3,7 +3,7 @@ import logging
 import os
 import sys
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union, cast
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union, cast
 
 import doit.action
 import doit.tools
@@ -157,14 +157,43 @@ class DoiTOML:
         task: Task = {"name": ":".join(task_name)}
         task.update(raw_task)
         cwd = task.pop("cwd", None)  # type: ignore
+        old_actions = task.pop(DOIT_ACTIONS)  # type: ignore
         new_actions: List[Any] = []
+        cmd_kwargs = {}
         if cwd:
             new_actions += [(doit.tools.create_folder, [cwd])]
-            for action in task["actions"]:
-                shell = isinstance(action, str)
-                cmd_action = doit.tools.CmdAction(action, cwd=str(cwd), shell=shell)
+            cmd_kwargs["cwd"] = cwd
 
-                new_actions += [cmd_action]
+        for i, action in enumerate(old_actions):
+            is_actor = isinstance(action, dict)
+            is_shell = isinstance(action, str)
+            is_tokens = isinstance(action, list) and all(
+                isinstance(t, (str, Path)) for t in action
+            )
+            if is_actor:
+                actor_actions = self.build_actor_action(action)
+                if actor_actions:
+                    new_actions += actor_actions
+                    continue
+            elif is_shell or is_tokens:
+                new_actions += [
+                    doit.tools.CmdAction(action, **cmd_kwargs, shell=is_shell),
+                ]
+                continue
+            message = f"""{task["name"]} action {i} is not a recognized action
+            {action}
+            """
+            raise TaskError(message)
 
-            task["actions"] = new_actions
+        task[DOIT_ACTIONS] = new_actions  # type: ignore
         return cast(Task, task)
+
+    def build_actor_action(
+        self,
+        action: Dict[str, Any],
+    ) -> Optional[List[Callable[[], Optional[bool]]]]:
+        """Resolve an actor action into a list of actions."""
+        for _actor_name, actor in self.entry_points.actors.items():
+            if actor.knows(action):
+                return actor.perform_action(action)
+        return None

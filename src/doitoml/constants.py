@@ -16,17 +16,19 @@ DOITOML_UPDATE_ENV = "update_env"
 DOITOML_FAIL_QUIETLY = "fail_quietly"
 
 ## entry points
-#: extend the doit DSL
+#: extend the pydoit DSL
 ENTRY_POINT_DSL = "doitoml.dsl.v0"
-#: extend the doit parser list
+#: extend the pydoit parser list
 ENTRY_POINT_PARSER = "doitoml.parser.v0"
-#: extend the doit config parser list
+#: extend the pydoit config parser list
 ENTRY_POINT_CONFIG = "doitoml.config-parser.v0"
+#: extend the pydoit dict action vocabulary
+ENTRY_POINT_ACTOR = "doitoml.actor.v0"
 
 ## doit constants
 #: ``doit`` actions
 DOIT_ACTIONS = "actions"
 #: ``doit`` task items known to be lists
-DOIT_TASK_LIST_KEYS = ["file_dep", "task_dep", "targets", "actions"]
+DOIT_TASK_LIST_KEYS = ["file_dep", "task_dep", "targets", "actions", "clean"]
 #: ``doit`` keys that are always paths
-DOIT_PATH_RELATIVE_LISTS = ["file_dep", "targets"]
+DOIT_PATH_RELATIVE_LISTS = ["file_dep", "targets", "clean"]

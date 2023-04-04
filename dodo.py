@@ -34,4 +34,5 @@ def task_bootstrap() -> "Task":
 
 if HAS_DOITOML:
     doitoml = DoiTOML()
-    globals().update(**doitoml.tasks())
+    tasks = doitoml.tasks()
+    globals().update(tasks)
