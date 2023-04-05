@@ -1,5 +1,6 @@
 # API
 
+
 ```{eval-rst}
 .. currentmodule:: doitoml
 .. automodule:: doitoml
@@ -105,5 +106,13 @@
 ```{eval-rst}
 .. currentmodule:: doitoml
 .. automodule:: doitoml.dsl
+    :private-members:
+```
+
+## Actors
+
+```{eval-rst}
+.. currentmodule:: doitoml
+.. automodule:: doitoml.actors
     :private-members:
 ```

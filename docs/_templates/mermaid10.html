@@ -1,0 +1,23 @@
+<script type="module">
+  document.addEventListener("DOMContentLoaded", () => {
+    const diagrams = document.querySelectorAll(".mermaid");
+    // do not load mermaidjs if not needed
+    console.info(`🧜‍♀️ diagrams found: ${diagrams.length}`);
+    if (!diagrams.length) {
+      return;
+    }
+    import(
+      "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs"
+    ).then((mermaid) => {
+      mermaid.default.initialize({
+        maxTextSize: 100000,
+        logLevel: 99,
+        startOnLoad: false,
+        theme: document.querySelector("[data-theme='light']")
+          ? "default"
+          : "dark",
+      });
+      mermaid.default.run();
+    });
+  });
+</script>

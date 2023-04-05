@@ -31,11 +31,9 @@ dependencies:
   - pytest-xdist
   - tomli-w
   # demo
-  - ipyforcegraph
-  - ipyelk
   - ipywidgets >=8
+  - jupyterlab-markup
   - jupyterlab >=3.6.1,<4
-  - jupyterlab-deck
   # docs
   - docutils >=0.19
   - myst-nb
@@ -44,5 +42,6 @@ dependencies:
   - sphinx-autodoc-typehints
   - sphinx-copybutton
   - sphinx-design
+  - sphinxcontrib-mermaid
   # check
   - pytest-check-links

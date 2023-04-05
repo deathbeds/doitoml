@@ -104,11 +104,18 @@ class Globber(DSL):
     ) -> PathOrStrings:
         """Expand a token to zero or more :class:`pathlib.Path` based on (r)glob(s).
 
-        Each glob may be a matcher or have a prefix, which will be applied
-        _after_ all matches occur.
+        Chunks are delimited by ``::``. The first chunk is a relative path.
 
-        - ``!``: treated as a :class:`re.Pattern` which will exclude all matched items
-        - ``/s/``: replace all occurances of each pattern with the given value
+        Each following chunk between ``::`` may be a matcher or have a prefix.
+
+        - ``!``: a :class:`re.Pattern` which will exclude all matched items
+        - ``/s/``: expects two following chunks:
+
+          - the first is a :class:`re.Pattern` to `find`
+          - the next is the `replacement` string
+
+        Order does not matter: all excludes an replacers will be applied `after`
+        all matches are expanded.
         """
         groups = match.groupdict()
         kind = cast(str, groups["kind"])

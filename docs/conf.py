@@ -33,14 +33,15 @@ version = ".".join(release.rsplit(".", 1))
 
 # sphinx config
 extensions = [
-    "sphinx.ext.autosectionlabel",
-    "myst_nb",
     "sphinx.ext.autodoc",
     "sphinx_autodoc_typehints",
-    "sphinx_copybutton",
-    "sphinx.ext.viewcode",
     "sphinx.ext.intersphinx",
+    "sphinx.ext.viewcode",
+    "myst_nb",
+    "sphinx.ext.autosectionlabel",
+    "sphinx_copybutton",
     "sphinx_design",
+    "sphinxcontrib.mermaid",
 ]
 
 # content
@@ -57,10 +58,14 @@ intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
 }
 
+mermaid_version = ""
+mermaid_init_js = False
+
 # warnings
 suppress_warnings = ["autosectionlabel.*"]
 
 # theme
+templates_path = ["_templates"]
 html_theme = "pydata_sphinx_theme"
 html_theme_options = {
     "github_url": PROJ_DATA["project"]["urls"]["Source"],
@@ -73,6 +78,7 @@ html_theme_options = {
             "icon": "fa-brands fa-python",
         },
     ],
+    "footer_end": ["mermaid10"],
 }
 
 if REPO_INFO is not None:

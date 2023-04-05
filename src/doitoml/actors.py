@@ -23,12 +23,12 @@ class Actor:
     rank = 100
 
     def __init__(self, doitoml: "DoiTOML") -> None:
-        """Create a DSL and remember its parent."""
+        """Create an Actor and remember its parent."""
         self.doitoml = doitoml
 
     @abc.abstractmethod
     def knows(self, action: Dict[str, Any]) -> bool:
-        """Whether the actor knows how to transform and perform an action/."""
+        """Whether the actor knows how to transform and perform an action."""
 
     @abc.abstractmethod
     def transform_action(
