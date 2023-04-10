@@ -133,6 +133,9 @@ class PyActor(Actor):
                 kwargs = args
             elif isinstance(args, list):
                 pargs = args
+            else:  # pragma: no cover
+                message = f"don't know what to do with action args: {args}"
+                raise ActorError(message)
 
             result = func(*pargs, **kwargs)
             return result is not False

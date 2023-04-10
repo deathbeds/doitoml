@@ -78,5 +78,6 @@ actions = [{py="shutil:copy2", args=["::js::dist_tgz", "::dist_tgz"]}]
 file_dep = ["::all_dist"]
 targets = ["::dist_hash"]
 actions = [
-  {py="_actions:hash_files", args={hashfile=["::dist_hash"], files=["::all_dist"]}}
+  {py="my_custom._actions:hash_files", args={hashfile=["::dist_hash"], files=["::all_dist"]}},
+  {py="my_custom._actions:hash_files", args=["::dist_hash", "::all_dist"]},
 ]

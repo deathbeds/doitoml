@@ -203,7 +203,7 @@ ppt = ["pyproject.toml"]
 all_ppt = [":glob::examples::*/pyproject.toml"]
 all_py_dist = ["::ppt", "::py_src", "README.md", "LICENSE.txt"]
 _actions = ["_actions.py"]
-_ex_actions = ["examples/py-js-web/_actions.py"]
+_ex_actions = ["examples/py-js-web/my_custom/_actions.py"]
 all_examples = [
   ":glob::examples/py-js-web::*.json::*.toml::*.yml::*.py::*.js",
   ":rglob::examples/py-js-web/src::*.*",

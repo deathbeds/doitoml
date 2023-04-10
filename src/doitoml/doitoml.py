@@ -175,7 +175,7 @@ class DoiTOML:
                 if actor_actions:
                     new_actions += actor_actions
                     continue
-            elif is_shell or is_tokens:
+            if is_shell or is_tokens:
                 new_actions += [
                     doit.tools.CmdAction(action, **cmd_kwargs, shell=is_shell),
                 ]

@@ -3,7 +3,7 @@ from typing import Any
 
 import pytest
 from doitoml import DoiTOML
-from doitoml.errors import ActorError, NoActorError
+from doitoml.errors import ActorError, NoActorError, TaskError
 
 from .conftest import TPyprojectMaker
 
@@ -36,3 +36,16 @@ def test_bad_py_actor(
 
     with pytest.raises(ActorError, match=message):
         DoiTOML(fail_quietly=False)
+
+
+def test_bad_performance(a_pyproject_with: TPyprojectMaker) -> None:
+    """Test a (difficult to reproduce) bad actor."""
+    a_pyproject_with({"tasks": {}})
+
+    doitoml = DoiTOML(fail_quietly=False)
+    doitoml.config.tasks[("", "baz")] = {"actions": [{"nope": False}]}  # type: ignore
+
+    tasks = doitoml.tasks()
+
+    with pytest.raises(TaskError, match="not a recognized action"):
+        list(tasks["task_baz"]())
