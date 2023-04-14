@@ -30,7 +30,7 @@ EXAMPLE_INPUT_FILE_COUNTS = {
     # also a package.json
     NO_DODO_JS_EXAMPLE.name: 3,
     # a whole mess of stuff
-    WEB_EXAMPLE.name: 16,
+    WEB_EXAMPLE.name: 15,
 }
 EXAMPLE_TASK_COUNTS = {
     NO_DODO_EXAMPLE.name: 2,

@@ -8,6 +8,7 @@
 getting-started
 cheatsheet
 dsl
+templates
 api
 contributing
 extending

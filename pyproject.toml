@@ -24,6 +24,8 @@ dependencies = [
   "tomli",
   "typing-extensions",
 ]
+[project.optional-dependencies]
+json-e = ["json-e"]
 [project.urls]
 "Bug Tracker" = "https://github.com/deathbeds/doitoml/issues"
 "Changelog" = "https://github.com/deathbeds/doitoml/blob/main/CHANGELOG.md"
@@ -45,6 +47,8 @@ json = "doitoml.sources.json._json:JsonParser"
 toml = "doitoml.sources.toml._toml:TomlParser"
 [project.entry-points."doitoml.actor.v0"]
 py = "doitoml.actors:PyActor"
+[project.entry-points."doitoml.templater.v0"]
+json-e = "doitoml.templaters:JsonE"
 
 [tool.pytest.ini_options]
 cache_dir = "build/.cache/pytest"
@@ -93,7 +97,7 @@ show_error_codes = true
 warn_return_any = true
 warn_unused_ignores = true
 overrides = [
-  { module = ["doit", "doit.*", "tomllib",], ignore_missing_imports = true }
+  { module = ["doit", "doit.*", "tomllib", "jsone"], ignore_missing_imports = true }
 ]
 
 [tool.doit]
@@ -204,6 +208,7 @@ all_ppt = [":glob::examples::*/pyproject.toml"]
 all_py_dist = ["::ppt", "::py_src", "README.md", "LICENSE.txt"]
 _actions = ["_actions.py"]
 _ex_actions = ["examples/py-js-web/my_custom/_actions.py"]
+_tmpl_actions = ["examples/template-json-e/_actions.py"]
 all_examples = [
   ":glob::examples/py-js-web::*.json::*.toml::*.yml::*.py::*.js",
   ":rglob::examples/py-js-web/src::*.*",
@@ -270,7 +275,11 @@ actions = [["mypy", "::all_py"]]
 [tool.doitoml.tasks.test.preflight]
 doc = "Prepare for testing"
 file_dep = ["::_actions"]
-actions = [{py="shutil:copy2", args=["::_actions", "::_ex_actions"]}]
+targets = ["::_ex_actions", "::_tmpl_actions"]
+actions = [
+  {py="shutil:copy2", args=["::_actions", "::_ex_actions"]},
+  {py="shutil:copy2", args=["::_actions", "::_tmpl_actions"]},
+]
 
 [tool.doitoml.tasks.test.pytest.fast]
 doc = "Run fast tests with pytest"

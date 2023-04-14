@@ -1,4 +1,5 @@
 """Handles discovering, loading, and normalizing configuration."""
+import os
 from copy import deepcopy
 from pathlib import Path
 from pprint import pformat
@@ -24,6 +25,7 @@ from doitoml.constants import (
     DOIT_PATH_RELATIVE_LISTS,
     DOITOML_FAIL_QUIETLY,
     DOITOML_UPDATE_ENV,
+    FALSEY,
 )
 from doitoml.errors import (
     ActionError,
@@ -31,6 +33,7 @@ from doitoml.errors import (
     DoitomlError,
     NoActorError,
     NoConfigError,
+    NoTemplaterError,
     PrefixError,
     UnresolvedError,
 )
@@ -96,6 +99,16 @@ class Config:
         self.update_env = update_env
         self.fail_quietly = fail_quietly
         self.discover_config_paths = discover_config_paths
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Return a normalized subset of config data."""
+        env = dict(**self.env)
+        env.update(os.environ)
+        return {
+            "env": env,
+            "cmd": {":".join(k): v for k, v in self.cmd.items()},
+            "paths": {":".join(k): v for k, v in self.paths.items()},
+        }
 
     def initialize(self) -> None:
         """Perform a few passes to configure everything."""
@@ -353,7 +366,24 @@ class Config:
     def init_tasks(self) -> None:
         """Initialize all intermediate task representations."""
         for prefix, source in self.sources.items():
-            raw_tasks = source.raw_config.get("tasks", {})
+            raw_templates = source.raw_config.get("templates", {}).get("tasks", {})
+            raw_tasks = deepcopy(source.raw_config.get("tasks", {}))
+            templaters = self.doitoml.entry_points.templaters
+            for templater_name, tasks in raw_templates.items():
+                templater = templaters.get(templater_name)
+                if templater is None:
+                    message = (
+                        f"Templater {templater_name} not one of "
+                        f"""{", ".join(templaters.keys())}"""
+                    )
+                    raise NoTemplaterError(message)
+                for task_name, task in tasks.items():
+                    templated = templater.transform_task(source, task)
+                    if isinstance(templated, dict):
+                        raw_tasks[task_name] = templated
+                    elif isinstance(templated, list):
+                        raw_tasks[task_name] = {t["name"]: t for t in templated}
+
             for task_prefix, task in self.resolve_one_task_or_group(
                 source,
                 (prefix,),
@@ -377,6 +407,11 @@ class Config:
         if not isinstance(task_or_group, dict):
             message = f"{source} task {prefixes} is not a dict: {task_or_group}"
             raise ConfigError(message)
+
+        skip = task_or_group.pop("skip", None)  # type: ignore
+        if str(skip).strip().lower() not in FALSEY:
+            return
+
         maybe_old_actions = task_or_group.get(DOIT_ACTIONS, [])
         if maybe_old_actions:
             task = cast(Task, task_or_group)

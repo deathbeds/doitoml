@@ -62,7 +62,7 @@ class DoiTOML:
             if fail_quietly or (
                 fail_quietly is None and self.config and self.config.fail_quietly
             ):
-                self.log.error(err)
+                self.log.error("%s: %s", type(err).__name__, err)
                 sys.exit(1)
             else:
                 raise err

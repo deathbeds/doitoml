@@ -1,0 +1,23 @@
+[tool.doit]
+loader = "doitoml"
+verbosity = 2
+
+[tool.doitoml.env]
+SKIP = ""
+
+[tool.doitoml.paths]
+pkg = [":glob::.::*/pyproject.toml::/s/::pyproject.toml::"]
+
+[tool.doitoml.templates.tasks.json-e.build]
+"$map" = ["::pkg"]
+
+[tool.doitoml.templates.tasks.json-e.build."each(pkg)"]
+skip = "${rsplit_any(pkg, '/', 1)[1] in split_any(env.SKIP, ',')}"
+name = "${rsplit_any(pkg, '/', 1)[1]}"
+cwd = "${pkg}"
+actions = [
+    { "$eval" = "['flit', 'build']" },
+    { py="_actions:hash_files", args=["${pkg}/SHA256SUMS", "${pkg}/*.tar.gz", "${pkg}/*.whl"] }
+]
+file_dep = ["${pkg}/pyproject.toml"]
+targets = ["${pkg}/dist/SHA256SUMS"]

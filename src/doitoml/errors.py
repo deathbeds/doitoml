@@ -51,6 +51,16 @@ class TaskError(DoitomlError):
     """An error related to generating valid tasks."""
 
 
+class TemplaterError(ConfigError):
+
+    """An error related to templates."""
+
+
+class NoTemplaterError(TemplaterError):
+
+    """An error related to missing templaters."""
+
+
 class ActionError(TaskError):
 
     """An error related to task actions."""
