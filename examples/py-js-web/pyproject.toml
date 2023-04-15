@@ -81,3 +81,20 @@ actions = [
   {py="my_custom._actions:hash_files", args={hashfile=["::dist_hash"], files=["::all_dist"]}},
   {py="my_custom._actions:hash_files", args=["::dist_hash", "::all_dist"]},
 ]
+
+[tool.__doitoml_tests__.steps.00_list]
+tasks = 10
+before = { files = {"**/*" = 15, "*" = 8} }
+after = { files = {"*" = 9} }
+run = ["doit", "list"]
+rc = 0
+
+[tool.__doitoml_tests__.steps.01_run]
+run = ["doit"]
+rc = 0
+
+[tool.__doitoml_tests__.steps.01_run.after.files]
+"*" = 12
+"dist/*.whl" = 1
+"dist/*.tar.gz" = 1
+"dist/SHA256SUMS" = 1

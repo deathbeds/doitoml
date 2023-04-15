@@ -1,7 +1,10 @@
 """Declarative actions for ``doitoml``."""
-
 import abc
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional
+import os
+import re
+import sys
+from pathlib import Path
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Union
 
 from doitoml.errors import ActorError
 
@@ -10,6 +13,11 @@ if TYPE_CHECKING:  # pragma: no cover
     from .sources._config import ConfigSource
 
 CallableAction = Callable[[], Optional[bool]]
+
+
+RE_PY_DOT_FUNC = re.compile(
+    r"^((?P<py_path>[^:]+?):)?((?P<dotted>[^:]+?):)((?P<func_name>[^:]+?))$",
+)
 
 
 class Actor:
@@ -39,7 +47,11 @@ class Actor:
         """Expand an action dict's tokens at the end of configuration."""
 
     @abc.abstractmethod
-    def perform_action(self, action: Dict[str, Any]) -> List[CallableAction]:
+    def perform_action(
+        self,
+        action: Dict[str, Any],
+        cwd: Optional[Union[Path, str]] = None,
+    ) -> List[CallableAction]:
         """Build a function that will fully resolve the action during task building."""
 
 
@@ -47,9 +59,20 @@ class PyActor(Actor):
 
     """An actor for arbitrary Python functions."""
 
+    def _get_py_dot_func(self, py: Optional[str]) -> Tuple[Optional[str], ...]:
+        if py is None:
+            return None, None, None
+        match = RE_PY_DOT_FUNC.search(py)
+        if not match:  # pragma: no cover
+            return None, None, None
+        groups = match.groupdict()
+        return groups.get("py_path"), groups.get("dotted"), groups.get("func_name")
+
     def knows(self, action: Dict[str, Any]) -> bool:
         """Only handles ``py`` actions."""
-        return "py" in action
+        _py_path, dotted, func_name = self._get_py_dot_func(action.get("py"))
+
+        return None not in [dotted, func_name]
 
     def transform_action(
         self,
@@ -115,29 +138,66 @@ class PyActor(Actor):
             return found_kwarg
         return None
 
-    def perform_action(self, action: Dict[str, Any]) -> List[CallableAction]:
+    def _fix_action_paths(
+        self,
+        cwd: Optional[Union[str, Path]] = None,
+        py_path: Optional[str] = None,
+    ) -> Tuple[Optional[str], Optional[List[str]]]:
+        old_sys_path = None
+        old_cwd = None
+
+        if cwd is not None:
+            old_cwd = str(Path.cwd())
+            if py_path is not None:
+                import_cwd = Path(cwd) / py_path
+                old_sys_path = [*sys.path]
+                sys.path = [str(import_cwd), *old_sys_path]
+            os.chdir(str(cwd))
+
+        return old_cwd, old_sys_path
+
+    def perform_action(
+        self,
+        action: Dict[str, Any],
+        cwd: Optional[Union[Path, str]] = None,
+    ) -> List[CallableAction]:
         """Build a python callable."""
+        py = action.get("py")
+        py_path, dotted, func_name = self._get_py_dot_func(py)
+
+        if dotted is None or func_name is None:  # pragma: no cover
+            message = f"Unknown py path: {py}"
+            raise ActorError(message)
 
         def _py_action() -> Optional[bool]:
-            dotted, func_name = action["py"].split(":")
-            current = __import__(dotted)
-            for dot in dotted.split(".")[1:]:
-                current = getattr(current, dot)
-            func = getattr(current, func_name)
-            args = action["args"]
+            old_cwd, old_sys_path = self._fix_action_paths(cwd, py_path)
 
-            pargs = []
-            kwargs = {}
+            try:
+                current = __import__(dotted)  # type: ignore
+                if py_path and cwd:
+                    os.chdir(str(cwd))
+                for dot in dotted.split(".")[1:]:  # type: ignore
+                    current = getattr(current, dot)
+                func = getattr(current, func_name)  # type: ignore
+                args = action["args"]
 
-            if isinstance(args, dict):
-                kwargs = args
-            elif isinstance(args, list):
-                pargs = args
-            else:  # pragma: no cover
-                message = f"don't know what to do with action args: {args}"
-                raise ActorError(message)
+                pargs = []
+                kwargs = {}
 
-            result = func(*pargs, **kwargs)
+                if isinstance(args, dict):
+                    kwargs = args
+                elif isinstance(args, list):
+                    pargs = args
+                else:  # pragma: no cover
+                    message = f"don't know what to do with action args: {args}"
+                    raise ActorError(message)
+
+                result = func(*pargs, **kwargs)
+            finally:
+                if old_cwd:
+                    os.chdir(str(old_cwd))
+                if old_sys_path:
+                    sys.path = old_sys_path
             return result is not False
 
         return [_py_action]

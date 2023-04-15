@@ -14,10 +14,10 @@ returns JSON-like objects.
 A common use case is to create a number of tasks, changing only certain key values.
 
 ```toml
-[tool.doitoml.templates.tasks.json-e.build]
+[tool.doitoml.templates.json-e.tasks.echo]
 "$map": ["a", "b"]
 
-[tool.doitoml.templates.tasks.json-e.echo."each(x)"]
+[tool.doitoml.templates.json-e.tasks.echo."each(x)"]
 name = "${x}"
 actions = [
     { "$eval" = "['echo', x]" }

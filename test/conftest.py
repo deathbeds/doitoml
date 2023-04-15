@@ -3,15 +3,21 @@ import logging
 import os
 import shutil
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Callable, Dict, Generator
+from typing import TYPE_CHECKING, Any, Callable, Dict, Generator, Tuple
 
 import pytest
 import tomli_w
+
+try:  # pragma: no cover
+    import tomllib
+except ImportError:  # pragma: no cover
+    import tomli as tomllib
 
 if TYPE_CHECKING:  # pragma: no cover
     from doitoml import DoiTOML
 
 TPyprojectMaker = Callable[[Any], Path]
+TDataExample = Tuple[Path, Dict[str, Any]]
 
 HERE = Path(__file__).parent
 ROOT = HERE.parent
@@ -19,52 +25,25 @@ ROOT = HERE.parent
 SELF_DODO = ROOT / "dodo.py"
 SELF_PPT = ROOT / "pyproject.toml"
 
-EXAMPLES = ROOT / "examples"
-WEB_EXAMPLE = EXAMPLES / "py-js-web"
-NO_DODO_EXAMPLE = EXAMPLES / "no-dodo"
-NO_DODO_JS_EXAMPLE = EXAMPLES / "no-dodo-js"
-EXAMPLES = [WEB_EXAMPLE, NO_DODO_EXAMPLE, NO_DODO_JS_EXAMPLE]
-EXAMPLE_INPUT_FILE_COUNTS = {
-    # just ``pyproject.toml`` and ``.gitignore```
-    NO_DODO_EXAMPLE.name: 2,
-    # also a package.json
-    NO_DODO_JS_EXAMPLE.name: 3,
-    # a whole mess of stuff
-    WEB_EXAMPLE.name: 15,
-}
-EXAMPLE_TASK_COUNTS = {
-    NO_DODO_EXAMPLE.name: 2,
-    NO_DODO_JS_EXAMPLE.name: 2,
-    WEB_EXAMPLE.name: 10,
-}
-EXAMPLE_DEFAULT_OUTPUTS = {
-    WEB_EXAMPLE.name: {
-        "dist/*.whl": 1,
-        "dist/*.tar.gz": 1,
-        "dist/*.tgz": 1,
-        "dist/SHA256SUMS": 1,
-    },
-    NO_DODO_EXAMPLE.name: {"*": 5, "*doit*": 3},
-    NO_DODO_JS_EXAMPLE.name: {"*": 6, "*doit*": 3},
-}
-
-EXAMPLE_IGNORES = {
-    example.name: (
-        (example / ".gitignore").read_text(encoding="utf-8").strip().splitlines()
-    )
-    for example in EXAMPLES
-}
+EXAMPLES_ROOT = ROOT / "examples"
+EXAMPLE_PPT = sorted(EXAMPLES_ROOT.glob("*/pyproject.toml"))
 
 
-@pytest.fixture(params=EXAMPLES)
-def an_example_project(tmp_path: Path, request: Any) -> Generator[Path, None, None]:
-    """Provide path to an example project."""
-    dest = tmp_path / f"{request.param.name}"
-    ignores = EXAMPLE_IGNORES[request.param.name]
-    shutil.copytree(request.param, dest, ignore=shutil.ignore_patterns(*ignores))
+@pytest.fixture(params=[p.parent.name for p in EXAMPLE_PPT])
+def a_data_example(
+    request: Any,
+    tmp_path: Path,
+) -> Generator[TDataExample, None, None]:
+    """Generate an example with data-driven test information."""
+    ppt = EXAMPLES_ROOT / f"{request.param}/pyproject.toml"
+    example = ppt.parent
+    ppt_data = tomllib.loads(ppt.read_text(encoding="utf-8"))
+    ignores = (example / ".gitignore").read_text(encoding="utf-8").strip().splitlines()
+    dest = tmp_path / f"{request.param}"
+    shutil.copytree(example, dest, ignore=shutil.ignore_patterns(*ignores))
     old_cwd = Path.cwd()
     os.chdir(str(dest))
-    yield dest
+    yield dest, ppt_data["tool"].get("__doitoml_tests__", {})
     os.chdir(str(old_cwd))
     shutil.rmtree(dest)
 

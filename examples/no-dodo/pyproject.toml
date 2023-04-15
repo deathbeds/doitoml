@@ -4,3 +4,15 @@ verbosity = 2
 
 [tool.doitoml.tasks.hello]
 actions = ['echo "hello world"']
+
+[tool.__doitoml_tests__.steps.00_list]
+tasks = 2
+before = { files = {"**/*" = 2, "*" = 2} }
+after = { files = {"*" = 4} }
+run = ["doit", "list"]
+rc = 0
+
+[tool.__doitoml_tests__.steps.01_run]
+after = { files = {"*" = 5} }
+run = ["doit"]
+rc = 0

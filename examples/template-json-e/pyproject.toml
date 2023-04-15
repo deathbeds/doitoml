@@ -3,21 +3,39 @@ loader = "doitoml"
 verbosity = 2
 
 [tool.doitoml.env]
-SKIP = ""
+SKIP = "c"
 
 [tool.doitoml.paths]
 pkg = [":glob::.::*/pyproject.toml::/s/::pyproject.toml::"]
 
-[tool.doitoml.templates.tasks.json-e.build]
-"$map" = ["::pkg"]
+[tool.doitoml.templates.json-e.tasks.build]
+"$map" = "::pkg"
 
-[tool.doitoml.templates.tasks.json-e.build."each(pkg)"]
-skip = "${rsplit_any(pkg, '/', 1)[1] in split_any(env.SKIP, ',')}"
-name = "${rsplit_any(pkg, '/', 1)[1]}"
+[tool.doitoml.templates.json-e.tasks.build."each(pkg)"]
+skip = "${split(pkg, '/')[-1] in split(env.SKIP, ',')}"
+name = "${split(pkg, '/')[-1]}"
 cwd = "${pkg}"
 actions = [
-    { "$eval" = "['flit', 'build']" },
-    { py="_actions:hash_files", args=["${pkg}/SHA256SUMS", "${pkg}/*.tar.gz", "${pkg}/*.whl"] }
+    ["pyproject-build", "--no-isolation"],
+    { py="..:_actions:hash_files", args={hashfile="${pkg}/dist/SHA256SUMS", files=["*.tar.gz", "*.whl"]} }
 ]
 file_dep = ["${pkg}/pyproject.toml"]
 targets = ["${pkg}/dist/SHA256SUMS"]
+
+[tool.__doitoml_tests__.steps.00_list]
+tasks = 3
+before = { files = {"**/*" = 10, "*" = 4} }
+after = { files = {"*" = 6} }
+run = ["doit", "list"]
+rc = 0
+
+[tool.__doitoml_tests__.steps.01_run_skip]
+after = { files = {"*" = 7, "*/dist/SHA256SUMS" = 1} }
+env = { SKIP = "a" }
+run = ["doit"]
+rc = 0
+
+[tool.__doitoml_tests__.steps.02_run_all]
+after = { files = {"*" = 7, "*/dist/SHA256SUMS" = 2} }
+run = ["doit"]
+rc = 0

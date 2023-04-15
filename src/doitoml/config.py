@@ -105,9 +105,9 @@ class Config:
         env = dict(**self.env)
         env.update(os.environ)
         return {
-            "env": env,
+            "env": {k: str(v) for k, v in env.items()},
             "cmd": {":".join(k): v for k, v in self.cmd.items()},
-            "paths": {":".join(k): v for k, v in self.paths.items()},
+            "paths": {":".join(k): list(map(str, v)) for k, v in self.paths.items()},
         }
 
     def initialize(self) -> None:
@@ -366,10 +366,10 @@ class Config:
     def init_tasks(self) -> None:
         """Initialize all intermediate task representations."""
         for prefix, source in self.sources.items():
-            raw_templates = source.raw_config.get("templates", {}).get("tasks", {})
             raw_tasks = deepcopy(source.raw_config.get("tasks", {}))
+            raw_templates = source.raw_config.get("templates", {})
             templaters = self.doitoml.entry_points.templaters
-            for templater_name, tasks in raw_templates.items():
+            for templater_name, templater_kinds in raw_templates.items():
                 templater = templaters.get(templater_name)
                 if templater is None:
                     message = (
@@ -377,7 +377,8 @@ class Config:
                         f"""{", ".join(templaters.keys())}"""
                     )
                     raise NoTemplaterError(message)
-                for task_name, task in tasks.items():
+                templater_tasks = deepcopy(templater_kinds.get("tasks", {}))
+                for task_name, task in templater_tasks.items():
                     templated = templater.transform_task(source, task)
                     if isinstance(templated, dict):
                         raw_tasks[task_name] = templated

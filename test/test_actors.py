@@ -32,7 +32,7 @@ def test_bad_py_actor(
     message: str,
 ) -> None:
     """Test a badly-built actor."""
-    a_pyproject_with({"tasks": {"foo": {"actions": [{"py": "1", "args": args}]}}})
+    a_pyproject_with({"tasks": {"foo": {"actions": [{"py": "1:1", "args": args}]}}})
 
     with pytest.raises(ActorError, match=message):
         DoiTOML(fail_quietly=False)

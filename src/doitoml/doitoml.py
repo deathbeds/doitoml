@@ -171,7 +171,7 @@ class DoiTOML:
                 isinstance(t, (str, Path)) for t in action
             )
             if is_actor:
-                actor_actions = self.build_actor_action(action)
+                actor_actions = self.build_actor_action(action, cwd)
                 if actor_actions:
                     new_actions += actor_actions
                     continue
@@ -191,9 +191,10 @@ class DoiTOML:
     def build_actor_action(
         self,
         action: Dict[str, Any],
+        cwd: Optional[Union[Path, str]] = None,
     ) -> Optional[List[Callable[[], Optional[bool]]]]:
         """Resolve an actor action into a list of actions."""
         for _actor_name, actor in self.entry_points.actors.items():
             if actor.knows(action):
-                return actor.perform_action(action)
+                return actor.perform_action(action, cwd)
         return None
