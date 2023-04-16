@@ -212,4 +212,7 @@ class Getter(DSL):
         if isinstance(new_value, dict):
             return [json.dumps(new_value)]
 
+        if isinstance(new_value, (int, float, bool)):
+            return [json.dumps(new_value)]
+
         return [x if isinstance(x, str) else json.dumps(x) for x in new_value]

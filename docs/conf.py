@@ -46,6 +46,9 @@ extensions = [
 
 # content
 autoclass_content = "both"
+always_document_param_types = True
+typehints_defaults = "comma"
+typehints_use_signature_return = True
 autodoc_default_options = {
     "members": True,
     "show-inheritance": True,
@@ -59,7 +62,6 @@ intersphinx_mapping = {
 }
 
 mermaid_version = ""
-mermaid_init_js = False
 
 # warnings
 suppress_warnings = ["autosectionlabel.*"]

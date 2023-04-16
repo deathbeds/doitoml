@@ -2,6 +2,8 @@
 import sys
 from typing import TYPE_CHECKING, Any, Dict, Tuple, Union
 
+from doitoml.errors import EntryPointError, MissingDependencyError
+
 from .constants import (
     ENTRY_POINT_ACTOR,
     ENTRY_POINT_CONFIG,
@@ -9,7 +11,6 @@ from .constants import (
     ENTRY_POINT_PARSER,
     ENTRY_POINT_TEMPLATER,
 )
-from .errors import EntryPointError
 
 if sys.version_info < (3, 10):  # pragma: no cover
     from importlib_metadata import entry_points
@@ -22,7 +23,7 @@ if TYPE_CHECKING:  # pragma: no cover
     from .dsl import DSL
     from .sources._config import ConfigParser
     from .sources._source import Parser
-    from .templaters import Templater
+    from .templaters._templater import Templater
 
 
 class EntryPoints:
@@ -57,8 +58,17 @@ class EntryPoints:
         for entry_point in entry_points(group=group):
             try:
                 eps[entry_point.name] = entry_point.load()(self.doitoml)
+            except MissingDependencyError as err:  # pragma: no cover
+                self.doitoml.log.info(
+                    "%s %s is missing a dependency: %s",
+                    group,
+                    entry_point.name,
+                    err,
+                )
             except Exception as err:  # pragma: no cover
-                message = f"{group} {entry_point.name} failed to load: {err}"
+                message = (
+                    f"{group} {entry_point.name} unexpectedly failed to load {err}"
+                )
                 raise EntryPointError(message) from err
 
         return dict(sorted(eps.items(), key=self.rank_key))

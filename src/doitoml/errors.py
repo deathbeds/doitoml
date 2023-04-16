@@ -6,6 +6,11 @@ class DoitomlError(ValueError):
     """Some kind of error in ``doitoml``."""
 
 
+class MissingDependencyError(ValueError):
+
+    """An error related to a missing (optional) dependency."""
+
+
 class ConfigError(DoitomlError):
 
     """An error related to configuration."""
@@ -54,6 +59,11 @@ class TaskError(DoitomlError):
 class TemplaterError(ConfigError):
 
     """An error related to templates."""
+
+
+class JsonEError(ConfigError):
+
+    """An error related to JSON-e."""
 
 
 class NoTemplaterError(TemplaterError):

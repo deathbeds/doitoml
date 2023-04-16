@@ -16,15 +16,15 @@ DOITOML_UPDATE_ENV = "update_env"
 DOITOML_FAIL_QUIETLY = "fail_quietly"
 
 ## entry points
-#: extend the pydoit DSL
+#: extend the ``doitoml`` DSL
 ENTRY_POINT_DSL = "doitoml.dsl.v0"
-#: extend the pydoit parser list
+#: extend the ``doitoml`` source parser vocabulary
 ENTRY_POINT_PARSER = "doitoml.parser.v0"
-#: extend the pydoit config parser list
+#: extend the ``doitoml`` config parser vocabulary
 ENTRY_POINT_CONFIG = "doitoml.config-parser.v0"
-#: extend the pydoit dict action vocabulary
+#: extend the ``doitoml`` actor vocabulary
 ENTRY_POINT_ACTOR = "doitoml.actor.v0"
-#: extend the templater vocabulary
+#: extend the ``doitoml`` templater vocabulary
 ENTRY_POINT_TEMPLATER = "doitoml.templater.v0"
 
 ## doit constants

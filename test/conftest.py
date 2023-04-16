@@ -8,6 +8,14 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, Generator, Tuple
 import pytest
 import tomli_w
 
+try:
+    __import__("jsone")
+    HAS_JSONE = True
+except (ImportError, AttributeError):
+    HAS_JSONE = False
+
+MSG_MISSING_JSONE = {"reason": "needs ``jsone`` installed"}
+
 try:  # pragma: no cover
     import tomllib
 except ImportError:  # pragma: no cover

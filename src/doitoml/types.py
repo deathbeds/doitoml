@@ -71,7 +71,6 @@ TaskGenerator = Generator[Task, None, None]
 TaskOrTaskGenerator = Union[Task, TaskGenerator]
 TaskFunction = Callable[[], TaskOrTaskGenerator]
 
-
 PrefixedTaskGenerator = Generator[Tuple[Tuple[str, ...], Task], None, None]
 
 PrefixedTasks = Dict[Tuple[str, ...], Task]
@@ -79,12 +78,3 @@ PrefixedPaths = Dict[Tuple[str, ...], Paths]
 PrefixedStrings = Dict[Tuple[str, ...], List[str]]
 PrefixedStringsOrPaths = Dict[Tuple[str, ...], List[Union[str, Path]]]
 GroupedTasks = Dict[str, PrefixedTasks]
-
-
-class ConfigDict(TypedDict, total=False):
-
-    """Internal representation of the configuration."""
-
-    env: Dict[str, str]
-    paths: PrefixedPaths
-    tasks: PrefixedTasks

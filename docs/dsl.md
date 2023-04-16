@@ -85,7 +85,7 @@ Get a version number.
 
 ````
 
-## `::` Reference a path or token 
+## `::` Reference a path or token
 
 > Get the value of any `paths` or `cmd`, either in the same `doitoml` configuration file, or with a named prefix.
 

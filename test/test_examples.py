@@ -1,8 +1,8 @@
 """Test example projects."""
-
 import json
 import os
 from pathlib import Path
+from pprint import pprint
 from typing import Any, Dict, Optional
 
 try:  # pragma: no cover
@@ -31,7 +31,8 @@ def _count_files(
         )
         observed[globbish] = paths
         observed_counts[globbish] = len(paths)
-    assert observed_counts == expected_counts, f"{message}: {observed}"
+    pprint(observed)
+    assert observed_counts == expected_counts, message
 
 
 def _count_tasks(
@@ -52,7 +53,9 @@ def _count_tasks(
         env=env or os.environ,
     )
     assert list_all.success
-    tasks = [t for t in list_all.stdout.strip().splitlines() if t.startswith("TASK:")]
+    stdout_lines = list_all.stdout.strip().splitlines()
+    tasks = [t for t in stdout_lines if t.startswith("TASK:")]
+    pprint(tasks)
     assert len(tasks) == expected_count, message
 
 

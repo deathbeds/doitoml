@@ -48,7 +48,7 @@ toml = "doitoml.sources.toml._toml:TomlParser"
 [project.entry-points."doitoml.actor.v0"]
 py = "doitoml.actors:PyActor"
 [project.entry-points."doitoml.templater.v0"]
-json-e = "doitoml.templaters:JsonE"
+json-e = "doitoml.templaters.jsone:JsonE"
 
 [tool.pytest.ini_options]
 cache_dir = "build/.cache/pytest"
@@ -173,7 +173,7 @@ select = [
 ]
 [tool.ruff.per-file-ignores]
 "_config.py" = ["PLR0912", "C901", "PLR0913"]
-"test/**/*.py" = ["S101", "T201"]
+"test/**/*.py" = ["S101", "T201", "T203"]
 "dsl.py" = ["ARG002"]
 "entry_points.py" = ["BLE001"]
 "dodo.py" = ["BLE001"]
@@ -260,7 +260,7 @@ actions = [["pyproject-fmt", "::all_ppt"]]
 [tool.doitoml.tasks.lint.black]
 doc = "Check python formatting with `black`"
 file_dep = ["::ppt", "::all_py"]
-actions = [["black", "--check", "::all_py"]]
+actions = [["black", "--quiet", "--check", "::all_py"]]
 
 [tool.doitoml.tasks.lint.ruff]
 doc = "Check python syntax with `ruff`"
