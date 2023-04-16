@@ -7,6 +7,7 @@ SKIP = "c"
 
 [tool.doitoml.paths]
 pkg = [":glob::.::*/pyproject.toml::/s/::pyproject.toml::"]
+all_sha256 = ["dist/SHA256SUMS"]
 
 [tool.doitoml.templates.json-e.tasks.echo]
 doc = "env var references need to be escaped"
@@ -22,29 +23,38 @@ actions = [
 skip = "${split(pkg, '/')[-1] in split(env.SKIP, ',')}"
 name = "${split(pkg, '/')[-1]}"
 cwd = "${pkg}"
-actions = [
-    ["pyproject-build", "--no-isolation", "--sdist"],
-    { py="..:_actions:hash_files", args={hashfile="${pkg}/dist/SHA256SUMS", files=["*.tar.gz", "*.whl"]} }
-]
 file_dep = ["${pkg}/pyproject.toml"]
 targets = ["${pkg}/dist/SHA256SUMS"]
+actions = [
+    ["pyproject-build", "--no-isolation", "--sdist"],
+    {py="..:_actions:hash_files", args={hashfile="${pkg}/dist/SHA256SUMS", files=["*.tar.gz", "*.whl"]}}
+]
 
 [tool.doitoml.templates.json-e.tasks.dist."$map"]
 a = ["a description"]
 b = ["another description"]
 
 [tool.doitoml.templates.json-e.tasks.dist."each(desc,pkg)"."${pkg}"]
-file_dep = ["${pkg}/dist/SHA256SUMS"]
 doc = "${desc}"
+file_dep = ["${pkg}/dist/SHA256SUMS"]
+targets = ["dist/${pkg}/SHA256SUMS"]
 actions = [
     {py="shutil:rmtree", args={ path = "dist/${pkg}", ignore_errors="1"}},
     {py="doit.tools:create_folder", args=["dist"]},
-    {py="shutil:copytree", args=["${pkg}/dist", "dist/${pkg}"]}
+    {py="shutil:copytree", args=["${pkg}/dist", "dist/${pkg}"]},
 ]
-targets = ["dist/${pkg}/SHA256SUMS"]
+
+[tool.doitoml.tasks.release]
+name = "all"
+cwd = "."
+file_dep = ["dist/a/SHA256SUMS", "dist/b/SHA256SUMS"]
+targets = ["::all_sha256"]
+actions = [
+    {py="_actions:hash_files", args={hashfile="dist/SHA256SUMS", files=["*/*.tar.gz", "*/*.whl"]}}
+]
 
 [tool.__doitoml_tests__.steps.00_list]
-tasks = 8
+tasks = 10
 before = { files = {"**/*" = 10, "*" = 4} }
 after = { files = {"*" = 6} }
 run = ["doit", "list"]
@@ -61,7 +71,7 @@ after = { files = {"*" = 7, "*/dist/SHA256SUMS" = 2} }
 run = ["doit", "build"]
 rc = 0
 
-[tool.__doitoml_tests__.steps.03_run_dist]
-after = { files = {"*" = 7, "*/dist/SHA256SUMS" = 2} }
-run = ["doit", "dist"]
+[tool.__doitoml_tests__.steps.03_run_release]
+after = { files = {"*" = 7, "dist/SHA256SUMS" = 1} }
+run = ["doit", "release"]
 rc = 0

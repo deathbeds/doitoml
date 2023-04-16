@@ -143,16 +143,20 @@ class PyActor(Actor):
         cwd: Optional[Union[str, Path]] = None,
         py_path: Optional[str] = None,
     ) -> Tuple[Optional[str], Optional[List[str]]]:
+        """Ensure the ``sys.path``, ``Path.cwd`` are correct: provide the old values."""
         old_sys_path = None
-        old_cwd = None
+        new_cwd = Path.cwd().resolve()
+        old_cwd = str(new_cwd)
 
         if cwd is not None:
-            old_cwd = str(Path.cwd())
-            if py_path is not None:
-                import_cwd = Path(cwd) / py_path
-                old_sys_path = [*sys.path]
-                sys.path = [str(import_cwd), *old_sys_path]
-            os.chdir(str(cwd))
+            new_cwd = Path(cwd).resolve()
+            os.chdir(str(new_cwd))
+            py_path = py_path or "."
+
+        if py_path is not None:
+            import_path = (new_cwd / py_path).resolve()
+            old_sys_path = [*sys.path]
+            sys.path = [str(import_path), *old_sys_path]
 
         return old_cwd, old_sys_path
 
@@ -193,7 +197,7 @@ class PyActor(Actor):
                     raise ActorError(message)
 
                 result = func(*pargs, **kwargs)
-            finally:
+            finally:  # pragma: no cover
                 if old_cwd:
                     os.chdir(str(old_cwd))
                 if old_sys_path:

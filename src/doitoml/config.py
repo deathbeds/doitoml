@@ -382,7 +382,7 @@ class Config:
                     templated = templater.transform_task(source, task)
                     if isinstance(templated, dict):
                         raw_tasks[task_name] = templated
-                    elif isinstance(templated, list):
+                    else:
                         raw_tasks[task_name] = {t["name"]: t for t in templated}
 
             for task_prefix, task in self.resolve_one_task_or_group(

@@ -41,9 +41,9 @@ def _clean_hashfile(hashfile: Union[PathOrString, List[PathOrString]]) -> Path:
 
 def _clean_root(root: Rootish, hashfile: Path) -> Path:
     if root is None:
-        return hashfile.parent
+        return hashfile.parent.resolve()
     if isinstance(root, Path):
-        return root
+        return root.resolve()
     if isinstance(root, str):
         return Path(root).resolve()
     if isinstance(hashfile, list) and len(hashfile) == 1:

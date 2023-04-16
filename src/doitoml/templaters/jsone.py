@@ -6,7 +6,6 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
 from doitoml.errors import (
     JsonEError,
     MissingDependencyError,
-    TemplaterError,
     UnresolvedError,
 )
 
@@ -41,9 +40,10 @@ class JsonE(Templater):
                 v,
                 source_relative=False,
             )
-            if unresolved:
-                unresolved += k_unresolved
-            new_map[k] = new_submap[0]
+            if new_submap:
+                new_map[k] = new_submap[0]
+            else:
+                unresolved += [k]
 
         return new_map, unresolved
 
@@ -52,18 +52,16 @@ class JsonE(Templater):
         source: "ConfigSource",
         dollar_map: List[Any],
     ) -> Tuple[List[Any], List[str]]:
-        """Handle a dynamic list ``$map``."""
+        """Pre-expand a dynamic JSON-e list ``$map``."""
         new_map, unresolved = self.doitoml.config.resolve_some_path_specs(
             source,
             dollar_map,
             source_relative=False,
         )
-        if new_map:
-            new_map = list(map(str, new_map))
-        return new_map, unresolved
+        return list(map(str, new_map)), unresolved
 
     def _expand_map(self, source: "ConfigSource", dollar_map: Any) -> Any:
-        """Pre-expand JSON-e ``$map`` operators, which cannot be dynamic."""
+        """Pre-expand JSON-e ``$map`` operators, not usually dynamic."""
         new_map: Optional[Any] = None
         unresolved = None
 
@@ -72,7 +70,7 @@ class JsonE(Templater):
 
         if isinstance(dollar_map, dict):
             new_map, unresolved = self._expand_dict_map(source, dollar_map)
-        else:
+        if isinstance(dollar_map, list):
             new_map, unresolved = self._expand_list_map(source, dollar_map)
 
         if unresolved:
@@ -81,7 +79,7 @@ class JsonE(Templater):
 
         if not new_map:
             message = f"$map did not find anything: {dollar_map}"
-            raise TemplaterError(message)
+            raise JsonEError(message)
 
         return new_map
 
