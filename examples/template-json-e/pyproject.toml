@@ -6,72 +6,93 @@ verbosity = 2
 SKIP = "c"
 
 [tool.doitoml.paths]
-pkg = [":glob::.::*/pyproject.toml::/s/::pyproject.toml::"]
 all_sha256 = ["dist/SHA256SUMS"]
+pkg = [":glob::.::*/pyproject.toml::/s/::pyproject.toml::"]
 
 [tool.doitoml.templates.json-e.tasks.echo]
-doc = "env var references need to be escaped"
 actions = [
-    ["echo", "$${SKIP}"],
-    ["echo", ":get::toml::pyproject.toml::tool::doit::verbosity"]
+  [
+    "echo",
+    "$${SKIP}",
+  ],
+  [
+    "echo",
+    ":get::toml::pyproject.toml::tool::doit::verbosity",
+  ],
 ]
+doc = "env var references need to be escaped"
 
 [tool.doitoml.templates.json-e.tasks.build]
 "$map" = "::pkg"
 
 [tool.doitoml.templates.json-e.tasks.build."each(pkg)"]
-_skip = "${split(pkg, '/')[-1] in split(env.SKIP, ',')}"
 _cwd = "${pkg}"
-name = "${split(pkg, '/')[-1]}"
-file_dep = ["${pkg}/pyproject.toml"]
-targets = ["${pkg}/dist/SHA256SUMS"]
+_skip = "${split(pkg, '/')[-1] in split(env.SKIP, ',')}"
 actions = [
-    ["pyproject-build", "--no-isolation", "--sdist"],
-    {py="..:_actions:hash_files", args={hashfile="${pkg}/dist/SHA256SUMS", files=["*.tar.gz", "*.whl"]}}
+  [
+    "pyproject-build",
+    "--no-isolation",
+    "--sdist",
+  ],
+  {py = "..:_actions:hash_files", args = {hashfile = "${pkg}/dist/SHA256SUMS", files = [
+    "*.tar.gz",
+    "*.whl",
+  ]}},
 ]
+file_dep = ["${pkg}/pyproject.toml"]
+name = "${split(pkg, '/')[-1]}"
+targets = ["${pkg}/dist/SHA256SUMS"]
 
 [tool.doitoml.templates.json-e.tasks.dist."$map"]
 a = ["a description"]
 b = ["another description"]
 
 [tool.doitoml.templates.json-e.tasks.dist."each(desc,pkg)"."${pkg}"]
+actions = [
+  {py = "shutil:rmtree", args = {path = "dist/${pkg}", ignore_errors = "1"}},
+  {py = "doit.tools:create_folder", args = [
+    "dist",
+  ]},
+  {py = "shutil:copytree", args = [
+    "${pkg}/dist",
+    "dist/${pkg}",
+  ]},
+]
 doc = "${desc}"
 file_dep = ["${pkg}/dist/SHA256SUMS"]
 targets = ["dist/${pkg}/SHA256SUMS"]
-actions = [
-    {py="shutil:rmtree", args={ path = "dist/${pkg}", ignore_errors="1"}},
-    {py="doit.tools:create_folder", args=["dist"]},
-    {py="shutil:copytree", args=["${pkg}/dist", "dist/${pkg}"]},
-]
 
 [tool.doitoml.tasks.release]
 _cwd = "."
-name = "all"
-file_dep = ["dist/a/SHA256SUMS", "dist/b/SHA256SUMS"]
-targets = ["::all_sha256"]
 actions = [
-    {py="_actions:hash_files", args={hashfile="dist/SHA256SUMS", files=["*/*.tar.gz", "*/*.whl"]}}
+  {py = "_actions:hash_files", args = {hashfile = "dist/SHA256SUMS", files = [
+    "*/*.tar.gz",
+    "*/*.whl",
+  ]}},
 ]
+file_dep = ["dist/a/SHA256SUMS", "dist/b/SHA256SUMS"]
+name = "all"
+targets = ["::all_sha256"]
 
 [tool.__doitoml_tests__.steps.00_list]
-tasks = 10
-before = { files = {"**/*" = 10, "*" = 4} }
-after = { files = {"*" = 6} }
-run = ["doit", "list"]
+after = {files = {"*" = 6}}
+before = {files = {"**/*" = 10, "*" = 4}}
 rc = 0
+run = ["doit", "list"]
+tasks = 10
 
 [tool.__doitoml_tests__.steps.01_run_skip]
-after = { files = {"*" = 7, "*/dist/SHA256SUMS" = 1} }
-env = { SKIP = "a" }
-run = ["doit", "build"]
+after = {files = {"*" = 7, "*/dist/SHA256SUMS" = 1}}
+env = {SKIP = "a"}
 rc = 0
+run = ["doit", "build"]
 
 [tool.__doitoml_tests__.steps.02_run_build]
-after = { files = {"*" = 7, "*/dist/SHA256SUMS" = 2} }
-run = ["doit", "build"]
+after = {files = {"*" = 7, "*/dist/SHA256SUMS" = 2}}
 rc = 0
+run = ["doit", "build"]
 
 [tool.__doitoml_tests__.steps.03_run_release]
-after = { files = {"*" = 7, "dist/SHA256SUMS" = 1} }
-run = ["doit", "release"]
+after = {files = {"*" = 7, "dist/SHA256SUMS" = 1}}
 rc = 0
+run = ["doit", "release"]

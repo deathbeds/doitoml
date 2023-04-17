@@ -1,39 +1,32 @@
 [build-system]
 build-backend = "flit_core.buildapi"
-requires = [
-  "flit_core<4,>=3.7.1",
-]
+requires = ["flit_core<4,>=3.7.1"]
 
 [project]
 name = "doitoml"
 version = "0.1.0"
 description = "declarative tasks for doit"
 readme = "README.md"
-authors = [
-  { name = "doitoml contributors", email = "deathbeds@googlegroups.com" },
-]
+authors = [{name = "doitoml contributors", email = "deathbeds@googlegroups.com"}]
 requires-python = ">=3.8"
 classifiers = [
   "License :: OSI Approved :: BSD License",
   "Programming Language :: Python :: 3 :: Only",
   "Programming Language :: Python :: 3",
 ]
-dependencies = [
-  "doit",
-  "jinja2",
-  "tomli",
-  "typing-extensions",
-]
+dependencies = ["doit", "jinja2", "tomli", "typing-extensions"]
 [project.optional-dependencies]
 json-e = ["json-e"]
 [project.urls]
 "Bug Tracker" = "https://github.com/deathbeds/doitoml/issues"
 "Changelog" = "https://github.com/deathbeds/doitoml/blob/main/CHANGELOG.md"
 "Documentation" = "https://doitoml.rtfd.io"
-"Source" = "https://github.com/deathbeds/doitoml/tree/main"
 "PyPI" = "https://pypi.org/project/doitoml"
+"Source" = "https://github.com/deathbeds/doitoml/tree/main"
 [project.entry-points."doit.LOADER"]
 doitoml = "doitoml.loaders:DoitomlLoader"
+[project.entry-points."doitoml.actor.v0"]
+py = "doitoml.actors:PyActor"
 [project.entry-points."doitoml.config-parser.v0"]
 doitoml-package-json = "doitoml.sources.json.package:PackageJsonParser"
 doitoml-pyproject-toml = "doitoml.sources.toml.pyproject:PyprojectTomlParser"
@@ -45,8 +38,6 @@ doitoml-dollar-env = "doitoml.dsl:EnvReplacer"
 [project.entry-points."doitoml.parser.v0"]
 json = "doitoml.sources.json._json:JsonParser"
 toml = "doitoml.sources.toml._toml:TomlParser"
-[project.entry-points."doitoml.actor.v0"]
-py = "doitoml.actors:PyActor"
 [project.entry-points."doitoml.templater.v0"]
 json-e = "doitoml.templaters.jsone:JsonE"
 
@@ -97,7 +88,12 @@ show_error_codes = true
 warn_return_any = true
 warn_unused_ignores = true
 overrides = [
-  { module = ["doit", "doit.*", "tomllib", "jsone"], ignore_missing_imports = true }
+  {module = [
+    "doit",
+    "doit.*",
+    "tomllib",
+    "jsone",
+  ], ignore_missing_imports = true},
 ]
 
 [tool.doit]
@@ -184,14 +180,30 @@ select = [
 prefix = ""
 
 [tool.doitoml.env]
-DOITOML_VERSION = ":get::toml::pyproject.toml::project::version"
-PIP_DOWNLOAD_CACHE = "./build/.cache/pip"
 BLACK_CACHE_DIR = "./build/.cache/black"
-DOITOML_WHEEL = "doitoml-${DOITOML_VERSION}-py3-none-any.whl"
 DOITOML_SDIST = "doitoml-${DOITOML_VERSION}.tar.gz"
+DOITOML_VERSION = ":get::toml::pyproject.toml::project::version"
+DOITOML_WHEEL = "doitoml-${DOITOML_VERSION}-py3-none-any.whl"
+PIP_DOWNLOAD_CACHE = "./build/.cache/pip"
+RUST_LOG = "error"
 
 [tool.doitoml.cmd]
 sphinx_opts = ["-b", "html", "docs", "build/docs"]
+taplo_opts = [
+  "--option=array_auto_collapse=true",
+  "--option=compact_inline_tables=true",
+  "--option=column_width=88",
+]
+check_links_opts = [
+  "--check-links-ignore=https://",
+  "--no-cov",
+  "--check-anchors",
+  "--html=build/reports/pytest-check-links.html",
+  "-p",
+  "no:importnb",
+  "--json-report-file=build/reports/pytest-check-links.json",
+  "--tb=no",
+]
 
 [tool.doitoml.paths]
 whl = ["dist/${DOITOML_WHEEL}"]
@@ -204,7 +216,7 @@ py_src = [":rglob::src::*.py"]
 all_ipynb = [":rglob::docs::*.ipynb::!ipynb_checkpoints"]
 all_py_test = [":rglob::test::*.py"]
 ppt = ["pyproject.toml"]
-all_ppt = [":glob::examples::*/pyproject.toml"]
+all_ppt = ["::ppt", ":glob::examples::*/pyproject.toml"]
 all_py_dist = ["::ppt", "::py_src", "README.md", "LICENSE.txt"]
 _actions = ["_actions.py"]
 _ex_actions = ["examples/py-js-web/my_custom/_actions.py"]
@@ -213,12 +225,9 @@ all_examples = [
   ":glob::examples/py-js-web::*.json::*.toml::*.yml::*.py::*.js",
   ":rglob::examples/py-js-web/src::*.*",
   ":rglob::examples/py-js-web/js::*.*",
-  "::all_ppt"
+  "::all_ppt",
 ]
-all_md = [
-  ":glob::.::*.md",
-  ":rglob::docs::*.md::!ipynb_checkpoints",
-]
+all_md = [":glob::.::*.md", ":rglob::docs::*.md::!ipynb_checkpoints"]
 docs_buildinfo = ["build/docs/.buildinfo"]
 
 [tool.doitoml.tasks.build.pypi]
@@ -232,7 +241,7 @@ doc = "Generate a hashfile"
 file_dep = ["::whl", "::sdist"]
 targets = ["::dist_hash"]
 actions = [
-  {py="_actions:hash_files", args={hashfile="::dist_hash", files="::all_dist"}}
+  {py = "_actions:hash_files", args = {hashfile = "::dist_hash", files = "::all_dist"}},
 ]
 
 [tool.doitoml.tasks.fix.ssort]
@@ -252,10 +261,21 @@ file_dep = ["::ppt", "::all_py"]
 task_dep = ["fix:black"]
 actions = [["ruff", "--fix", "::all_py"]]
 
-[tool.doitoml.tasks.fix.pyproject-fmt]
-doc = "Format pyproject.toml with pyproject-fmt"
+[tool.doitoml.tasks.fix.toml]
+doc = "Format pyproject.toml with pyproject-fmt and taplo"
 file_dep = ["::all_ppt"]
-actions = [["pyproject-fmt", "::all_ppt"]]
+actions = [
+  [
+    "pyproject-fmt",
+    "::all_ppt",
+  ],
+  [
+    "taplo",
+    "fmt",
+    "::taplo_opts",
+    "::all_ppt",
+  ],
+]
 
 [tool.doitoml.tasks.lint.black]
 doc = "Check python formatting with `black`"
@@ -277,8 +297,14 @@ doc = "Prepare for testing"
 file_dep = ["::_actions"]
 targets = ["::_ex_actions", "::_tmpl_actions"]
 actions = [
-  {py="shutil:copy2", args=["::_actions", "::_ex_actions"]},
-  {py="shutil:copy2", args=["::_actions", "::_tmpl_actions"]},
+  {py = "shutil:copy2", args = [
+    "::_actions",
+    "::_ex_actions",
+  ]},
+  {py = "shutil:copy2", args = [
+    "::_actions",
+    "::_tmpl_actions",
+  ]},
 ]
 
 [tool.doitoml.tasks.test.pytest.fast]
@@ -301,18 +327,7 @@ targets = ["::docs_buildinfo"]
 [tool.doitoml.tasks.docs.check.links]
 doc = "Check documentation with `pytest-check-links`"
 file_dep = ["::docs_buildinfo", "::ppt"]
-actions = [[
-    "pytest-check-links",
-    "build/docs",
-    "--check-links-ignore=https://",
-    "--no-cov",
-    "--check-anchors",
-    "--html=build/reports/pytest-check-links.html",
-    "-p",
-    "no:importnb",
-    "--json-report-file=build/reports/pytest-check-links.json",
-    "--tb=no",
-]]
+actions = [["pytest-check-links", "build/docs", "::check_links_opts"]]
 
 [tool.doitoml.tasks.watch.docs]
 doc = "Watch docs, rebuild on changes"
