@@ -22,6 +22,7 @@ dependencies:
   - pyproject-fmt
   - ruff
   - ssort
+  - taplo
   # test
   - hypothesis-jsonschema
   - pytest
