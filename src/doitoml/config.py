@@ -24,6 +24,7 @@ from doitoml.constants import (
     DOIT_ACTIONS,
     DOIT_PATH_RELATIVE_LISTS,
     DOITOML_FAIL_QUIETLY,
+    DOITOML_TASK_SKIP,
     DOITOML_UPDATE_ENV,
     FALSEY,
 )
@@ -409,7 +410,7 @@ class Config:
             message = f"{source} task {prefixes} is not a dict: {task_or_group}"
             raise ConfigError(message)
 
-        skip = task_or_group.pop("skip", None)  # type: ignore
+        skip = task_or_group.pop(DOITOML_TASK_SKIP, None)  # type: ignore
         if str(skip).strip().lower() not in FALSEY:
             return
 

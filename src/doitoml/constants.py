@@ -15,6 +15,13 @@ DOITOML_UPDATE_ENV = "update_env"
 #: the key for controlling error verbosity
 DOITOML_FAIL_QUIETLY = "fail_quietly"
 
+#: non-standard. for skipping tasks with non-falsey values
+DOITOML_TASK_SKIP = "_skip"
+#: non-standard. for setting the current working directory of a task
+DOITOML_TASK_CWD = "_cwd"
+#: all the false things
+FALSEY = ["", "false", "0", "0.0", "{}", "[]", "null", "none"]
+
 ## entry points
 #: extend the ``doitoml`` DSL
 ENTRY_POINT_DSL = "doitoml.dsl.v0"
@@ -34,5 +41,3 @@ DOIT_ACTIONS = "actions"
 DOIT_TASK_LIST_KEYS = ["file_dep", "task_dep", "targets", "actions", "clean"]
 #: ``doit`` keys that are always paths
 DOIT_PATH_RELATIVE_LISTS = ["file_dep", "targets", "clean"]
-
-FALSEY = ["", "false", "0", "0.0", "{}", "[]", "null", "none"]

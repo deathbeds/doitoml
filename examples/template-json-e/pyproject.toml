@@ -20,9 +20,9 @@ actions = [
 "$map" = "::pkg"
 
 [tool.doitoml.templates.json-e.tasks.build."each(pkg)"]
-skip = "${split(pkg, '/')[-1] in split(env.SKIP, ',')}"
+_skip = "${split(pkg, '/')[-1] in split(env.SKIP, ',')}"
+_cwd = "${pkg}"
 name = "${split(pkg, '/')[-1]}"
-cwd = "${pkg}"
 file_dep = ["${pkg}/pyproject.toml"]
 targets = ["${pkg}/dist/SHA256SUMS"]
 actions = [
@@ -45,8 +45,8 @@ actions = [
 ]
 
 [tool.doitoml.tasks.release]
+_cwd = "."
 name = "all"
-cwd = "."
 file_dep = ["dist/a/SHA256SUMS", "dist/b/SHA256SUMS"]
 targets = ["::all_sha256"]
 actions = [

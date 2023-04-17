@@ -68,7 +68,12 @@ suppress_warnings = ["autosectionlabel.*"]
 
 # theme
 templates_path = ["_templates"]
+html_static_path = ["_static"]
 html_theme = "pydata_sphinx_theme"
+html_logo = "_static/img/logo.svg"
+html_favicon = "_static/img/logo.svg"
+html_css_files = ["css/theme.css"]
+
 html_theme_options = {
     "github_url": PROJ_DATA["project"]["urls"]["Source"],
     "use_edit_page_button": REPO_INFO is not None,

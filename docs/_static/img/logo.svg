@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="32"
+   height="32"
+   viewBox="0 0 8.4666665 8.4666669"
+   version="1.1"
+   id="svg5"
+   inkscape:version="1.1.2 (0a00cf5339, 2022-02-04)"
+   sodipodi:docname="logo.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview7"
+     pagecolor="#505050"
+     bordercolor="#eeeeee"
+     borderopacity="1"
+     inkscape:pageshadow="0"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="0"
+     inkscape:document-units="px"
+     showgrid="false"
+     inkscape:zoom="12.302764"
+     inkscape:cx="12.314306"
+     inkscape:cy="14.915347"
+     inkscape:window-width="1920"
+     inkscape:window-height="1016"
+     inkscape:window-x="0"
+     inkscape:window-y="27"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="text1620"
+     units="px"
+     showguides="true"
+     inkscape:guide-bbox="true" />
+  <defs
+     id="defs2" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <g
+       aria-label="[dt]"
+       transform="scale(1.0004245,0.99957564)"
+       id="text1620"
+       style="font-size:5.82503px;line-height:1.25;font-family:'Ubuntu Condensed';-inkscape-font-specification:'Ubuntu Condensed, Normal';letter-spacing:0px;word-spacing:0px;fill:#941be0;stroke:#441267;stroke-width:0.265;stroke-linecap:round;paint-order:stroke fill markers">
+      <path
+         d="M 0.45532551,6.966494 H 1.5293817 c 0.1479239,0 0.2251015,-0.1546055 0.2251015,-0.2963271 0,-0.1674894 -0.083609,-0.309211 -0.2251015,-0.309211 H 0.83478251 V 2.1093052 H 1.5293817 c 0.1414925,0 0.2251015,-0.1417215 0.2251015,-0.3092109 0,-0.1417215 -0.077178,-0.2963271 -0.2251015,-0.2963271 H 0.45532551 c -0.15435539,0 -0.30227929,0.083744 -0.30227929,0.2254662 v 5.0117943 c 0,0.1481637 0.1479239,0.2254663 0.30227929,0.2254663 z"
+         style="font-weight:600;font-family:Dosis-v2031b;-inkscape-font-specification:'Dosis-v2031b, Semi-Bold';text-align:center;text-anchor:middle;stroke-width:0.265;fill:#9556cf;fill-opacity:1"
+         id="path6385" />
+      <path
+         d="m 2.814512,6.0495686 c 0.3601621,0 0.6624416,-0.1996988 0.855386,-0.5024677 v 0.244792 c 0,0.1095127 0.1414923,0.2190245 0.3151417,0.2190245 0.1800821,0 0.3087113,-0.1159542 0.3087113,-0.2319083 V 1.7266958 c 0,-0.1288377 -0.1350608,-0.2190244 -0.3344367,-0.2190244 -0.1865127,0 -0.3408682,0.090186 -0.3408682,0.2190244 V 3.1700417 C 3.4319334,2.9123658 3.1553802,2.7513185 2.814512,2.7513185 c -0.6753049,0 -1.1769604,0.5604449 -1.1769604,1.2561695 v 0.7730274 c 0,0.6699569 0.5016555,1.2690532 1.1769604,1.2690532 z M 2.9688676,5.4504723 c -0.3794579,0 -0.656011,-0.3156527 -0.656011,-0.6699569 V 4.007488 c 0,-0.3414204 0.2765531,-0.6570734 0.656011,-0.6570734 0.3794569,0 0.6495785,0.315653 0.6495785,0.6570734 v 0.7730274 c 0,0.3543042 -0.2701216,0.6699569 -0.6495785,0.6699569 z"
+         style="font-weight:600;font-family:Dosis-v2031b;-inkscape-font-specification:'Dosis-v2031b, Semi-Bold';text-align:center;text-anchor:middle;stroke-width:0.265;fill:#9556cf;fill-opacity:1"
+         id="path6387"
+         sodipodi:nodetypes="scsssssscsssssssssss" />
+      <path
+         d="M 6.5465025,5.4311468 H 6.3921469 c -0.3537314,0 -0.4502036,-0.1803731 -0.4502036,-0.6570733 V 3.3246472 h 0.6238531 c 0.1479239,0 0.2251012,-0.13528 0.2251012,-0.2705596 0,-0.1288379 -0.077175,-0.2641177 -0.2251012,-0.2641177 H 5.9419433 V 1.7557317 c 0,-0.1610474 -0.1736494,-0.251234 -0.3344366,-0.251234 -0.1607865,0 -0.3408675,0.090186 -0.3408675,0.251234 V 2.7899699 H 4.9450647 c -0.1414924,0 -0.2251013,0.1352798 -0.2251013,0.2641177 0,0.1352796 0.08361,0.2705596 0.2251013,0.2705596 h 0.3215745 v 1.4880776 c 0,0.8760978 0.2894156,1.1981926 0.9261319,1.1981926 h 0.3087111 c 0.1672179,0 0.2894154,-0.1159542 0.2894154,-0.3092112 0,-0.1610473 -0.08361,-0.2705594 -0.2443951,-0.2705594 z"
+         style="font-weight:600;font-family:Dosis-v2031b;-inkscape-font-specification:'Dosis-v2031b, Semi-Bold';text-align:center;text-anchor:middle;stroke-width:0.265;fill:#9556cf;fill-opacity:1"
+         id="path6389"
+         sodipodi:nodetypes="ssscssscssscssscsssss" />
+      <path
+         d="m 6.9487573,6.966494 h 1.0804878 c 0.1479246,0 0.3022792,-0.077302 0.3022792,-0.2254663 V 1.7292334 c 0,-0.1417216 -0.1479237,-0.2254662 -0.3022792,-0.2254662 H 6.9487573 c -0.1479237,0 -0.2251015,0.1546056 -0.2251015,0.2963271 0,0.1674894 0.090042,0.3092109 0.2251015,0.3092109 H 7.6497881 V 6.3609559 H 6.9487573 c -0.1350609,0 -0.2251015,0.1417216 -0.2251015,0.309211 0,0.1417216 0.07718,0.2963271 0.2251015,0.2963271 z"
+         style="font-weight:600;font-family:Dosis-v2031b;-inkscape-font-specification:'Dosis-v2031b, Semi-Bold';text-align:center;text-anchor:middle;stroke-width:0.265;fill:#9556cf;fill-opacity:1"
+         id="path6391" />
+    </g>
+  </g>
+</svg>

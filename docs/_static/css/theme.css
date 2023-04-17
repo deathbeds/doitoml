@@ -1,0 +1,13 @@
+html[data-theme="light"],
+html[data-theme="dark"] {
+  --pst-color-primary: #9556cf;
+}
+
+html[data-theme="dark"] {
+  --pst-color-border: #444;
+}
+
+.sd-tab-content {
+  border-top: solid 1px var(--pst-color-border);
+  box-shadow: unset;
+}

@@ -9,7 +9,7 @@ import doit.action
 import doit.tools
 
 from .config import Config
-from .constants import DOIT_ACTIONS
+from .constants import DOIT_ACTIONS, DOITOML_TASK_CWD
 from .entry_points import EntryPoints
 from .errors import DoitomlError, EnvVarError, TaskError
 from .types import (
@@ -156,7 +156,7 @@ class DoiTOML:
         """Build a single generated ``doit`` task."""
         task: Task = {"name": ":".join(task_name)}
         task.update(raw_task)
-        cwd = task.pop("cwd", None)  # type: ignore
+        cwd = task.pop(DOITOML_TASK_CWD, None)  # type: ignore
         old_actions = task.pop(DOIT_ACTIONS)  # type: ignore
         new_actions: List[Any] = []
         cmd_kwargs = {}
