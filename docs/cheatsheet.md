@@ -30,9 +30,9 @@
 | **`meta`** | `run` | dict | [custom metadata](#doitoml-task-metadata) for tasks
 
 <details>
-   
+
 <summary><b>Why these fields? What about...</b></summary>
-    
+
 > The [pydoit documentation](https://pydoit.org/tasks.html) provides a number of other fields: many of these only make sense in a `dodo.py`, or otherwise don't lend themselves cleanly to declarative, portable tasks.
 
 </details>
@@ -47,10 +47,10 @@
 
 ### `doitoml` task metadata
 
-> Put these in your `task.{task name}.metadata` to fune-tune the behavior of tasks.
+> Put these in your `task.{task name}.meta.doitoml` to fune-tune the behavior of tasks.
 
 | field title | field data type | field description |
-|-|-| -|
-| **`doitoml-cwd`** | string or `Path` | the current working directory for _shell_, _token_, and _actor_ tasks
-| **`doitoml-skip`** | string or `bool` | if _falsey_, this task will not appear in `doit list`, or included in `doit run`
-| **`doitoml-env`** | dictionary of strings | environment variables to overload for a specific task
+|-|-|-|
+| **`cwd`** | string or `Path` | the current working directory for _shell_, _token_, and _actor_ tasks
+| **`skip`** | string or `bool` | if _falsey_, this task will not appear in `doit list` or be included in `doit run`
+| **`env`** | dictionary of strings | environment variables to overload for a specific task

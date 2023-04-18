@@ -26,8 +26,7 @@ doc = "env var references need to be escaped"
 "$map" = "::pkg"
 
 [tool.doitoml.templates.json-e.tasks.build."each(pkg)"]
-_cwd = "${pkg}"
-_skip = "${split(pkg, '/')[-1] in split(env.SKIP, ',')}"
+meta = {doitoml = {cwd = "${pkg}", skip = "${split(pkg, '/')[-1] in split(env.SKIP, ',')}"}}
 actions = [
   [
     "pyproject-build",
@@ -63,7 +62,7 @@ file_dep = ["${pkg}/dist/SHA256SUMS"]
 targets = ["dist/${pkg}/SHA256SUMS"]
 
 [tool.doitoml.tasks.release]
-_cwd = "."
+meta = {doitoml = {cwd = "."}}
 actions = [
   {py = "_actions:hash_files", args = {hashfile = "dist/SHA256SUMS", files = [
     "*/*.tar.gz",

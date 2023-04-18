@@ -40,6 +40,21 @@ Action = Union[
 ]
 
 
+class DoitomlTaskMetadata(TypedDict, total=False):
+
+    """Custom metadata for ``doitoml``."""
+
+    skip: Any
+    cwd: PathOrString
+
+
+class TaskMetadata(TypedDict, total=False):
+
+    """Well-known values in task metadata."""
+
+    doitoml: DoitomlTaskMetadata
+
+
 class Task(TypedDict, total=False):
 
     """a mostly-inaccurate, but well-intentioned definition of some doit task."""
@@ -58,7 +73,7 @@ class Task(TypedDict, total=False):
     clean: List[Path]
     # seldom
     verbosity: int
-    meta: Dict[str, Any]
+    meta: TaskMetadata
     # whoa
     getargs: Dict[str, Tuple[str, Any]]
     calc_dep: List[str]

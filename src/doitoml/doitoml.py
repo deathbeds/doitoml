@@ -9,7 +9,7 @@ import doit.action
 import doit.tools
 
 from .config import Config
-from .constants import DOIT_ACTIONS, DOITOML_TASK_CWD
+from .constants import DOIT_TASK, DOITOML_META, NAME
 from .entry_points import EntryPoints
 from .errors import DoitomlError, EnvVarError, TaskError
 from .types import (
@@ -142,7 +142,7 @@ class DoiTOML:
 
         def task() -> TaskGenerator:
             for subtask_name, subtask in subtasks.items():
-                if DOIT_ACTIONS in subtask:
+                if DOIT_TASK.ACTIONS in subtask:
                     yield self.build_subtask(subtask_name, subtask)
                 else:  # pragma: no cover
                     message = "Expected a task in {subtask_name} {subtask}"
@@ -156,8 +156,10 @@ class DoiTOML:
         """Build a single generated ``doit`` task."""
         task: Task = {"name": ":".join(task_name)}
         task.update(raw_task)
-        cwd = task.pop(DOITOML_TASK_CWD, None)  # type: ignore
-        old_actions = task.pop(DOIT_ACTIONS)  # type: ignore
+        cwd = None
+        meta = cast(dict, task.get(DOIT_TASK.META, {}))
+        cwd = meta.get(NAME, {}).get(DOITOML_META.CWD)
+        old_actions = task.pop(DOIT_TASK.ACTIONS)  # type: ignore
         new_actions: List[Any] = []
         cmd_kwargs = {}
         if cwd:
@@ -185,7 +187,7 @@ class DoiTOML:
             """
             raise TaskError(message)
 
-        task[DOIT_ACTIONS] = new_actions  # type: ignore
+        task[DOIT_TASK.ACTIONS] = new_actions  # type: ignore
         return cast(Task, task)
 
     def build_actor_action(

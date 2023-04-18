@@ -169,12 +169,13 @@ select = [
 ]
 [tool.ruff.per-file-ignores]
 "_config.py" = ["PLR0912", "C901", "PLR0913"]
-"test/**/*.py" = ["S101", "T201", "T203"]
+"_source.py" = ["BLE001"]
+"constants.py" = ["N801"]
+"docs/conf.py" = ["INP001", "A001"]
+"dodo.py" = ["BLE001"]
 "dsl.py" = ["ARG002"]
 "entry_points.py" = ["BLE001"]
-"dodo.py" = ["BLE001"]
-"_source.py" = ["BLE001"]
-"docs/conf.py" = ["INP001", "A001"]
+"test/**/*.py" = ["S101", "T201", "T203"]
 
 [tool.doitoml]
 prefix = ""

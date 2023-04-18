@@ -20,13 +20,11 @@ if TYPE_CHECKING:  # pragma: no cover
 
 
 from doitoml.constants import (
-    DEFAULT_CONFIG_PATH,
-    DOIT_ACTIONS,
-    DOIT_PATH_RELATIVE_LISTS,
-    DOITOML_FAIL_QUIETLY,
-    DOITOML_TASK_SKIP,
-    DOITOML_UPDATE_ENV,
+    DEFAULTS,
+    DOIT_TASK,
+    DOITOML_META,
     FALSEY,
+    NAME,
 )
 from doitoml.errors import (
     ActionError,
@@ -126,7 +124,7 @@ class Config:
             raise UnresolvedError(message)
 
         # load other top-level config values from the first config
-        for key in [DOITOML_UPDATE_ENV, DOITOML_FAIL_QUIETLY]:
+        for key in [DEFAULTS.UPDATE_ENV, DEFAULTS.FAIL_QUIETLY]:
             if getattr(self, key, None) is None:
                 setattr(self, key, top_config.raw_config.get(key, True))
 
@@ -154,7 +152,7 @@ class Config:
             unchecked += self.find_fallback_config_sources()
 
         if not unchecked:
-            path = self.doitoml.cwd / DEFAULT_CONFIG_PATH
+            path = self.doitoml.cwd / DEFAULTS.CONFIG_PATH
             if path.exists():
                 unchecked += [path]
 
@@ -410,11 +408,17 @@ class Config:
             message = f"{source} task {prefixes} is not a dict: {task_or_group}"
             raise ConfigError(message)
 
-        skip = task_or_group.pop(DOITOML_TASK_SKIP, None)  # type: ignore
-        if str(skip).strip().lower() not in FALSEY:
-            return
+        maybe_old_actions = task_or_group.get(DOIT_TASK.ACTIONS, [])
 
-        maybe_old_actions = task_or_group.get(DOIT_ACTIONS, [])
+        meta = cast(dict, task_or_group.get(DOIT_TASK.META))
+
+        if isinstance(meta, dict) and NAME in meta:
+            dt_meta = meta[NAME]
+            if isinstance(dt_meta, dict) and DOITOML_META.SKIP in dt_meta:
+                skip = dt_meta.get(DOITOML_META.SKIP)
+                if str(skip).strip().lower() not in FALSEY:
+                    return
+
         if maybe_old_actions:
             task = cast(Task, task_or_group)
             yield from self.resolve_one_task(source, prefixes, task)
@@ -436,7 +440,7 @@ class Config:
         task: Task,
     ) -> PrefixedTaskGenerator:
         """Resolve a single simple task."""
-        old_actions = cast(List[Action], task[DOIT_ACTIONS])  # type: ignore
+        old_actions = cast(List[Action], task[DOIT_TASK.ACTIONS])  # type: ignore
         new_task = deepcopy(task)
         all_unresolved_specs: List[str] = []
         new_actions: List[Action] = []
@@ -450,7 +454,7 @@ class Config:
 
         new_task["actions"] = new_actions
 
-        for field in DOIT_PATH_RELATIVE_LISTS:
+        for field in DOIT_TASK.RELATIVE_LISTS:
             specs: Strings = task.get(field, [])  # type: ignore
             new_paths, unresolved_specs = self.resolve_one_task_field(source, specs)
             if unresolved_specs:

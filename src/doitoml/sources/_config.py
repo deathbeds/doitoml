@@ -4,7 +4,7 @@ import re
 from pathlib import Path
 from typing import Any, Dict, Tuple
 
-from doitoml.constants import DOITOML_CONFIG_PATHS
+from doitoml.constants import DEFAULTS
 from doitoml.types import Paths
 
 from ._source import Parser, Source
@@ -26,7 +26,7 @@ class ConfigSource(Source):
     def extra_config_paths(self) -> Paths:
         return [
             (self.path.parent / path).resolve()
-            for path in self.raw_config.get(DOITOML_CONFIG_PATHS, [])
+            for path in self.raw_config.get(DEFAULTS.CONFIG_PATHS, [])
         ]
 
     @abc.abstractproperty

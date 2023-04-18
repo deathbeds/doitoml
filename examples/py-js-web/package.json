@@ -131,7 +131,11 @@
               ".."
             ]
           ],
-          "_cwd": "dist"
+          "meta": {
+            "doitoml": {
+              "cwd": "dist"
+            }
+          }
         }
       }
     }

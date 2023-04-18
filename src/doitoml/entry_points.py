@@ -4,13 +4,7 @@ from typing import TYPE_CHECKING, Any, Dict, Tuple, Union
 
 from doitoml.errors import EntryPointError, MissingDependencyError
 
-from .constants import (
-    ENTRY_POINT_ACTOR,
-    ENTRY_POINT_CONFIG,
-    ENTRY_POINT_DSL,
-    ENTRY_POINT_PARSER,
-    ENTRY_POINT_TEMPLATER,
-)
+from .constants import ENTRY_POINTS
 
 if sys.version_info < (3, 10):  # pragma: no cover
     from importlib_metadata import entry_points
@@ -44,12 +38,12 @@ class EntryPoints:
     def initialize(self) -> None:
         """Load all ``entry_points``."""
         # load the parsers
-        self.config_parsers = self.load_entry_point_group(ENTRY_POINT_CONFIG)
-        self.parsers = self.load_entry_point_group(ENTRY_POINT_PARSER)
+        self.config_parsers = self.load_entry_point_group(ENTRY_POINTS.CONFIG)
+        self.parsers = self.load_entry_point_group(ENTRY_POINTS.PARSER)
         # load DSL, which might reference parsers
-        self.dsl = self.load_entry_point_group(ENTRY_POINT_DSL)
-        self.actors = self.load_entry_point_group(ENTRY_POINT_ACTOR)
-        self.templaters = self.load_entry_point_group(ENTRY_POINT_TEMPLATER)
+        self.dsl = self.load_entry_point_group(ENTRY_POINTS.DSL)
+        self.actors = self.load_entry_point_group(ENTRY_POINTS.ACTOR)
+        self.templaters = self.load_entry_point_group(ENTRY_POINTS.TEMPLATER)
 
     def load_entry_point_group(self, group: str) -> Dict[str, Any]:
         """Find and load ``entry_points`` from installed packages."""
