@@ -2,6 +2,7 @@
 
 import abc
 import json
+import os
 import re
 from pathlib import Path
 from typing import TYPE_CHECKING, List, Tuple, cast
@@ -142,10 +143,11 @@ class Globber(DSL):
 
         final_value = []
 
+        parent_posix = source.path.parent.as_posix()
         for path in new_value:
             as_posix = path.as_posix()
             if excludes:
-                as_posix_rel = str(path.relative_to(source.path.parent).as_posix())
+                as_posix_rel = str(Path(os.path.relpath(str(as_posix), parent_posix)))
                 if as_posix_rel and any(ex.search(as_posix_rel) for ex in excludes):
                     continue
             for pattern, repl_value in replacers:

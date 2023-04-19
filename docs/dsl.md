@@ -51,7 +51,6 @@ Use this to get data from a predictable location in a structured data file, such
 
 ### Examples
 
-
 ````{tab-set}
 
 ```{tab-item} pyproject.toml
@@ -88,7 +87,6 @@ Get a version number.
 ## `::` Reference a path or token
 
 > Get the value of any `paths` or `cmd`, either in the same `doitoml` configuration file, or with a named prefix.
-
 
 ```{mermaid}
 flowchart LR
@@ -151,6 +149,5 @@ end
 ```
 
 ### Examples
-
 
 > TODO

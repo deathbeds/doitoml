@@ -23,21 +23,26 @@
 ## Usage
 
 1. Enable `doitoml`
-  - in `pyproject.toml`...
-   ```toml
-   [tool.doit]
-   loader = "doitoml"
-   ```
-  - or in a `dodo.py`...
-   ```py
-   # dodo.py
-   from doitoml import DoiTOML
-   d = DoiTOML()
-   globals().update(d.tasks())
-   ```
+
+- in `pyproject.toml`...
+
+```toml
+[tool.doit]
+loader = "doitoml"
+```
+
+- or in a `dodo.py`...
+
+```py
+# dodo.py
+from doitoml import DoiTOML
+d = DoiTOML()
+globals().update(d.tasks())
+```
+
 2. add `[tool.doitoml]` to your `pyproject.toml`
    - _optionally_, add more sources like `package.json`
-    - or nested `pyproject.toml`
+   - or nested `pyproject.toml`
 3. run `doit`
    - get shippable, reproducible software artifacts
      - and/or docs, test reports, linter findings, or anything else your project builds
@@ -51,7 +56,6 @@
 6. run `doit` again
    - only **do what _needs_ to be done**
 
-
 ## The Simplest Example
 
 > The minimum footprint for a `doitoml` project.
@@ -60,6 +64,7 @@ The simplest way to use `doitoml` requires only a `pyproject.toml`, which `doit`
 will already check for configuration data.
 
 <!-- toml examples/no-dodo -->
+
 ```toml
 [tool.doit]
 loader = "doitoml"
@@ -68,6 +73,7 @@ verbosity = 2
 [tool.doitoml.tasks.hello]
 actions = ['echo "Hello World!"']
 ```
+
 <!-- toml examples/no-dodo -->
 
 Running:
@@ -95,6 +101,7 @@ opinions:
 <summary><i>Explore the file tree...</i></summary>
 
 <!-- tree examples/py-js-web -->
+
 ```
   README.md
   LICENSE
@@ -114,10 +121,10 @@ opinions:
     style/
       index.css
 ```
+
 <!-- tree examples/py-js-web -->
 
 </details>
-
 
 ### `dodo.py`
 
@@ -130,15 +137,16 @@ covered by `doitoml`.
 <summary><i>Explore <code>dodo.py</code>...</i></summary>
 
 <!-- py examples/py-js-web/dodo.py -->
+
 ```py
 from doitoml import DoiTOML
 doitoml = DoiTOML()
 globals().update(doitoml.tasks())
 ```
+
 <!-- py examples/py-js-web/dodo.py -->
 
 </details>
-
 
 ### `pyproject.toml`
 
@@ -152,6 +160,7 @@ well-known file `pyproject.toml`, under the `tool.doit` key.
 <summary><i>Explore <code>pyproject.toml</code>...</i></summary>
 
 <!-- toml examples/py-js-web/pyproject.toml -->
+
 ```toml
 [tool.doit]
 default_tasks = ["backend:build"]
@@ -175,10 +184,10 @@ file_dep = ["::readme", "::license", "::ppt", "::py_src", "::frontend::dist"]
 targets = ["::whl"]
 actions = [["pyproject-build"]]
 ```
+
 <!-- toml examples/py-js-web/pyproject.toml -->
 
 </details>
-
 
 ### `package.json`
 
@@ -190,6 +199,7 @@ tasks inside that folder.
 <summary><i>Explore <code>package.json</code>...</i></summary>
 
 <!-- json examples/py-js-web/js/package.json -->
+
 ```json
 {
   "name": "foo",
@@ -229,10 +239,10 @@ tasks inside that folder.
   }
 }
 ```
+
 <!-- json examples/py-js-web/js/package.json -->
 
 </details>
-
 
 ### Build the Wheel
 

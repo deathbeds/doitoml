@@ -179,6 +179,7 @@ select = [
 
 [tool.doitoml]
 prefix = ""
+config_paths = ["js/package.json"]
 
 [tool.doitoml.env]
 BLACK_CACHE_DIR = "./build/.cache/black"
@@ -248,6 +249,7 @@ actions = [
 [tool.doitoml.tasks.fix.ssort]
 doc = "Predictably order python source with `ssort`"
 file_dep = ["::ppt", "::all_py"]
+task_dep = ["js:fix:prettier"]
 actions = [["ssort", "::all_py"]]
 
 [tool.doitoml.tasks.fix.black]

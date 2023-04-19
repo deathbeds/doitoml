@@ -19,10 +19,12 @@ dependencies:
   # lint
   - black
   - mypy
+  - nodejs >=18,<19
   - pyproject-fmt
   - ruff
   - ssort
   - taplo
+  - yarn >=3,<4
   # test
   - hypothesis-jsonschema
   - pytest

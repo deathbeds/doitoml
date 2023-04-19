@@ -1,6 +1,5 @@
 # API
 
-
 ```{eval-rst}
 .. currentmodule:: doitoml
 .. automodule:: doitoml

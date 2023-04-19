@@ -445,6 +445,10 @@ class Config:
         all_unresolved_specs: List[str] = []
         new_actions: List[Action] = []
 
+        meta = cast(dict, cast(dict, new_task).setdefault(DOIT_TASK.META, {}))
+        dt_meta = meta.setdefault(NAME, {})
+        dt_meta.setdefault(DOITOML_META.CWD, source.path.parent)
+
         for action in old_actions:
             action_actions, unresolved_specs = self.resolve_one_action(source, action)
             if unresolved_specs:
