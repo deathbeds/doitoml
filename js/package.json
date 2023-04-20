@@ -18,7 +18,7 @@
         ":glob::..::*.md::*.json",
         ":glob::../.binder::*.yml",
         ":glob::../examples::*/*.json",
-        ":rglob::../docs::*.md::*.html::*.yml::*.css::!ipynb_checkpoints"
+        ":rglob::../docs::*.md::*.html::*.yml::*.css::*.mjs::!ipynb_checkpoints"
       ],
       "yarn_in": [
         ":glob::.::yarn.lock",

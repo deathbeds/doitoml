@@ -11,3 +11,36 @@ html[data-theme="dark"] {
   border-top: solid 1px var(--pst-color-border);
   box-shadow: unset;
 }
+
+.jp-Mermaid > .mermaid,
+.jp-Mermaid:not(.jp-RenderedMermaid) {
+  display: none;
+}
+
+.jp-Mermaid > svg {
+  display: block;
+  margin: auto;
+}
+
+.jp-RenderedMermaid > .jp-mod-warning {
+  width: auto;
+  padding: 10px;
+  border: var(--jp-border-width) solid var(--jp-warn-color2);
+  border-radius: var(--jp-border-radius);
+  color: var(--jp-ui-font-color1);
+  font-size: var(--jp-ui-font-size1);
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.jp-RenderedMermaid > .jp-mod-warning details > pre {
+  margin-top: 1em;
+}
+
+.jp-RenderedMermaid > .jp-mod-warning summary {
+  color: var(--jp-warn-color2);
+}
+
+.jp-RenderedMermaid > .jp-mod-warning summary > pre {
+  display: inline-block;
+}

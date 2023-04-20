@@ -62,6 +62,8 @@ intersphinx_mapping = {
 }
 
 mermaid_version = ""
+mermaid_init_js = "false"
+
 
 # warnings
 suppress_warnings = ["autosectionlabel.*"]

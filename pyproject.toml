@@ -213,6 +213,7 @@ sdist = ["dist/${DOITOML_SDIST}"]
 all_dist = ["::whl", "::sdist"]
 dist_hash = ["dist/SHA256SUMS"]
 docs_py = ["docs/conf.py"]
+docs_etc = [":rglob::docs/_static::*.*", ":rglob::docs/_templates::*.*"]
 all_py = ["dodo.py", "_actions.py", "::py_src", "::all_py_test", "::docs_py"]
 py_src = [":rglob::src::*.py"]
 all_ipynb = [":rglob::docs::*.ipynb::!ipynb_checkpoints"]
@@ -323,7 +324,7 @@ actions = [["pytest"]]
 
 [tool.doitoml.tasks.docs.sphinx]
 doc = "Build documentation with `sphinx`"
-file_dep = ["::py_src", "::ppt", "::all_md", "::all_ipynb", "::docs_py"]
+file_dep = ["::py_src", "::ppt", "::all_md", "::all_ipynb", "::docs_py", "::docs_etc"]
 actions = [["sphinx-build", "-W", "::sphinx_opts"]]
 targets = ["::docs_buildinfo"]
 

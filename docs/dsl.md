@@ -4,6 +4,8 @@
 
 > Get the value of an environment variable. Usually executed before any other parsers.
 
+<div class="jp-Mermaid">
+
 ```{mermaid}
 flowchart LR
 
@@ -16,6 +18,8 @@ var-name([<i>a variable name</i>])
 any-after([<i>any text</i>])
 ```
 
+</div>
+
 Environment variables are shared across all `doitoml` configuration files.
 
 ### Examples
@@ -25,6 +29,8 @@ Environment variables are shared across all `doitoml` configuration files.
 ## `:get` Get File Data
 
 > Read a piece of data from a path in a structured file: the result is usally cast to a JSON string, if neccessary.
+
+<div class="jp-Mermaid">
 
 ```{mermaid}
 flowchart LR
@@ -46,6 +52,8 @@ subgraph selectors [1+ selectors]
   selector([<code>::</code><i>string or int</i>])
 end
 ```
+
+</div>
 
 Use this to get data from a predictable location in a structured data file, such as a software package version.
 
@@ -88,6 +96,8 @@ Get a version number.
 
 > Get the value of any `paths` or `cmd`, either in the same `doitoml` configuration file, or with a named prefix.
 
+<div class="jp-Mermaid">
+
 ```{mermaid}
 flowchart LR
 
@@ -114,11 +124,15 @@ subgraph doitoml
 end
 ```
 
+</div>
+
 ### Examples
 
 > TODO
 
 ## `:glob` Find files
+
+<div class="jp-Mermaid">
 
 ```{mermaid}
 flowchart LR
@@ -147,6 +161,8 @@ subgraph subs [0+ substitutions]
   sub --> sub-find --> sub-replace
 end
 ```
+
+</div>
 
 ### Examples
 
