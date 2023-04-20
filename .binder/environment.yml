@@ -5,12 +5,12 @@ dependencies:
   # run
   - doit
   - jinja2
-  - json-e
   - python >=3.8,<3.12
   - tomli
   # optional
-  - orjson
-  - pysimdjson
+  - json-e
+  - pyyaml
+  - types-pyyaml
   # build
   - flit >=3.8
   - pip

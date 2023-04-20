@@ -87,6 +87,13 @@
 .. automodule:: doitoml.sources.toml.pyproject
 ```
 
+### YAML
+
+```{eval-rst}
+.. currentmodule:: doitoml
+.. automodule:: doitoml.sources.yaml._yaml
+```
+
 ## `doit` Specific Language
 
 ```{eval-rst}

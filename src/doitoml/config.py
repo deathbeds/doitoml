@@ -15,7 +15,7 @@ from typing import (
     cast,
 )
 
-if TYPE_CHECKING:  # pragma: no cover
+if TYPE_CHECKING:
     from doitoml.doitoml import DoiTOML
 
 
@@ -49,7 +49,7 @@ from doitoml.types import (
     Task,
 )
 
-from .sources._config import ConfigSource
+from .sources._config import ConfigParser, ConfigSource
 from .sources._source import Source
 
 Parsers = Dict[str, Type[Source]]
@@ -145,41 +145,41 @@ class Config:
 
     def find_config_sources(self) -> ConfigSources:
         """Find all directly and referenced configuration sources."""
-        sources: ConfigSources = {}
-        unchecked = [*self.config_paths]
+        config_sources: ConfigSources = {}
+        unchecked_paths = [*self.config_paths]
 
-        if not unchecked:
-            unchecked += self.find_fallback_config_sources()
+        if not unchecked_paths:
+            unchecked_paths += self.find_fallback_config_sources()
 
-        if not unchecked:
+        if not unchecked_paths:
             path = self.doitoml.cwd / DEFAULTS.CONFIG_PATH
             if path.exists():
-                unchecked += [path]
+                unchecked_paths += [path]
 
-        checked = []
+        while unchecked_paths:
+            config_path = unchecked_paths.pop(0)
+            config_source = self.load_config_source(Path(config_path))
+            self.find_one_config_source(config_source, config_sources)
 
-        while unchecked:
-            config_path = unchecked.pop(0)
-            checked += [config_path]
-            source = self.load_config_source(Path(config_path))
-            if source in sources.values() or not source.raw_config:
-                continue
-
-            self.claim_prefix(source, sources)
-
-            for extra_path in source.extra_config_paths:
-                if extra_path not in checked and extra_path not in unchecked:
-                    unchecked.append(extra_path)
-
-        if not sources:
-            message = "No config found in any of: " + (
-                "\n".join(
-                    [""] + [f"- {p}" for p in checked],
-                )
-            )
+        if not config_sources:
+            message = "No ``doitoml`` config found"
             raise NoConfigError(message)
 
-        return sources
+        return config_sources
+
+    def find_one_config_source(
+        self,
+        config_source: ConfigSource,
+        sources: ConfigSources,
+    ) -> None:
+        """Discover a config source and its potentially-nested extra sources."""
+        if config_source in sources.values() or not config_source.raw_config:
+            return
+
+        self.claim_prefix(config_source, sources)
+
+        for extra_source in config_source.extra_config_sources(self.doitoml):
+            self.find_one_config_source(extra_source, sources)
 
     def find_fallback_config_sources(self) -> Paths:
         """Find sources."""
@@ -203,17 +203,21 @@ class Config:
             raise PrefixError(message)
         sources[prefix] = source
 
-    def load_config_source(self, config_path: Path) -> ConfigSource:
-        """Maybe load a configuration source."""
+    def get_config_parser(self, config_path: Path) -> ConfigParser:
+        """Find the config parser for a path."""
         config_parsers = self.doitoml.entry_points.config_parsers
         tried = []
         for config_parser in config_parsers.values():
             if config_parser.pattern.search(config_path.name):
-                source = config_parser(config_path)
-                return source
+                return config_parser
             tried += [config_parser.pattern.pattern]
         message = f"Cannot load {config_path}: expected one of {tried}"
         raise ConfigError(message)
+
+    def load_config_source(self, config_path: Path) -> ConfigSource:
+        """Maybe load a configuration source."""
+        config_parser = self.get_config_parser(config_path)
+        return config_parser(config_path)
 
     def init_env(self, unresolved_env: EnvDict, retries: int) -> EnvDict:
         """Initialize the global environment variable."""

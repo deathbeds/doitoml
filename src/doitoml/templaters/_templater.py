@@ -3,7 +3,7 @@
 import abc
 from typing import TYPE_CHECKING, Any
 
-if TYPE_CHECKING:  # pragma: no cover
+if TYPE_CHECKING:
     from doitoml.doitoml import DoiTOML
     from doitoml.sources._config import ConfigSource
 

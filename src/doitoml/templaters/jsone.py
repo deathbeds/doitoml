@@ -18,7 +18,7 @@ except ImportError as err:  # pragma: no cover
 
 from ._templater import Templater
 
-if TYPE_CHECKING:  # pragma: no cover
+if TYPE_CHECKING:
     from doitoml.sources._config import ConfigSource
 
 

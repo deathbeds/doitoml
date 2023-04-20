@@ -1,6 +1,6 @@
 # `doitoml`
 
-> Load declarative tasks for [doit] from well-known TOML, JSON, and other files.
+> Load declarative tasks for [doit] from TOML, JSON, YAML, and other files.
 
 [doit]: https://github.com/pydoit/doit
 

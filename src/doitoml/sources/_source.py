@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional
 from doitoml.constants import UTF8
 from doitoml.errors import DoitomlError, ParseError
 
-if TYPE_CHECKING:  # pragma: no cover
+if TYPE_CHECKING:
     from doitoml.doitoml import DoiTOML
 
 

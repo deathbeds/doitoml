@@ -15,6 +15,26 @@ function update() {
     fontFamily,
   });
 
+  function preCode(text) {
+    const pre = document.createElement("pre");
+    const code = document.createElement("code");
+    pre.appendChild(code);
+    code.textContent = text.trim();
+    return pre;
+  }
+
+  function makeError(error, raw) {
+    const warning = document.createElement("div");
+    warning.className = "jp-mod-warning admonition warning";
+    const details = document.createElement("details");
+    const summary = document.createElement("summary");
+    warning.appendChild(details);
+    details.appendChild(summary);
+    summary.appendChild(preCode(raw));
+    details.appendChild(preCode(error));
+    return warning;
+  }
+
   async function renderOneMarmaid(parent) {
     parent.classList.remove("jp-RenderedMermaid");
     [...parent.querySelectorAll("svg, .jp-mod-warning")].forEach((el) =>
@@ -43,15 +63,7 @@ function update() {
       const svg = parser.parseFromString(svgText, "image/svg+xml");
       parent.appendChild(svg.children[0]);
     } else {
-      const warn = docuemnt.createElement("details");
-      warn.classList.add(".jp-mod-warning");
-      warn.innerHTML = `<details>
-            <summary>
-              <pre><code>${raw}</code></pre>
-            </summary>
-            <pre><code>${error}</code></pre>
-          </details>`;
-      parent.appendChild(warn);
+      parent.appendChild(makeError(error, raw));
     }
   }
 

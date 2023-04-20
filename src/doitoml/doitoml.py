@@ -1,4 +1,4 @@
-"""Opinionated, declarative ``doit`` tasks from TOML, JSON, and more."""
+"""Opinionated, declarative ``doit`` tasks from TOML, JSON, YAML, and more."""
 import logging
 import os
 import sys

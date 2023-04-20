@@ -11,7 +11,7 @@ if sys.version_info < (3, 10):  # pragma: no cover
 else:  # pragma: no cover
     from importlib.metadata import entry_points
 
-if TYPE_CHECKING:  # pragma: no cover
+if TYPE_CHECKING:
     from .actors import Actor
     from .doitoml import DoiTOML
     from .dsl import DSL

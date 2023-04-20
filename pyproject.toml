@@ -5,7 +5,7 @@ requires = ["flit_core<4,>=3.7.1"]
 [project]
 name = "doitoml"
 version = "0.1.0"
-description = "declarative tasks for doit"
+description = "Load declarative tasks for doit from TOML, JSON, YAML, and other files."
 readme = "README.md"
 authors = [{name = "doitoml contributors", email = "deathbeds@googlegroups.com"}]
 requires-python = ">=3.8"
@@ -17,6 +17,7 @@ classifiers = [
 dependencies = ["doit", "jinja2", "tomli", "typing-extensions"]
 [project.optional-dependencies]
 json-e = ["json-e"]
+yaml = ["pyyaml"]
 [project.urls]
 "Bug Tracker" = "https://github.com/deathbeds/doitoml/issues"
 "Changelog" = "https://github.com/deathbeds/doitoml/blob/main/CHANGELOG.md"
@@ -38,6 +39,7 @@ doitoml-dollar-env = "doitoml.dsl:EnvReplacer"
 [project.entry-points."doitoml.parser.v0"]
 json = "doitoml.sources.json._json:JsonParser"
 toml = "doitoml.sources.toml._toml:TomlParser"
+yaml = "doitoml.sources.yaml._yaml:YamlParser"
 [project.entry-points."doitoml.templater.v0"]
 json-e = "doitoml.templaters.jsone:JsonE"
 
@@ -72,6 +74,8 @@ addopts = [
 [tool.coverage.html]
 show_contexts = true
 
+[tool.coverage.report]
+exclude_lines = ["pragma: no cover", "if TYPE_CHECKING:"]
 [tool.coverage.run]
 data_file = "build/reports/coverage/.coverage"
 
@@ -179,7 +183,7 @@ select = [
 
 [tool.doitoml]
 prefix = ""
-config_paths = ["js/package.json"]
+config_paths = [":get::json::js/package.json::doitoml"]
 
 [tool.doitoml.env]
 BLACK_CACHE_DIR = "./build/.cache/black"

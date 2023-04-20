@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple
 
 from doitoml.errors import ActorError
 
-if TYPE_CHECKING:  # pragma: no cover
+if TYPE_CHECKING:
     from .doitoml import DoiTOML
     from .sources._config import ConfigSource
 

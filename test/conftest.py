@@ -21,7 +21,7 @@ try:  # pragma: no cover
 except ImportError:  # pragma: no cover
     import tomli as tomllib
 
-if TYPE_CHECKING:  # pragma: no cover
+if TYPE_CHECKING:
     from doitoml import DoiTOML
 
 TPyprojectMaker = Callable[[Any], Path]

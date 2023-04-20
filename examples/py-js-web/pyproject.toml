@@ -35,6 +35,7 @@ prefix = "backend"
 
 [tool.doitoml.env]
 EXAMPLE_PY_VERSION = ":get::toml::pyproject.toml::project::version"
+EXAMPLE_DEPS = ":get::yaml::environment.yml::dependencies"
 
 [tool.doitoml.paths]
 all_dist = ["::whl", "::sdist", "::dist_tgz"]
