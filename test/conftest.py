@@ -32,6 +32,8 @@ ROOT = HERE.parent
 
 SELF_DODO = ROOT / "dodo.py"
 SELF_PPT = ROOT / "pyproject.toml"
+SELF_JS = ROOT / "js"
+SELF_PACKAGE_JSON = SELF_JS / "package.json"
 
 EXAMPLES_ROOT = ROOT / "examples"
 EXAMPLE_PPT = sorted(EXAMPLES_ROOT.glob("*/pyproject.toml"))
@@ -60,9 +62,14 @@ def a_data_example(
 def a_self_test_skeleton(tmp_path: Path) -> Generator[Path, None, None]:
     """Provide ``doitoml``'s own ``doitoml`` configuration."""
     dest = tmp_path / "self"
-    dest.mkdir(parents=True)
+    js_dest = dest / "js"
+    js_dest.mkdir(parents=True)
     for path in [SELF_DODO, SELF_PPT]:
         shutil.copy2(path, dest / path.name)
+
+    for path in [SELF_PACKAGE_JSON]:
+        shutil.copy2(path, js_dest / path.name)
+
     old_cwd = Path.cwd()
     os.chdir(str(dest))
     yield dest
