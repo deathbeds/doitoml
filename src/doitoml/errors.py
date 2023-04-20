@@ -56,6 +56,11 @@ class TaskError(DoitomlError):
     """An error related to generating valid tasks."""
 
 
+class MetaError(TaskError):
+
+    """An error related to ``doitoml`` task metadata."""
+
+
 class TemplaterError(ConfigError):
 
     """An error related to templates."""

@@ -4,7 +4,7 @@ import os
 import re
 import sys
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple
 
 from doitoml.errors import ActorError
 
@@ -50,7 +50,7 @@ class Actor:
     def perform_action(
         self,
         action: Dict[str, Any],
-        cwd: Optional[Union[Path, str]] = None,
+        cwd: Path,
     ) -> List[CallableAction]:
         """Build a function that will fully resolve the action during task building."""
 
@@ -140,7 +140,7 @@ class PyActor(Actor):
 
     def _fix_action_paths(
         self,
-        cwd: Optional[Union[str, Path]] = None,
+        cwd: Path,
         py_path: Optional[str] = None,
     ) -> Tuple[Optional[str], Optional[List[str]]]:
         """Ensure the ``sys.path``, ``Path.cwd`` are correct: provide the old values."""
@@ -148,22 +148,19 @@ class PyActor(Actor):
         new_cwd = Path.cwd().resolve()
         old_cwd = str(new_cwd)
 
-        if cwd is not None:
-            new_cwd = Path(cwd).resolve()
-            os.chdir(str(new_cwd))
-            py_path = py_path or "."
-
-        if py_path is not None:
-            import_path = (new_cwd / py_path).resolve()
-            old_sys_path = [*sys.path]
-            sys.path = [str(import_path), *old_sys_path]
+        new_cwd = Path(cwd).resolve()
+        os.chdir(str(new_cwd))
+        py_path = py_path or "."
+        import_path = (new_cwd / py_path).resolve()
+        old_sys_path = [*sys.path]
+        sys.path = [str(import_path), *old_sys_path]
 
         return old_cwd, old_sys_path
 
     def perform_action(
         self,
         action: Dict[str, Any],
-        cwd: Optional[Union[Path, str]] = None,
+        cwd: Path,
     ) -> List[CallableAction]:
         """Build a python callable."""
         py = action.get("py")

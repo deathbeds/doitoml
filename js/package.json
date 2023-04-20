@@ -14,15 +14,15 @@
     "prefix": "js",
     "paths": {
       "all_prettier": [
+        ":glob::.::*.yml::*.json",
         ":glob::..::*.md::*.json",
-        ":rglob::../docs::*.md::!ipynb_checkpoints",
         ":glob::../.binder::*.yml",
         ":glob::../examples::*/*.json",
-        ":glob::.::*.yml::*.json"
+        ":rglob::../docs::*.md::*.html::*.yml::*.css::!ipynb_checkpoints"
       ],
       "yarn_in": [
-        "package.json",
-        ":glob::.::yarn.lock"
+        ":glob::.::yarn.lock",
+        "package.json"
       ],
       "yarn_out": [
         ".yarn/install-state.gz"
@@ -52,8 +52,8 @@
       "fix": {
         "prettier": {
           "file_dep": [
-            "::yarn_out",
-            "::all_prettier"
+            "::all_prettier",
+            "::yarn_out"
           ],
           "actions": [
             [
@@ -67,8 +67,8 @@
       "lint": {
         "prettier": {
           "file_dep": [
-            "::yarn_out",
-            "::all_prettier"
+            "::all_prettier",
+            "::yarn_out"
           ],
           "actions": [
             [

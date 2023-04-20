@@ -154,17 +154,14 @@ class DoiTOML:
 
     def build_subtask(self, task_name: Tuple[str, ...], raw_task: Task) -> Task:
         """Build a single generated ``doit`` task."""
-        task: Task = {"name": ":".join(task_name)}
+        name = ":".join(task_name)
+        task: Task = {"name": name}
         task.update(raw_task)
-        cwd = None
         meta = cast(dict, task.get(DOIT_TASK.META, {}))
-        cwd = meta.get(NAME, {}).get(DOITOML_META.CWD)
+        cwd = meta.get(NAME, {}).get(DOITOML_META.CWD) or self.cwd
         old_actions = task.pop(DOIT_TASK.ACTIONS)  # type: ignore
-        new_actions: List[Any] = []
-        cmd_kwargs = {}
-        if cwd:
-            new_actions += [(doit.tools.create_folder, [cwd])]
-            cmd_kwargs["cwd"] = cwd
+        new_actions: List[Any] = [(doit.tools.create_folder, [cwd])]
+        cmd_kwargs = {"cwd": cwd}
 
         for i, action in enumerate(old_actions):
             is_actor = isinstance(action, dict)
@@ -193,7 +190,7 @@ class DoiTOML:
     def build_actor_action(
         self,
         action: Dict[str, Any],
-        cwd: Optional[Union[Path, str]] = None,
+        cwd: Path,
     ) -> Optional[List[Callable[[], Optional[bool]]]]:
         """Resolve an actor action into a list of actions."""
         for _actor_name, actor in self.entry_points.actors.items():

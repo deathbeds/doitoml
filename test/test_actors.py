@@ -1,11 +1,14 @@
 """Tests for (bad) ``doitoml`` ``Actors``."""
-from typing import Any
+from typing import Any, cast
 
 import pytest
 from doitoml import DoiTOML
 from doitoml.errors import ActorError, NoActorError, TaskError
+from doitoml.types import Task
 
 from .conftest import TPyprojectMaker
+
+DEFAULT_META = {"meta": {"doitoml": {"cwd": "."}}}
 
 
 def test_no_actor(
@@ -43,7 +46,8 @@ def test_bad_performance(a_pyproject_with: TPyprojectMaker) -> None:
     a_pyproject_with({"tasks": {}})
 
     doitoml = DoiTOML(fail_quietly=False)
-    doitoml.config.tasks[("", "baz")] = {"actions": [{"nope": False}]}  # type: ignore
+    task = cast(Task, {**DEFAULT_META, "actions": [{"nope": False}]})
+    doitoml.config.tasks[("", "baz")] = task
 
     tasks = doitoml.tasks()
 
