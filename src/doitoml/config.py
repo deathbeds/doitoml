@@ -248,14 +248,16 @@ class Config:
 
     def resolve_one_env(self, source: ConfigSource, env_value: str) -> Optional[str]:
         """Resolve a single env member."""
+        new_value = env_value
         for dsl in self.doitoml.entry_points.dsl.values():
             match = dsl.pattern.search(env_value)
             if match is not None:
                 try:
-                    return str(dsl.transform_token(source, match, env_value)[0])
+                    new_value = str(dsl.transform_token(source, match, env_value)[0])
+                    break
                 except DoitomlError:
                     return None
-        return env_value
+        return new_value
 
     def init_paths(
         self,
@@ -452,7 +454,12 @@ class Config:
         meta = cast(dict, cast(dict, new_task).setdefault(DOIT_TASK.META, {}))
         dt_meta = meta.setdefault(NAME, {})
         dt_meta.setdefault(DOITOML_META.CWD, source.path.parent)
+        env = dt_meta.get(DOITOML_META.ENV)
 
+        if isinstance(env, dict):
+            for env_key, env_value in env.items():
+                new_key_value = self.resolve_one_env(source, env_value)
+                env[env_key] = env_value if new_key_value is None else new_key_value
         for action in old_actions:
             action_actions, unresolved_specs = self.resolve_one_action(source, action)
             if unresolved_specs:

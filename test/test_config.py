@@ -2,6 +2,7 @@
 import json
 import shutil
 from pathlib import Path
+from pprint import pprint
 from typing import Any, Dict, Type
 
 import pytest
@@ -96,6 +97,36 @@ def test_env_collision(a_pyproject_with: TPyprojectMaker, tmp_path: Path) -> Non
 
     doitoml = DoiTOML([pj, ppt], update_env=False)
     assert doitoml.get_env("foo") == "2"
+
+
+def test_task_env(a_pyproject_with: TPyprojectMaker, script_runner: Any) -> None:
+    """Test short fails."""
+    ppt = a_pyproject_with(
+        {
+            "doit": {"verbosity": 2, "loader": "doitoml"},
+            "doitoml": {
+                "env": {"FOO": "bar0"},
+                "cmd": {"a": ["boo2"], "foo": ["python", "foo.py"]},
+                "tasks": {
+                    "foo": {
+                        "meta": {"doitoml": {"env": {"FOO": "baz1"}}},
+                        "actions": [["::foo"]],
+                    },
+                    "foo2": {
+                        "meta": {"doitoml": {"env": {"FOO": "::a"}}},
+                        "actions": [["::foo"]],
+                    },
+                },
+            },
+        },
+    )
+    foo_py = ppt.parent / "foo.py"
+    foo_py.write_text("""print("FOO is {FOO}".format(**__import__("os").environ))""")
+    pprint(sorted(ppt.parent.glob("*")))
+    res = script_runner.run("doit", "foo")
+    assert "FOO is baz" in res.stdout
+    res = script_runner.run("doit", "foo2")
+    assert "FOO is boo" in res.stdout
 
 
 def test_fail_quietly(a_pyproject_with: TPyprojectMaker) -> None:

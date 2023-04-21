@@ -158,10 +158,14 @@ class DoiTOML:
         task: Task = {"name": name}
         task.update(raw_task)
         meta = cast(dict, task.get(DOIT_TASK.META, {}))
-        cwd = meta.get(NAME, {}).get(DOITOML_META.CWD) or self.cwd
+        dt_meta = meta.get(NAME, {})
+        cwd = dt_meta.get(DOITOML_META.CWD) or self.cwd
+        env = dt_meta.get(DOITOML_META.ENV, {})
+        cmd_env = dict(os.environ)
+        cmd_env.update(env)
         old_actions = task.pop(DOIT_TASK.ACTIONS)  # type: ignore
         new_actions: List[Any] = [(doit.tools.create_folder, [cwd])]
-        cmd_kwargs = {"cwd": cwd}
+        cmd_kwargs = {DOITOML_META.CWD: cwd, DOITOML_META.ENV: cmd_env}
 
         for i, action in enumerate(old_actions):
             is_actor = isinstance(action, dict)
@@ -170,7 +174,7 @@ class DoiTOML:
                 isinstance(t, (str, Path)) for t in action
             )
             if is_actor:
-                actor_actions = self.build_actor_action(action, cwd)
+                actor_actions = self.build_actor_action(action, cwd, env)
                 if actor_actions:
                     new_actions += actor_actions
                     continue
@@ -191,9 +195,10 @@ class DoiTOML:
         self,
         action: Dict[str, Any],
         cwd: Path,
+        env: Dict[str, Any],
     ) -> Optional[List[Callable[[], Optional[bool]]]]:
         """Resolve an actor action into a list of actions."""
         for _actor_name, actor in self.entry_points.actors.items():
             if actor.knows(action):
-                return actor.perform_action(action, cwd)
+                return actor.perform_action(action, cwd, env)
         return None

@@ -56,8 +56,14 @@ class DOITOML_META:
 
     #: skipping tasks with non-falsey values
     SKIP = "skip"
-    #: non-standard. for setting the current working directory of a task
+    #: set the current working directory of a task
     CWD = "cwd"
+    #: environment variables for this task
+    ENV = "env"
+    #: file to capture stdout
+    STDOUT = "stdout"
+    #: file to capture stderr
+    STDERR = "stderr"
 
 
 #: all the false things

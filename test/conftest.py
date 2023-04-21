@@ -109,11 +109,17 @@ def empty_doitoml(tmp_path: Path) -> Generator["DoiTOML", None, None]:
 
 @pytest.fixture()
 def a_pyproject_with(tmp_path: Path) -> Generator[TPyprojectMaker, None, None]:
-    """Make a broken ``pyproject.toml``."""
+    """Make a ``pyproject.toml``."""
     ppt = tmp_path / "pyproject.toml"
 
-    def make_pyproject_toml(dotoml_cfg: Dict[str, Any]) -> Path:
-        ppt_text = tomli_w.dumps({"tool": {"doitoml": dotoml_cfg}})
+    def make_pyproject_toml(
+        tool_cfg: Dict[str, Any],
+    ) -> Path:
+        if "doitoml" in tool_cfg:
+            write_config = {"tool": tool_cfg}
+        else:
+            write_config = {"tool": {"doitoml": tool_cfg}}
+        ppt_text = tomli_w.dumps(write_config)
         ppt.write_text(ppt_text, encoding="utf-8")
         return ppt
 

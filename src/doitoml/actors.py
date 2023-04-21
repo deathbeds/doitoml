@@ -51,6 +51,7 @@ class Actor:
         self,
         action: Dict[str, Any],
         cwd: Path,
+        env: Dict[str, str],
     ) -> List[CallableAction]:
         """Build a function that will fully resolve the action during task building."""
 
@@ -141,9 +142,13 @@ class PyActor(Actor):
     def _fix_action_paths(
         self,
         cwd: Path,
+        env: Dict[str, str],
         py_path: Optional[str] = None,
-    ) -> Tuple[Optional[str], Optional[List[str]]]:
+    ) -> Tuple[str, Dict[str, str], Optional[List[str]]]:
         """Ensure the ``sys.path``, ``Path.cwd`` are correct: provide the old values."""
+        old_env = dict(os.environ)
+        os.environ.update(env)
+
         old_sys_path = None
         new_cwd = Path.cwd().resolve()
         old_cwd = str(new_cwd)
@@ -155,12 +160,13 @@ class PyActor(Actor):
         old_sys_path = [*sys.path]
         sys.path = [str(import_path), *old_sys_path]
 
-        return old_cwd, old_sys_path
+        return old_cwd, old_env, old_sys_path
 
     def perform_action(
         self,
         action: Dict[str, Any],
         cwd: Path,
+        env: Dict[str, str],
     ) -> List[CallableAction]:
         """Build a python callable."""
         py = action.get("py")
@@ -171,7 +177,7 @@ class PyActor(Actor):
             raise ActorError(message)
 
         def _py_action() -> Optional[bool]:
-            old_cwd, old_sys_path = self._fix_action_paths(cwd, py_path)
+            old_cwd, old_env, old_sys_path = self._fix_action_paths(cwd, env, py_path)
 
             try:
                 current = __import__(dotted)  # type: ignore
@@ -199,6 +205,8 @@ class PyActor(Actor):
                     os.chdir(str(old_cwd))
                 if old_sys_path:
                     sys.path = old_sys_path
+                os.environ.clear()
+                os.environ.update(old_env)
             return result is not False
 
         return [_py_action]
