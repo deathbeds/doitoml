@@ -175,7 +175,7 @@ class Config:
             raise UnresolvedError(message)
 
         # load other top-level config values from the first config
-        for key in [DEFAULTS.UPDATE_ENV, DEFAULTS.FAIL_QUIETLY]:
+        for key in DEFAULTS.ALL_FROM_FIRST_CONFIG:
             if getattr(self, key, None) is None:
                 setattr(self, key, top_config.raw_config.get(key, True))
 

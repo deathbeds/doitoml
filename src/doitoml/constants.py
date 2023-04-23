@@ -13,13 +13,17 @@ class DEFAULTS:
     """``doitoml`` config values."""
 
     #: the fallback config path
-    CONFIG_PATH = "./pyproject.toml"
+    CONFIG_PATH: Literal["./pyproject.toml"] = "./pyproject.toml"
     #: the key for extra sources
-    CONFIG_PATHS = "config_paths"
+    CONFIG_PATHS: Literal["config_paths"] = "config_paths"
     #: the key for extra sources
-    UPDATE_ENV = "update_env"
+    UPDATE_ENV: Literal["update_env"] = "update_env"
     #: the key for controlling error verbosity
-    FAIL_QUIETLY = "fail_quietly"
+    FAIL_QUIETLY: Literal["fail_quietly"] = "fail_quietly"
+    #: the key for controlling validation
+    VALIDATE: Literal["validate"] = "validate"
+    #: the values that will be read from the first config file
+    ALL_FROM_FIRST_CONFIG = [UPDATE_ENV, FAIL_QUIETLY, VALIDATE, CONFIG_PATH]
 
 
 class ENTRY_POINTS:
