@@ -48,6 +48,7 @@ dependencies:
   - sphinx-autodoc-typehints
   - sphinx-copybutton
   - sphinx-design
+  - sphinx-jsonschema
   - sphinxcontrib-mermaid
   # check
   - pytest-check-links
