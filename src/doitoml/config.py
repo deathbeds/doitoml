@@ -123,8 +123,38 @@ class Config:
             "env": {k: str(v) for k, v in env.items()},
             "cmd": {":".join(k): list(map(str, v)) for k, v in self.cmd.items()},
             "paths": {":".join(k): list(map(str, v)) for k, v in self.paths.items()},
-            "tasks": {":".join(k): v for k, v in self.tasks.items()},
+            "tasks": {":".join(k): self.task_to_dict(v) for k, v in self.tasks.items()},
         }
+
+    def task_to_dict(self, task: Task) -> Dict[str, Any]:
+        """Make a 'dumb' JSON object of a task."""
+        new_task = deepcopy(task)
+        if DOIT_TASK.ACTIONS in new_task:
+            new_actions: List[Action] = []
+            for action in new_task[DOIT_TASK.ACTIONS]:
+                if not isinstance(action, str) and isinstance(action, list):
+                    new_actions += [list(map(str, action))]
+                    continue
+                new_actions += [action]
+            new_task[DOIT_TASK.ACTIONS] = new_actions
+
+        for key in DOIT_TASK.RELATIVE_LISTS:
+            if key in new_task:
+                new_task[key] = list(map(str, new_task[key]))  # type: ignore
+
+        dt_meta = new_task[DOIT_TASK.META].setdefault(NAME, {})  # type: ignore
+
+        if DOITOML_META.CWD in dt_meta:
+            dt_meta[DOITOML_META.CWD] = str(dt_meta[DOITOML_META.CWD])
+
+        if DOITOML_META.LOG in dt_meta:
+            dt_log = dt_meta[DOITOML_META.LOG]
+            if isinstance(dt_log, (Path, str)):
+                dt_meta[DOITOML_META.LOG] = str(dt_log)
+            elif isinstance(dt_log, list):
+                dt_meta[DOITOML_META.LOG] = list(map(str, dt_log))
+
+        return dict(new_task)
 
     def initialize(self) -> None:
         """Perform a few passes to configure everything."""
@@ -438,7 +468,9 @@ class Config:
             message = f"{source} task {prefixes} is not a dict: {task_or_group}"
             raise ConfigError(message)
 
-        maybe_old_actions = task_or_group.get(DOIT_TASK.ACTIONS, [])
+        maybe_old_actions: Optional[List[Action]] = task_or_group.get(
+            DOIT_TASK.ACTIONS,
+        )  # type: ignore
 
         meta = cast(dict, task_or_group.get(DOIT_TASK.META))
 
@@ -470,7 +502,7 @@ class Config:
         task: Task,
     ) -> PrefixedTaskGenerator:
         """Resolve a single simple task."""
-        old_actions = cast(List[Action], task[DOIT_TASK.ACTIONS])  # type: ignore
+        old_actions = cast(List[Action], task[DOIT_TASK.ACTIONS])
         new_task = self.normalize_task_meta(source, task)
         all_unresolved_specs: List[str] = []
         new_actions: List[Action] = []

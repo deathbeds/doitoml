@@ -173,7 +173,7 @@ class DoiTOML:
         dt_log = dt_meta.get(DOITOML_META.LOG)
         cmd_env = dict(os.environ)
         cmd_env.update(dt_env)
-        old_actions = task.pop(DOIT_TASK.ACTIONS)  # type: ignore
+        old_actions = task.pop(DOIT_TASK.ACTIONS)
         new_actions: List[Any] = [(doit.tools.create_folder, [dt_cwd])]
 
         for i, action in enumerate(old_actions):
@@ -186,7 +186,7 @@ class DoiTOML:
                 raise TaskError(message)
             new_actions += action_actions
 
-        task[DOIT_TASK.ACTIONS] = new_actions  # type: ignore
+        task[DOIT_TASK.ACTIONS] = new_actions
         return cast(Task, task)
 
     def build_one_action(

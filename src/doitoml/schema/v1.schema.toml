@@ -1,8 +1,10 @@
 "$id" = "https://doitoml.rtfd.io/en/latest/schema/v1.schema.json"
 "$ref" = "#/definitions/config"
 "$schema" = "http://json-schema.org/draft-07/schema#"
+description = "schema definitions for ``doitoml`` configuration"
 
 [definitions.config]
+title = "doitoml Schema"
 description = "schema for ``doitoml`` configuration"
 type = "object"
 required = ["tasks", "cmd", "env", "paths"]
@@ -17,10 +19,54 @@ paths = {"$ref" = "#/definitions/paths", description = "named paths"}
 type = "array"
 items = {type = "string"}
 
-[definitions.tasks.patternProperties.'[^=\s]+']
-"$ref" = "#/definitions/task"
+[definitions.tasks]
+type = "object"
+additionalProperties = {"$ref" = "#/definitions/task"}
 
 [definitions.task]
+type = "object"
+
+[definitions.task.properties]
+name = {type = "string"}
+doc = {type = "string"}
+title = {type = "string"}
+actions = {"$ref" = "#/definitions/actions"}
+file_dep = {"$ref" = "#/definitions/array-of-strings"}
+targets = {"$ref" = "#/definitions/array-of-strings"}
+verbosity = {type = "number", enum = [1, 2, 3]}
+meta = {"$ref" = "#/definitions/meta"}
+
+[definitions.meta]
+type = "object"
+properties = {doitoml = {"$ref" = "#/definitions/meta-doitoml"}}
+
+[definitions.meta-doitoml]
+type = "object"
+
+[definitions.meta-doitoml.properties]
+skip = {type = "string"}
+cwd = {type = "string"}
+
+[definitions.actions]
+type = "array"
+items = {"$ref" = "#/definitions/action"}
+
+[definitions.action]
+oneOf = [
+  {"$ref" = "#/definitions/action-raw-shell"},
+  {"$ref" = "#/definitions/action-token"},
+  {"$ref" = "#/definitions/action-actor"},
+]
+
+[definitions.action-token]
+type = "array"
+items = {type = "string"}
+
+[definitions.action-raw-shell]
+type = "string"
+
+[definitions.action-actor]
+description = "a custom action"
 type = "object"
 
 [definitions.cmd]

@@ -1,5 +1,7 @@
 """Constants for ``doitoml``."""
 #: default encoding
+from typing import Literal
+
 UTF8 = "utf-8"
 
 #: package/config name
@@ -25,15 +27,15 @@ class ENTRY_POINTS:
     """``doitoml`` extension points."""
 
     #: extend the ``doitoml`` DSL
-    DSL = "doitoml.dsl.v0"
+    DSL: Literal["doitoml.dsl.v0"] = "doitoml.dsl.v0"
     #: extend the ``doitoml`` source parser vocabulary
-    PARSER = "doitoml.parser.v0"
+    PARSER: Literal["doitoml.parser.v0"] = "doitoml.parser.v0"
     #: extend the ``doitoml`` config parser vocabulary
-    CONFIG = "doitoml.config-parser.v0"
+    CONFIG: Literal["doitoml.config-parser.v0"] = "doitoml.config-parser.v0"
     #: extend the ``doitoml`` actor vocabulary
-    ACTOR = "doitoml.actor.v0"
+    ACTOR: Literal["doitoml.actor.v0"] = "doitoml.actor.v0"
     #: extend the ``doitoml`` templater vocabulary
-    TEMPLATER = "doitoml.templater.v0"
+    TEMPLATER: Literal["doitoml.templater.v0"] = "doitoml.templater.v0"
 
 
 class DOIT_TASK:
@@ -41,13 +43,13 @@ class DOIT_TASK:
     """A collection of well-known ``doit`` keys."""
 
     #: ``doit`` actions
-    ACTIONS = "actions"
+    ACTIONS: Literal["actions"] = "actions"
     #: ``doit`` task items known to be lists
     LIST_KEYS = ["file_dep", "task_dep", "targets", "actions", "clean"]
     #: ``doit`` keys that are always paths
     RELATIVE_LISTS = ["file_dep", "targets", "clean"]
     #: field for arbitrary data in tasks
-    META = "meta"
+    META: Literal["meta"] = "meta"
 
 
 class DOITOML_META:
@@ -55,13 +57,13 @@ class DOITOML_META:
     """Keys of the ``doitoml`` map in ``doit`` task ``meta``."""
 
     #: skipping tasks with non-falsey values
-    SKIP = "skip"
+    SKIP: Literal["skip"] = "skip"
     #: set the current working directory of a task
-    CWD = "cwd"
+    CWD: Literal["cwd"] = "cwd"
     #: environment variables for this task
-    ENV = "env"
+    ENV: Literal["env"] = "env"
     #: file to capture stdout and stderr
-    LOG = "log"
+    LOG: Literal["log"] = "log"
 
 
 #: all the false things
