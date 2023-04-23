@@ -2,6 +2,34 @@ from typing import Any, Dict, List, Literal, TypedDict, Union
 
 from typing_extensions import Required
 
+Action = Union["ShellAction", "TokenAction", "ActorAction"]
+"""
+action.
+
+oneOf
+"""
+
+
+ActorAction = Dict[str, Any]
+"""
+actor action.
+
+a custom action
+"""
+
+
+CommandTokens = Dict[str, List[str]]
+""" command tokens. """
+
+
+class DoitomlMetadataa(TypedDict, total=False):
+
+    """doitoml Metadataa."""
+
+    skip: str
+    cwd: str
+    log: List["_DoitomlMetadataaLogItem"]
+
 
 class DoitomlSchema(TypedDict, total=False):
 
@@ -10,68 +38,64 @@ class DoitomlSchema(TypedDict, total=False):
     schema for ``doitoml`` configuration
     """
 
-    tasks: Required[Dict[str, "_Task"]]
+    tasks: Required[Dict[str, "Task"]]
     """
     named tasks
 
     Required property
     """
 
-    cmd: Required[Dict[str, List[str]]]
-    """
-    named command tokens
+    cmd: Required["CommandTokens"]
+    """ Required property """
 
-    Required property
-    """
+    env: Required["EnvironmentVariables"]
+    """ Required property """
 
-    env: Required[Dict[str, str]]
-    """
-    environment variables
-
-    Required property
-    """
-
-    paths: Required[Dict[str, List[str]]]
-    """
-    named paths
-
-    Required property
-    """
+    paths: Required["PathTokens"]
+    """ Required property """
 
 
-_Action = Union[str, List[str], "_ActionActor"]
-""" oneOf """
+EnvironmentVariables = Dict[str, str]
+""" environment variables. """
 
 
-_ActionActor = Dict[str, Any]
-""" a custom action """
+class Metadata(TypedDict, total=False):
+
+    """Metadata."""
+
+    doitoml: "DoitomlMetadataa"
 
 
-class _Meta(TypedDict, total=False):
-    doitoml: "_MetaDoitoml"
+PathTokens = Dict[str, List[str]]
+""" path tokens. """
 
 
-class _MetaDoitoml(TypedDict, total=False):
-    skip: str
-    cwd: str
-    log: List["_MetaDoitomlLogItem"]
+ShellAction = str
+""" shell action. """
 
 
-_MetaDoitomlLogItem = Union[str, None]
-""" oneOf """
+class Task(TypedDict, total=False):
 
+    """Task."""
 
-class _Task(TypedDict, total=False):
     name: str
     doc: str
     title: str
-    actions: List["_Action"]
+    actions: List["Action"]
     file_dep: List[str]
     targets: List[str]
     verbosity: "_TaskVerbosity"
-    meta: "_Meta"
+    meta: "Metadata"
     calc_dep: List[str]
     watch: List[str]
+
+
+TokenAction = List[str]
+""" token action. """
+
+
+_DoitomlMetadataaLogItem = Union[str, None]
+""" oneOf """
 
 
 _TaskVerbosity = Union[Literal[1], Literal[2], Literal[3]]

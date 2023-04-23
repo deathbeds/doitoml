@@ -41,6 +41,7 @@
       }
     },
     "task": {
+      "title": "Task",
       "type": "object",
       "properties": {
         "name": {
@@ -77,6 +78,7 @@
       }
     },
     "meta": {
+      "title": "Metadata",
       "type": "object",
       "properties": {
         "doitoml": {
@@ -85,6 +87,7 @@
       }
     },
     "meta-doitoml": {
+      "title": "doitoml Metadataa",
       "type": "object",
       "properties": {
         "skip": {
@@ -115,9 +118,10 @@
       }
     },
     "action": {
+      "title": "action",
       "oneOf": [
         {
-          "$ref": "#/definitions/action-raw-shell"
+          "$ref": "#/definitions/action-shell"
         },
         {
           "$ref": "#/definitions/action-token"
@@ -128,31 +132,37 @@
       ]
     },
     "action-token": {
+      "title": "token action",
       "type": "array",
       "items": {
         "type": "string"
       }
     },
-    "action-raw-shell": {
+    "action-shell": {
+      "title": "shell action",
       "type": "string"
     },
     "action-actor": {
+      "title": "actor action",
       "description": "a custom action",
       "type": "object"
     },
     "cmd": {
+      "title": "command tokens",
       "type": "object",
       "additionalProperties": {
         "$ref": "#/definitions/array-of-strings"
       }
     },
     "env": {
+      "title": "environment variables",
       "type": "object",
       "additionalProperties": {
         "type": "string"
       }
     },
     "paths": {
+      "title": "path tokens",
       "type": "object",
       "additionalProperties": {
         "$ref": "#/definitions/array-of-strings"

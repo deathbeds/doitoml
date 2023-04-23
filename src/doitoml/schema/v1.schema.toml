@@ -24,6 +24,7 @@ type = "object"
 additionalProperties = {"$ref" = "#/definitions/task"}
 
 [definitions.task]
+title = "Task"
 type = "object"
 
 [definitions.task.properties]
@@ -39,10 +40,12 @@ calc_dep = {"$ref" = "#/definitions/array-of-strings"}
 watch = {"$ref" = "#/definitions/array-of-strings"}
 
 [definitions.meta]
+title = "Metadata"
 type = "object"
 properties = {doitoml = {"$ref" = "#/definitions/meta-doitoml"}}
 
 [definitions.meta-doitoml]
+title = "doitoml Metadataa"
 type = "object"
 
 [definitions.meta-doitoml.properties]
@@ -55,31 +58,38 @@ type = "array"
 items = {"$ref" = "#/definitions/action"}
 
 [definitions.action]
+title = "action"
 oneOf = [
-  {"$ref" = "#/definitions/action-raw-shell"},
+  {"$ref" = "#/definitions/action-shell"},
   {"$ref" = "#/definitions/action-token"},
   {"$ref" = "#/definitions/action-actor"},
 ]
 
 [definitions.action-token]
+title = "token action"
 type = "array"
 items = {type = "string"}
 
-[definitions.action-raw-shell]
+[definitions.action-shell]
+title = "shell action"
 type = "string"
 
 [definitions.action-actor]
+title = "actor action"
 description = "a custom action"
 type = "object"
 
 [definitions.cmd]
+title = "command tokens"
 type = "object"
 additionalProperties = {"$ref" = "#/definitions/array-of-strings"}
 
 [definitions.env]
+title = "environment variables"
 type = "object"
 additionalProperties = {type = "string"}
 
 [definitions.paths]
+title = "path tokens"
 type = "object"
 additionalProperties = {"$ref" = "#/definitions/array-of-strings"}

@@ -19,6 +19,20 @@
 .. automodule:: doitoml.types
 ```
 
+## Schema
+
+```{eval-rst}
+.. currentmodule:: doitoml
+.. automodule:: doitoml.schema
+```
+
+### Schema Types
+
+```{eval-rst}
+.. currentmodule:: doitoml
+.. automodule:: doitoml.schema._v1_schema
+```
+
 ## Errors
 
 ```{eval-rst}
