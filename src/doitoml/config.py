@@ -545,7 +545,6 @@ class Config:
         if stderr_path is None and stdout_path is None:
             message = f"Expected log to be a string, or {log}"
             raise ConfigError(message)
-        __import__("pprint").pprint({"stdout": stdout_path, "stderr": stderr_path})
         return stdout_path, stderr_path
 
     def resolve_one_action(

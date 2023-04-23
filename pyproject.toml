@@ -350,3 +350,10 @@ actions = [["pytest-check-links", "build/docs", "::check_links_opts"]]
 doc = "Watch docs, rebuild on changes"
 file_dep = ["::docs_buildinfo"]
 actions = [["sphinx-autobuild", "::sphinx_opts", "--no-initial", "--watch=src"]]
+
+[tool.doitoml.tasks.gen.schema]
+doc = "build typings from jsonschema"
+file_dep = ["src/doitoml/schema/v1.schema.toml"]
+targets = ["src/doitoml/schema/v1.schema.json"]
+actions = [["taplo", "get", "-o=json", "-f", "src/doitoml/schema/v1.schema.toml"]]
+meta = {doitoml = {log = "src/doitoml/schema/v1.schema.json"}}
