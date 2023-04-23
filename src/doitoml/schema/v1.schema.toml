@@ -35,6 +35,8 @@ file_dep = {"$ref" = "#/definitions/array-of-strings"}
 targets = {"$ref" = "#/definitions/array-of-strings"}
 verbosity = {type = "number", enum = [1, 2, 3]}
 meta = {"$ref" = "#/definitions/meta"}
+calc_dep = {"$ref" = "#/definitions/array-of-strings"}
+watch = {"$ref" = "#/definitions/array-of-strings"}
 
 [definitions.meta]
 type = "object"
@@ -46,6 +48,7 @@ type = "object"
 [definitions.meta-doitoml.properties]
 skip = {type = "string"}
 cwd = {type = "string"}
+log = {type = "array", items = {oneOf = [{type = "string"}, {type = "null"}]}}
 
 [definitions.actions]
 type = "array"

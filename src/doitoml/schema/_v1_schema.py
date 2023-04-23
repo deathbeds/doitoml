@@ -54,6 +54,11 @@ class _Meta(TypedDict, total=False):
 class _MetaDoitoml(TypedDict, total=False):
     skip: str
     cwd: str
+    log: List["_MetaDoitomlLogItem"]
+
+
+_MetaDoitomlLogItem = Union[str, None]
+""" oneOf """
 
 
 class _Task(TypedDict, total=False):
@@ -65,6 +70,8 @@ class _Task(TypedDict, total=False):
     targets: List[str]
     verbosity: "_TaskVerbosity"
     meta: "_Meta"
+    calc_dep: List[str]
+    watch: List[str]
 
 
 _TaskVerbosity = Union[Literal[1], Literal[2], Literal[3]]

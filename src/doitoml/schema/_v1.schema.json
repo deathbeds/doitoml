@@ -67,6 +67,12 @@
         },
         "meta": {
           "$ref": "#/definitions/meta"
+        },
+        "calc_dep": {
+          "$ref": "#/definitions/array-of-strings"
+        },
+        "watch": {
+          "$ref": "#/definitions/array-of-strings"
         }
       }
     },
@@ -86,6 +92,19 @@
         },
         "cwd": {
           "type": "string"
+        },
+        "log": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
         }
       }
     },

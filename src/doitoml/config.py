@@ -52,6 +52,7 @@ from doitoml.types import (
     Task,
 )
 
+from .schema._v1_schema import DoitomlSchema
 from .sources._config import ConfigParser, ConfigSource
 from .sources._source import Source
 
@@ -115,16 +116,23 @@ class Config:
         self.fail_quietly = fail_quietly
         self.discover_config_paths = discover_config_paths
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> DoitomlSchema:
         """Return a normalized subset of config data."""
         env = dict(**self.env)
         env.update(os.environ)
-        return {
-            "env": {k: str(v) for k, v in env.items()},
-            "cmd": {":".join(k): list(map(str, v)) for k, v in self.cmd.items()},
-            "paths": {":".join(k): list(map(str, v)) for k, v in self.paths.items()},
-            "tasks": {":".join(k): self.task_to_dict(v) for k, v in self.tasks.items()},
-        }
+        return cast(
+            DoitomlSchema,
+            {
+                "env": {k: str(v) for k, v in env.items()},
+                "cmd": {":".join(k): list(map(str, v)) for k, v in self.cmd.items()},
+                "paths": {
+                    ":".join(k): list(map(str, v)) for k, v in self.paths.items()
+                },
+                "tasks": {
+                    ":".join(k): self.task_to_dict(v) for k, v in self.tasks.items()
+                },
+            },
+        )
 
     def task_to_dict(self, task: Task) -> Dict[str, Any]:
         """Make a 'dumb' JSON object of a task."""
@@ -142,17 +150,15 @@ class Config:
             if key in new_task:
                 new_task[key] = list(map(str, new_task[key]))  # type: ignore
 
-        dt_meta = new_task[DOIT_TASK.META].setdefault(NAME, {})  # type: ignore
+        meta = new_task.setdefault(DOIT_TASK.META, {})  # type: ignore
+        dt_meta = meta.setdefault(NAME, {})
 
         if DOITOML_META.CWD in dt_meta:
             dt_meta[DOITOML_META.CWD] = str(dt_meta[DOITOML_META.CWD])
 
         if DOITOML_META.LOG in dt_meta:
             dt_log = dt_meta[DOITOML_META.LOG]
-            if isinstance(dt_log, (Path, str)):
-                dt_meta[DOITOML_META.LOG] = str(dt_log)
-            elif isinstance(dt_log, list):
-                dt_meta[DOITOML_META.LOG] = list(map(str, dt_log))
+            dt_meta[DOITOML_META.LOG] = [str(log) if log else None for log in dt_log]
 
         return dict(new_task)
 
