@@ -49,10 +49,9 @@
 
 > Put these in your `task.{task name}.meta.doitoml` to fune-tune the behavior of tasks.
 
-| field title  | field data type       | field description                                                                  |
-| ------------ | --------------------- | ---------------------------------------------------------------------------------- |
-| **`cwd`**    | string or `Path`      | the current working directory for _shell_, _token_, and _actor_ tasks              |
-| **`env`**    | dictionary of strings | environment variables to overload for a specific task                              |
-| **`skip`**   | string or `bool`      | if _falsey_, this task will not appear in `doit list` or be included in `doit run` |
-| **`stdout`** | string or `Path`      | file to capture `stodut` output.                                                   |
-| **`stderr`** | string or `Path`      | file to capture `stderr`. Set to `STDOUT` to combine streams.                      |
+| field title | field data type            | field description                                                                                 |
+| ----------- | -------------------------- | ------------------------------------------------------------------------------------------------- |
+| **`cwd`**   | string or `Path`           | the current working directory for _shell_, _token_, and _actor_ tasks                             |
+| **`env`**   | dictionary of strings      | environment variables to overload for a specific task                                             |
+| **`skip`**  | string or `bool`           | if _falsey_, this task will not appear in `doit list` or be included in `doit run`                |
+| **`log`**   | (list of) string or `Path` | file(s) to capture output of actions, e.g. `task.log` or `["task.stdout.log", "task.stderr.log"]` |

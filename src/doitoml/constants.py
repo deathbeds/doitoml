@@ -60,10 +60,8 @@ class DOITOML_META:
     CWD = "cwd"
     #: environment variables for this task
     ENV = "env"
-    #: file to capture stdout
-    STDOUT = "stdout"
-    #: file to capture stderr
-    STDERR = "stderr"
+    #: file to capture stdout and stderr
+    LOG = "log"
 
 
 #: all the false things

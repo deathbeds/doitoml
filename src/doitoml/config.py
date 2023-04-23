@@ -38,6 +38,8 @@ from doitoml.errors import (
 )
 from doitoml.types import (
     Action,
+    LogPaths,
+    PathOrString,
     PathOrStrings,
     Paths,
     PrefixedPaths,
@@ -447,19 +449,10 @@ class Config:
     ) -> PrefixedTaskGenerator:
         """Resolve a single simple task."""
         old_actions = cast(List[Action], task[DOIT_TASK.ACTIONS])  # type: ignore
-        new_task = deepcopy(task)
+        new_task = self.normalize_task_meta(source, task)
         all_unresolved_specs: List[str] = []
         new_actions: List[Action] = []
 
-        meta = cast(dict, cast(dict, new_task).setdefault(DOIT_TASK.META, {}))
-        dt_meta = meta.setdefault(NAME, {})
-        dt_meta.setdefault(DOITOML_META.CWD, source.path.parent)
-        env = dt_meta.get(DOITOML_META.ENV)
-
-        if isinstance(env, dict):
-            for env_key, env_value in env.items():
-                new_key_value = self.resolve_one_env(source, env_value)
-                env[env_key] = env_value if new_key_value is None else new_key_value
         for action in old_actions:
             action_actions, unresolved_specs = self.resolve_one_action(source, action)
             if unresolved_specs:
@@ -485,6 +478,53 @@ class Config:
             raise UnresolvedError(message)
 
         yield prefixes, new_task
+
+    def normalize_task_meta(
+        self,
+        source: ConfigSource,
+        task: Task,
+    ) -> Task:
+        """Normalize task metadata."""
+        new_task = deepcopy(task)
+        meta = cast(dict, cast(dict, new_task).setdefault(DOIT_TASK.META, {}))
+        dt_meta = cast(dict, meta.setdefault(NAME, {}))
+        dt_cwd = Path(dt_meta.get(DOITOML_META.CWD, source.path.parent))
+        dt_log_paths = self.build_log_paths(dt_meta.get(DOITOML_META.LOG), dt_cwd)
+        dt_meta[DOITOML_META.LOG] = dt_log_paths
+        dt_meta[DOITOML_META.CWD] = dt_cwd
+        env = dt_meta.setdefault(DOITOML_META.ENV, {})
+        for env_key, env_value in env.items():
+            new_key_value = self.resolve_one_env(source, env_value)
+            env[env_key] = env_value if new_key_value is None else new_key_value
+        return new_task
+
+    def build_log_paths(
+        self,
+        log: Optional[Union[PathOrString, List[PathOrString]]],
+        cwd: Path,
+    ) -> LogPaths:
+        """Set up proper path behavior from log metadata."""
+        if not log:
+            return (None, None)
+        stdout_path = None
+        stderr_path = None
+        if isinstance(log, (str, Path)) and log:
+            stderr_path = stdout_path = cwd / log
+        else:
+            stdout_path, stderr_path = (
+                cwd / stream if stream else None for stream in log  # type: ignore
+            )
+
+        for path in [stderr_path, stdout_path]:
+            if path and path.is_dir():
+                message = f"A log path was a directory: {path}"
+                raise ConfigError(message)
+
+        if stderr_path is None and stdout_path is None:
+            message = f"Expected log to be a string, or {log}"
+            raise ConfigError(message)
+        __import__("pprint").pprint({"stdout": stdout_path, "stderr": stderr_path})
+        return stdout_path, stderr_path
 
     def resolve_one_action(
         self,

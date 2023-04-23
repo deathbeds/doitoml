@@ -1,12 +1,14 @@
 """Declarative actions for ``doitoml``."""
 import abc
+import contextlib
 import os
 import re
 import sys
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, cast
 
 from doitoml.errors import ActorError
+from doitoml.types import LogPaths
 
 if TYPE_CHECKING:
     from .doitoml import DoiTOML
@@ -52,6 +54,7 @@ class Actor:
         action: Dict[str, Any],
         cwd: Path,
         env: Dict[str, str],
+        log_paths: Optional[LogPaths],
     ) -> List[CallableAction]:
         """Build a function that will fully resolve the action during task building."""
 
@@ -81,7 +84,10 @@ class PyActor(Actor):
         action: Dict[str, Any],
     ) -> List[Dict[str, Any]]:
         """Expand a dict containing `py`."""
-        args = action.pop("args")
+        args = action.pop("args", None)
+        if args is None:
+            return [action]
+
         if isinstance(args, list):
             found_args, unresolved_args = self.doitoml.config.resolve_some_path_specs(
                 source,
@@ -139,17 +145,16 @@ class PyActor(Actor):
             return found_kwarg
         return None
 
-    def _fix_action_paths(
+    def _patch_action_paths(
         self,
         cwd: Path,
         env: Dict[str, str],
         py_path: Optional[str] = None,
-    ) -> Tuple[str, Dict[str, str], Optional[List[str]]]:
+    ) -> Tuple[str, Dict[str, str], List[str]]:
         """Ensure the ``sys.path``, ``Path.cwd`` are correct: provide the old values."""
         old_env = dict(os.environ)
         os.environ.update(env)
 
-        old_sys_path = None
         new_cwd = Path.cwd().resolve()
         old_cwd = str(new_cwd)
 
@@ -162,51 +167,112 @@ class PyActor(Actor):
 
         return old_cwd, old_env, old_sys_path
 
+    def _call_with_capture(
+        self,
+        func: Callable[[Any], Optional[bool]],
+        pargs: List[Any],
+        kwargs: Dict[str, Any],
+        log_paths: LogPaths,
+    ) -> Optional[bool]:
+        stdout, stderr = self.doitoml.ensure_parents(*log_paths)
+
+        stdout_mgr: contextlib.AbstractContextManager = contextlib.nullcontext()
+        stderr_mgr: contextlib.AbstractContextManager = contextlib.nullcontext()
+
+        managers: List[contextlib.AbstractContextManager] = []
+        if stdout:
+            stdout_fh = stdout.open("w")
+            stdout_mgr = contextlib.redirect_stdout(stdout_fh)
+            managers += [stdout_mgr]
+        if stderr:
+            if stderr == stdout:
+                stderr_mgr = contextlib.redirect_stderr(stdout_fh)
+            else:
+                stderr_fh = stderr.open("w")
+                stderr_mgr = contextlib.redirect_stderr(stderr_fh)
+            managers += [stderr_mgr]
+
+        with stdout_mgr, stderr_mgr:
+            return func(*pargs, **kwargs)
+
+    def _init_action_args(
+        self,
+        action: Dict[str, Any],
+    ) -> Tuple[List[Any], Dict[str, Any]]:
+        """Create positional and named arguments."""
+        cfg_args = action.get("args", [])
+        pargs = []
+        kwargs = {}
+
+        if isinstance(cfg_args, dict):
+            kwargs = cfg_args
+        elif isinstance(cfg_args, list):
+            pargs = cfg_args
+        else:  # pragma: no cover
+            message = f"don't know what to do with action args: {cfg_args}"
+            raise ActorError(message)
+
+        return pargs, kwargs
+
+    def _restore_action_paths(
+        self,
+        old_cwd: str,
+        old_sys_path: List[str],
+        old_env: Dict[str, str],
+    ) -> None:
+        """Put paths back the way they were."""
+        os.chdir(str(old_cwd))
+        sys.path = old_sys_path
+        os.environ.clear()
+        os.environ.update(old_env)
+
     def perform_action(
         self,
         action: Dict[str, Any],
         cwd: Path,
         env: Dict[str, str],
+        log_paths: Optional[LogPaths],
     ) -> List[CallableAction]:
         """Build a python callable."""
         py = action.get("py")
         py_path, dotted, func_name = self._get_py_dot_func(py)
+        pargs, kwargs = self._init_action_args(action)
 
         if dotted is None or func_name is None:  # pragma: no cover
             message = f"Unknown py path: {py}"
             raise ActorError(message)
 
         def _py_action() -> Optional[bool]:
-            old_cwd, old_env, old_sys_path = self._fix_action_paths(cwd, env, py_path)
+            """Perform a python action."""
+            old_cwd, old_env, old_sys_path = self._patch_action_paths(cwd, env, py_path)
 
             try:
-                current = __import__(dotted)  # type: ignore
-                if py_path and cwd:
-                    os.chdir(str(cwd))
-                for dot in dotted.split(".")[1:]:  # type: ignore
-                    current = getattr(current, dot)
-                func = getattr(current, func_name)  # type: ignore
-                args = action["args"]
+                func = self.import_dotted(str(dotted), str(func_name), cwd, py_path)
+                result = self._call_with_capture(
+                    func,
+                    pargs,
+                    kwargs,
+                    cast(LogPaths, log_paths or [None, None]),
+                )
 
-                pargs = []
-                kwargs = {}
-
-                if isinstance(args, dict):
-                    kwargs = args
-                elif isinstance(args, list):
-                    pargs = args
-                else:  # pragma: no cover
-                    message = f"don't know what to do with action args: {args}"
-                    raise ActorError(message)
-
-                result = func(*pargs, **kwargs)
             finally:  # pragma: no cover
-                if old_cwd:
-                    os.chdir(str(old_cwd))
-                if old_sys_path:
-                    sys.path = old_sys_path
-                os.environ.clear()
-                os.environ.update(old_env)
+                self._restore_action_paths(old_cwd, old_sys_path, old_env)
+
             return result is not False
 
         return [_py_action]
+
+    def import_dotted(
+        self,
+        dotted: str,
+        func_name: str,
+        cwd: Path,
+        py_path: Optional[str],
+    ) -> Any:
+        """Import a named function from a module."""
+        if py_path and cwd:
+            os.chdir(str(cwd))
+        current = __import__(dotted)
+        for dot in dotted.split(".")[1:]:
+            current = getattr(current, dot)
+        return getattr(current, func_name)

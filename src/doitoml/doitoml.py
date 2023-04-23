@@ -1,9 +1,11 @@
 """Opinionated, declarative ``doit`` tasks from TOML, JSON, YAML, and more."""
 import logging
 import os
+import subprocess
 import sys
+from io import BufferedWriter
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union, cast
+from typing import Any, Dict, List, Optional, Tuple, Union, cast
 
 import doit.action
 import doit.tools
@@ -13,7 +15,9 @@ from .constants import DOIT_TASK, DOITOML_META, NAME
 from .entry_points import EntryPoints
 from .errors import DoitomlError, EnvVarError, TaskError
 from .types import (
+    Action,
     GroupedTasks,
+    LogPaths,
     PathOrStrings,
     PrefixedTasks,
     Task,
@@ -159,46 +163,91 @@ class DoiTOML:
         task.update(raw_task)
         meta = cast(dict, task.get(DOIT_TASK.META, {}))
         dt_meta = meta.get(NAME, {})
-        cwd = dt_meta.get(DOITOML_META.CWD) or self.cwd
-        env = dt_meta.get(DOITOML_META.ENV, {})
+        dt_cwd = dt_meta.get(DOITOML_META.CWD) or self.cwd
+        dt_env = dt_meta.get(DOITOML_META.ENV, {})
+        dt_log = dt_meta.get(DOITOML_META.LOG)
         cmd_env = dict(os.environ)
-        cmd_env.update(env)
+        cmd_env.update(dt_env)
         old_actions = task.pop(DOIT_TASK.ACTIONS)  # type: ignore
-        new_actions: List[Any] = [(doit.tools.create_folder, [cwd])]
-        cmd_kwargs = {DOITOML_META.CWD: cwd, DOITOML_META.ENV: cmd_env}
+        new_actions: List[Any] = [(doit.tools.create_folder, [dt_cwd])]
 
         for i, action in enumerate(old_actions):
-            is_actor = isinstance(action, dict)
-            is_shell = isinstance(action, str)
-            is_tokens = isinstance(action, list) and all(
-                isinstance(t, (str, Path)) for t in action
-            )
-            if is_actor:
-                actor_actions = self.build_actor_action(action, cwd, env)
-                if actor_actions:
-                    new_actions += actor_actions
-                    continue
-            if is_shell or is_tokens:
-                new_actions += [
-                    doit.tools.CmdAction(action, **cmd_kwargs, shell=is_shell),
-                ]
-                continue
-            message = f"""{task["name"]} action {i} is not a recognized action
-            {action}
-            """
-            raise TaskError(message)
+            action_actions = self.build_one_action(action, dt_cwd, cmd_env, dt_log)
+
+            if action_actions is None:
+                message = f"""{task["name"]} action {i} is not a recognized action
+                {action}
+                """
+                raise TaskError(message)
+            new_actions += action_actions
 
         task[DOIT_TASK.ACTIONS] = new_actions  # type: ignore
         return cast(Task, task)
 
-    def build_actor_action(
+    def build_one_action(
         self,
-        action: Dict[str, Any],
+        action: Action,
         cwd: Path,
-        env: Dict[str, Any],
-    ) -> Optional[List[Callable[[], Optional[bool]]]]:
-        """Resolve an actor action into a list of actions."""
-        for _actor_name, actor in self.entry_points.actors.items():
-            if actor.knows(action):
-                return actor.perform_action(action, cwd, env)
+        env: Dict[str, str],
+        log_paths: LogPaths,
+    ) -> Optional[List[Action]]:
+        """Build up a single action definition."""
+        is_shell = isinstance(action, str)
+        is_tokens = isinstance(action, list) and all(
+            isinstance(t, (str, Path)) for t in action
+        )
+        if isinstance(action, dict):
+            for _actor_name, actor in self.entry_points.actors.items():
+                if actor.knows(cast(dict, action)):
+                    return actor.perform_action(
+                        action,
+                        cwd,
+                        env,
+                        log_paths,
+                    )
+        if isinstance(action, (str, list)) and (is_shell or is_tokens):
+            popen_kwargs = {"cwd": cwd, "env": env}
+            if not any(log_paths):
+                return [doit.tools.CmdAction(action, **popen_kwargs, shell=is_shell)]
+
+            args = [action] if isinstance(action, str) else list(map(str, action))
+            return [
+                (
+                    self.logged_action,
+                    [args, log_paths, popen_kwargs],
+                ),
+            ]
         return None
+
+    def logged_action(
+        self,
+        args: List[str],
+        log_paths: LogPaths,
+        popen_kwargs: Dict[str, Any],
+    ) -> bool:
+        """Run a process, capturing the output to files."""
+        stdout, stderr = self.ensure_parents(*log_paths)
+
+        out = stdout.open("wb") if stdout else None
+        err = None
+        if stderr:
+            err = subprocess.STDOUT if stdout == stderr else stderr.open("wb")
+        streams: Dict[str, Any] = {"stdout": out, "stderr": err}
+
+        rc = subprocess.call(args, **streams, **popen_kwargs)  # noqa: S603
+
+        for stream in streams.values():
+            if isinstance(stream, BufferedWriter):
+                stream.close()
+
+        return rc == 0
+
+    def ensure_parents(self, *paths: Optional[Path]) -> Tuple[Optional[Path], ...]:
+        """Clean out some paths and ensure their parents."""
+        for path in paths:
+            if not path:
+                continue
+            path.parent.mkdir(parents=True, exist_ok=True)
+            if path.exists():
+                path.unlink()
+        return paths
