@@ -17,6 +17,7 @@ classifiers = [
 dependencies = ["doit", "jinja2", "tomli", "typing-extensions"]
 [project.optional-dependencies]
 json-e = ["json-e"]
+jsonschema = ["jsonschema[format]"]
 yaml = ["pyyaml"]
 [project.urls]
 "Bug Tracker" = "https://github.com/deathbeds/doitoml/issues"

@@ -9,8 +9,10 @@ dependencies:
   - tomli
   # optional
   - json-e
+  - jsonschema-with-format
   - pyyaml
   - types-pyyaml
+  - types-jsonschema
   # build
   - flit >=3.8
   - pip
