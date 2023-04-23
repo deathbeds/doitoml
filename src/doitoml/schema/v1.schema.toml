@@ -19,6 +19,10 @@ tasks = {"$ref" = "#/definitions/tasks", description = "named tasks"}
 type = "array"
 items = {type = "string"}
 
+[definitions.array-of-paths]
+type = "array"
+items = {type = "string", minLength = 1}
+
 [definitions.tasks]
 type = "object"
 additionalProperties = {"$ref" = "#/definitions/task"}
@@ -29,15 +33,15 @@ type = "object"
 
 [definitions.task.properties]
 actions = {"$ref" = "#/definitions/actions"}
-calc_dep = {"$ref" = "#/definitions/array-of-strings"}
+calc_dep = {"$ref" = "#/definitions/array-of-paths"}
 doc = {type = "string"}
-file_dep = {"$ref" = "#/definitions/array-of-strings"}
+file_dep = {"$ref" = "#/definitions/array-of-paths"}
 meta = {"$ref" = "#/definitions/meta"}
 name = {type = "string"}
-targets = {"$ref" = "#/definitions/array-of-strings"}
+targets = {"$ref" = "#/definitions/array-of-paths"}
 title = {type = "string"}
 verbosity = {type = "number", enum = [1, 2, 3]}
-watch = {"$ref" = "#/definitions/array-of-strings"}
+watch = {"$ref" = "#/definitions/array-of-paths"}
 
 [definitions.meta]
 title = "Metadata"
@@ -48,13 +52,14 @@ properties = {doitoml = {"$ref" = "#/definitions/meta-doitoml"}}
 title = "doitoml Metadataa"
 type = "object"
 additionalProperties = false
-required = ["cwd", "log"]
+required = ["cwd", "log", "source"]
 
 [definitions.meta-doitoml.properties]
 cwd = {type = "string"}
 env = {"$ref" = "#/definitions/env"}
 log = {type = "array", items = {oneOf = [{type = "string"}, {type = "null"}]}}
 skip = {type = "string"}
+source = {type = "string"}
 
 [definitions.actions]
 type = "array"
@@ -95,4 +100,4 @@ additionalProperties = {type = "string"}
 [definitions.paths]
 title = "path tokens"
 type = "object"
-additionalProperties = {"$ref" = "#/definitions/array-of-strings"}
+additionalProperties = {"$ref" = "#/definitions/array-of-paths"}

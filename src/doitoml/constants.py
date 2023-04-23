@@ -64,6 +64,8 @@ class DOITOML_META:
     ENV: Literal["env"] = "env"
     #: file to capture stdout and stderr
     LOG: Literal["log"] = "log"
+    #: the file that defined the task
+    SOURCE: Literal["source"] = "source"
 
 
 #: all the false things

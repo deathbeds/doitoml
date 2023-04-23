@@ -34,6 +34,13 @@
         "type": "string"
       }
     },
+    "array-of-paths": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
     "tasks": {
       "type": "object",
       "additionalProperties": {
@@ -48,13 +55,13 @@
           "$ref": "#/definitions/actions"
         },
         "calc_dep": {
-          "$ref": "#/definitions/array-of-strings"
+          "$ref": "#/definitions/array-of-paths"
         },
         "doc": {
           "type": "string"
         },
         "file_dep": {
-          "$ref": "#/definitions/array-of-strings"
+          "$ref": "#/definitions/array-of-paths"
         },
         "meta": {
           "$ref": "#/definitions/meta"
@@ -63,7 +70,7 @@
           "type": "string"
         },
         "targets": {
-          "$ref": "#/definitions/array-of-strings"
+          "$ref": "#/definitions/array-of-paths"
         },
         "title": {
           "type": "string"
@@ -73,7 +80,7 @@
           "enum": [1, 2, 3]
         },
         "watch": {
-          "$ref": "#/definitions/array-of-strings"
+          "$ref": "#/definitions/array-of-paths"
         }
       }
     },
@@ -90,7 +97,7 @@
       "title": "doitoml Metadataa",
       "type": "object",
       "additionalProperties": false,
-      "required": ["cwd", "log"],
+      "required": ["cwd", "log", "source"],
       "properties": {
         "cwd": {
           "type": "string"
@@ -112,6 +119,9 @@
           }
         },
         "skip": {
+          "type": "string"
+        },
+        "source": {
           "type": "string"
         }
       }
@@ -170,7 +180,7 @@
       "title": "path tokens",
       "type": "object",
       "additionalProperties": {
-        "$ref": "#/definitions/array-of-strings"
+        "$ref": "#/definitions/array-of-paths"
       }
     }
   }

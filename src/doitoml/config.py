@@ -153,12 +153,10 @@ class Config:
         meta = new_task.setdefault(DOIT_TASK.META, {})  # type: ignore
         dt_meta = meta.setdefault(NAME, {})
 
-        if DOITOML_META.CWD in dt_meta:
-            dt_meta[DOITOML_META.CWD] = str(dt_meta[DOITOML_META.CWD])
-
-        if DOITOML_META.LOG in dt_meta:
-            dt_log = dt_meta[DOITOML_META.LOG]
-            dt_meta[DOITOML_META.LOG] = [str(log) if log else None for log in dt_log]
+        dt_meta[DOITOML_META.CWD] = str(dt_meta[DOITOML_META.CWD])
+        dt_log = dt_meta[DOITOML_META.LOG]
+        dt_meta[DOITOML_META.LOG] = [str(log) if log else None for log in dt_log]
+        dt_meta[DOITOML_META.SOURCE] = str(dt_meta[DOITOML_META.SOURCE])
 
         return dict(new_task)
 
@@ -552,6 +550,7 @@ class Config:
         dt_log_paths = self.build_log_paths(dt_meta.get(DOITOML_META.LOG), dt_cwd)
         dt_meta[DOITOML_META.LOG] = dt_log_paths
         dt_meta[DOITOML_META.CWD] = dt_cwd
+        dt_meta[DOITOML_META.SOURCE] = source
         env = dt_meta.setdefault(DOITOML_META.ENV, {})
         for env_key, env_value in env.items():
             new_key_value = self.resolve_one_env(source, env_value)

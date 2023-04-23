@@ -34,6 +34,8 @@ class DoitomlMetadataa(TypedDict, total=False):
     """ Required property """
 
     skip: str
+    source: Required[str]
+    """ Required property """
 
 
 class DoitomlSchema(TypedDict, total=False):
@@ -71,7 +73,7 @@ class Metadata(TypedDict, total=False):
     doitoml: "DoitomlMetadataa"
 
 
-PathTokens = Dict[str, List[str]]
+PathTokens = Dict[str, List["_ArrayOfPathsItem"]]
 """ path tokens. """
 
 
@@ -84,19 +86,23 @@ class Task(TypedDict, total=False):
     """Task."""
 
     actions: List["Action"]
-    calc_dep: List[str]
+    calc_dep: List["_ArrayOfPathsItem"]
     doc: str
-    file_dep: List[str]
+    file_dep: List["_ArrayOfPathsItem"]
     meta: "Metadata"
     name: str
-    targets: List[str]
+    targets: List["_ArrayOfPathsItem"]
     title: str
     verbosity: "_TaskVerbosity"
-    watch: List[str]
+    watch: List["_ArrayOfPathsItem"]
 
 
 TokenAction = List[str]
 """ token action. """
+
+
+_ArrayOfPathsItem = str
+""" minLength: 1 """
 
 
 _DoitomlMetadataaLogItem = Union[str, None]
