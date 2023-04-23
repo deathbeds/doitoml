@@ -18,6 +18,8 @@ dependencies:
   - pip
   - python-build
   - twine
+  # codegen
+  - jsonschema-gentypes
   # lint
   - black
   - mypy
