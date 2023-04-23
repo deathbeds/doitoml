@@ -52,7 +52,7 @@ class EntryPoints:
         for entry_point in entry_points(group=group):
             try:
                 eps[entry_point.name] = entry_point.load()(self.doitoml)
-            except MissingDependencyError as err:  # pragma: no cover
+            except MissingDependencyError as err:
                 self.doitoml.log.info(
                     "%s %s is missing a dependency: %s",
                     group,

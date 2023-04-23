@@ -76,7 +76,12 @@ addopts = [
 show_contexts = true
 
 [tool.coverage.report]
-exclude_lines = ["pragma: no cover", "if TYPE_CHECKING:"]
+exclude_lines = [
+  "except ImportError as err:",
+  "except MissingDependencyError as err:",
+  "if TYPE_CHECKING:",
+  "pragma: no cover",
+]
 [tool.coverage.run]
 data_file = "build/reports/coverage/.coverage"
 
@@ -179,6 +184,7 @@ select = [
 "docs/conf.py" = ["INP001", "A001"]
 "dodo.py" = ["BLE001"]
 "dsl.py" = ["ARG002"]
+"doitoml.py" = ["PLR0913"]
 "entry_points.py" = ["BLE001"]
 "test/**/*.py" = ["S101", "T201", "T203"]
 
@@ -225,6 +231,8 @@ all_ipynb = [":rglob::docs::*.ipynb::!ipynb_checkpoints"]
 all_py_test = [":rglob::test::*.py"]
 ppt = ["pyproject.toml"]
 all_ppt = ["::ppt", ":glob::examples::*/pyproject.toml"]
+all_schema_toml = [":rglob::src/doitoml::*.toml"]
+all_toml = ["::all_ppt", "::all_schema_toml"]
 all_py_dist = ["::ppt", "::py_src", "README.md", "LICENSE.txt"]
 _actions = ["_actions.py"]
 _ex_actions = ["examples/py-js-web/my_custom/_actions.py"]
@@ -272,17 +280,17 @@ actions = [["ruff", "--fix", "::all_py"]]
 
 [tool.doitoml.tasks.fix.toml]
 doc = "Format pyproject.toml with pyproject-fmt and taplo"
-file_dep = ["::all_ppt"]
+file_dep = ["::all_toml"]
 actions = [
   [
     "pyproject-fmt",
-    "::all_ppt",
+    "::all_toml",
   ],
   [
     "taplo",
     "fmt",
     "::taplo_opts",
-    "::all_ppt",
+    "::all_toml",
   ],
 ]
 

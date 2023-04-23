@@ -30,6 +30,7 @@ from doitoml.errors import (
     ActionError,
     ConfigError,
     DoitomlError,
+    MissingDependencyError,
     NoActorError,
     NoConfigError,
     NoTemplaterError,
@@ -65,6 +66,16 @@ EnvDict = Dict[str, str]
 RETRIES = 11
 
 
+try:
+    from . import schema
+
+    HAS_JSONSCHEMA = True
+    JSONSCHEMA_ERROR = None
+except MissingDependencyError as err:
+    HAS_JSONSCHEMA = False
+    JSONSCHEMA_ERROR = f"cannot validate: {err}"
+
+
 class Config:
 
     """A composite configuration loaded from multiple ConfigSource."""
@@ -79,6 +90,7 @@ class Config:
     update_env: Optional[bool]
     fail_quietly: Optional[bool]
     discover_config_paths: Optional[bool]
+    validate: bool
 
     def __init__(
         self,
@@ -88,8 +100,10 @@ class Config:
         update_env: Optional[bool] = None,
         fail_quietly: Optional[bool] = None,
         discover_config_paths: Optional[bool] = None,
+        validate: Optional[bool] = None,
     ) -> None:
         """Create empty configuration and discover sources."""
+        self.validate = HAS_JSONSCHEMA if validate is None else validate
         self.doitoml = doitoml
         self.config_paths = config_paths
         self.sources = {}
@@ -109,6 +123,7 @@ class Config:
             "env": {k: str(v) for k, v in env.items()},
             "cmd": {":".join(k): v for k, v in self.cmd.items()},
             "paths": {":".join(k): list(map(str, v)) for k, v in self.paths.items()},
+            "tasks": {":".join(k): v for k, v in self.tasks.items()},
         }
 
     def initialize(self) -> None:
@@ -144,6 +159,13 @@ class Config:
 
         # .. then find the tasks
         self.init_tasks()
+
+        if self.validate:
+            self.validate_all()
+
+    def validate_all(self) -> None:
+        """Check for validation errors."""
+        schema.latest.validate(self.to_dict())
 
     def find_config_sources(self) -> ConfigSources:
         """Find all directly and referenced configuration sources."""

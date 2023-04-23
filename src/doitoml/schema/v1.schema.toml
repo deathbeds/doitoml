@@ -1,0 +1,18 @@
+"$id" = "https://doitoml.rtfd.io/en/latest/schema/v1.schema.json"
+"$ref" = "#/$defs/top"
+"$schema" = "https://json-schema.org/draft/2020-12/schema"
+
+["$defs".top]
+title = "doitoml schema"
+description = "schema for declarative doit tasks"
+type = "object"
+required = ["tasks"]
+
+["$defs".top.properties]
+tasks = {"$ref" = "#/$defs/tasks", description = "named tasks"}
+
+["$defs".tasks.patternProperties.'[^=\s]+']
+"$ref" = "#/$defs/task"
+
+["$defs".task]
+type = "object"

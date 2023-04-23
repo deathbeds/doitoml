@@ -6,6 +6,11 @@ class DoitomlError(ValueError):
     """Some kind of error in ``doitoml``."""
 
 
+class SchemaError(DoitomlError):
+
+    """An error related to a non-conforming ``doitoml`` configuration."""
+
+
 class MissingDependencyError(ValueError):
 
     """An error related to a missing (optional) dependency."""

@@ -7,7 +7,7 @@ from doitoml.sources._source import JsonLikeSource, Parser
 
 try:
     from yaml import safe_load
-except ImportError as err:  # pragma: no cover
+except ImportError as err:
     message = "install ``doitoml[yaml]`` or ``pyyaml`` to use YAML sources"
     raise MissingDependencyError(message) from err
 

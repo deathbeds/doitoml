@@ -11,7 +11,7 @@ from doitoml.errors import (
 
 try:
     import jsone
-except ImportError as err:  # pragma: no cover
+except ImportError as err:
     message = "install ``doitoml[jsone]`` or ``jsone`` to use JSON-e templates"
     raise MissingDependencyError(message) from err
 
