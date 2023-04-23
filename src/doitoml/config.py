@@ -121,7 +121,7 @@ class Config:
         env.update(os.environ)
         return {
             "env": {k: str(v) for k, v in env.items()},
-            "cmd": {":".join(k): v for k, v in self.cmd.items()},
+            "cmd": {":".join(k): list(map(str, v)) for k, v in self.cmd.items()},
             "paths": {":".join(k): list(map(str, v)) for k, v in self.paths.items()},
             "tasks": {":".join(k): v for k, v in self.tasks.items()},
         }

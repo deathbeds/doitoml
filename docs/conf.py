@@ -1,9 +1,30 @@
 """documentation for ``doitoml``."""
 import datetime
+import os
 import re
 from pathlib import Path
+from typing import Any, Tuple
 
 import tomli
+
+os.environ.update(IN_SPHINX="1")
+
+
+def patch_jsonschema() -> None:
+    """Apply some fixes to jsonschema tables."""
+    sphinx_jsonschema = __import__("sphinx-jsonschema")
+
+    _old_transform = sphinx_jsonschema.wide_format.WideFormat.transform
+
+    def transform_add_class(self: Any, schema: Any) -> Tuple[Any, Any]:
+        table, definitions = _old_transform(self, schema)
+        table.attributes["classes"] += ["jsonschema"]
+        return table, definitions
+
+    sphinx_jsonschema.wide_format.WideFormat.transform = transform_add_class
+
+
+patch_jsonschema()
 
 CONF_PY = Path(__file__)
 HERE = CONF_PY.parent
@@ -42,6 +63,7 @@ extensions = [
     "sphinx_copybutton",
     "sphinx_design",
     "sphinxcontrib.mermaid",
+    "sphinx-jsonschema",
 ]
 
 # content
@@ -63,6 +85,12 @@ intersphinx_mapping = {
 
 mermaid_version = ""
 mermaid_init_js = "false"
+jsonschema_options = {
+    "lift_title": True,
+    "lift_description": True,
+    "lift_definitions": True,
+    "auto_reference": True,
+}
 
 
 # warnings

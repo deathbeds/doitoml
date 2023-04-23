@@ -1,5 +1,6 @@
 """optional schema for ``doitoml``."""
 
+import os
 from pathlib import Path
 from pprint import pformat
 from typing import Any, Mapping, Optional, cast
@@ -10,7 +11,7 @@ from doitoml.sources.toml._toml import tomllib
 HAS_JSONSCHEMA = False
 
 try:
-    from jsonschema import Draft7Validator
+    from jsonschema import Draft7Validator, ValidationError
 
     HAS_JSONSCHEMA = True
 except ImportError as err:
@@ -56,8 +57,21 @@ class Version:
         return self._validator
 
     def validate(self, instance: Any) -> None:
-        """Validate an instance."""
-        errors = [*self.validator.iter_errors(instance)]
+        """Validate an instance.
+
+        Something better would be https://json-schema.org/draft/2020-12/output/schema
+        """
+        errors = []
+        error: ValidationError
+
+        for error in self.validator.iter_errors(instance):
+            path = "/".join(list(map(str, error.relative_schema_path)))
+            errors += [
+                {
+                    "path": f"#/{path}",
+                    "message": error.message,
+                },
+            ]
 
         if errors:
             message = f"Invalid doitoml data: {pformat(errors)}"
@@ -67,3 +81,6 @@ class Version:
 v1 = Version("1")
 
 latest = v1
+
+if os.environ.get("IN_SPHINX"):  # pragma: no cover
+    DOITOML_SCHEMA = latest.schema

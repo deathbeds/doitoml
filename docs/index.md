@@ -10,6 +10,7 @@ cheatsheet
 dsl
 templates
 api
+schema
 contributing
 extending
 changelog
