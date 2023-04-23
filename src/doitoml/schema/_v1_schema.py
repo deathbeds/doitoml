@@ -26,9 +26,14 @@ class DoitomlMetadataa(TypedDict, total=False):
 
     """doitoml Metadataa."""
 
+    cwd: Required[str]
+    """ Required property """
+
+    env: "EnvironmentVariables"
+    log: Required[List["_DoitomlMetadataaLogItem"]]
+    """ Required property """
+
     skip: str
-    cwd: str
-    log: List["_DoitomlMetadataaLogItem"]
 
 
 class DoitomlSchema(TypedDict, total=False):
@@ -36,13 +41,6 @@ class DoitomlSchema(TypedDict, total=False):
     """doitoml Schema.
 
     schema for ``doitoml`` configuration
-    """
-
-    tasks: Required[Dict[str, "Task"]]
-    """
-    named tasks
-
-    Required property
     """
 
     cmd: Required["CommandTokens"]
@@ -53,6 +51,13 @@ class DoitomlSchema(TypedDict, total=False):
 
     paths: Required["PathTokens"]
     """ Required property """
+
+    tasks: Required[Dict[str, "Task"]]
+    """
+    named tasks
+
+    Required property
+    """
 
 
 EnvironmentVariables = Dict[str, str]
@@ -78,15 +83,15 @@ class Task(TypedDict, total=False):
 
     """Task."""
 
-    name: str
-    doc: str
-    title: str
     actions: List["Action"]
-    file_dep: List[str]
-    targets: List[str]
-    verbosity: "_TaskVerbosity"
-    meta: "Metadata"
     calc_dep: List[str]
+    doc: str
+    file_dep: List[str]
+    meta: "Metadata"
+    name: str
+    targets: List[str]
+    title: str
+    verbosity: "_TaskVerbosity"
     watch: List[str]
 
 

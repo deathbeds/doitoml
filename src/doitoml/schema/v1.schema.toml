@@ -10,10 +10,10 @@ type = "object"
 required = ["tasks", "cmd", "env", "paths"]
 
 [definitions.config.properties]
-tasks = {"$ref" = "#/definitions/tasks", description = "named tasks"}
 cmd = {"$ref" = "#/definitions/cmd", description = "named command tokens"}
 env = {"$ref" = "#/definitions/env", description = "environment variables"}
 paths = {"$ref" = "#/definitions/paths", description = "named paths"}
+tasks = {"$ref" = "#/definitions/tasks", description = "named tasks"}
 
 [definitions.array-of-strings]
 type = "array"
@@ -28,15 +28,15 @@ title = "Task"
 type = "object"
 
 [definitions.task.properties]
-name = {type = "string"}
-doc = {type = "string"}
-title = {type = "string"}
 actions = {"$ref" = "#/definitions/actions"}
-file_dep = {"$ref" = "#/definitions/array-of-strings"}
-targets = {"$ref" = "#/definitions/array-of-strings"}
-verbosity = {type = "number", enum = [1, 2, 3]}
-meta = {"$ref" = "#/definitions/meta"}
 calc_dep = {"$ref" = "#/definitions/array-of-strings"}
+doc = {type = "string"}
+file_dep = {"$ref" = "#/definitions/array-of-strings"}
+meta = {"$ref" = "#/definitions/meta"}
+name = {type = "string"}
+targets = {"$ref" = "#/definitions/array-of-strings"}
+title = {type = "string"}
+verbosity = {type = "number", enum = [1, 2, 3]}
 watch = {"$ref" = "#/definitions/array-of-strings"}
 
 [definitions.meta]
@@ -47,11 +47,14 @@ properties = {doitoml = {"$ref" = "#/definitions/meta-doitoml"}}
 [definitions.meta-doitoml]
 title = "doitoml Metadataa"
 type = "object"
+additionalProperties = false
+required = ["cwd", "log"]
 
 [definitions.meta-doitoml.properties]
-skip = {type = "string"}
 cwd = {type = "string"}
+env = {"$ref" = "#/definitions/env"}
 log = {type = "array", items = {oneOf = [{type = "string"}, {type = "null"}]}}
+skip = {type = "string"}
 
 [definitions.actions]
 type = "array"
