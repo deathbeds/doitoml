@@ -1,18 +1,33 @@
 "$id" = "https://doitoml.rtfd.io/en/latest/schema/v1.schema.json"
-"$ref" = "#/$defs/top"
-"$schema" = "https://json-schema.org/draft/2020-12/schema"
+"$ref" = "#/definitions/config"
+"$schema" = "http://json-schema.org/draft-07/schema#"
 
-["$defs".top]
+[definitions.config]
 title = "doitoml schema"
-description = "schema for declarative doit tasks"
+description = "schema for ``doitoml`` configuration"
 type = "object"
-required = ["tasks"]
+required = ["tasks", "cmd", "env", "paths"]
 
-["$defs".top.properties]
-tasks = {"$ref" = "#/$defs/tasks", description = "named tasks"}
+[definitions.config.properties]
+tasks = {"$ref" = "#/definitions/tasks", description = "named tasks"}
+cmd = {"$ref" = "#/definitions/cmd", description = "named command tokens"}
+env = {"$ref" = "#/definitions/env", description = "environment variables"}
+paths = {"$ref" = "#/definitions/paths", description = "named paths"}
 
-["$defs".tasks.patternProperties.'[^=\s]+']
-"$ref" = "#/$defs/task"
+[definitions.tasks.patternProperties.'[^=\s]+']
+"$ref" = "#/definitions/task"
 
-["$defs".task]
+[definitions.task]
 type = "object"
+
+[definitions.cmd]
+type = "object"
+additionalProperties = {type = "array", items = {type = "string"}}
+
+[definitions.env]
+type = "object"
+additionalProperties = {type = "string"}
+
+[definitions.paths]
+type = "object"
+additionalProperties = {type = "array", items = {type = "string"}}

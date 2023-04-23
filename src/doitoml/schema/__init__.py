@@ -10,7 +10,7 @@ from doitoml.sources.toml._toml import tomllib
 HAS_JSONSCHEMA = False
 
 try:
-    from jsonschema import Draft202012Validator
+    from jsonschema import Draft7Validator
 
     HAS_JSONSCHEMA = True
 except ImportError as err:
@@ -33,7 +33,7 @@ class Version:
     #: the cached schema
     _schema: Optional[AnyMapping]
     #: the cached validator
-    _validator: Optional[Draft202012Validator]
+    _validator: Optional[Draft7Validator]
 
     def __init__(self, version: str) -> None:
         """Initialize a validator."""
@@ -49,10 +49,10 @@ class Version:
         return self._schema
 
     @property
-    def validator(self) -> Draft202012Validator:
+    def validator(self) -> Draft7Validator:
         """Get the cached validator."""
         if self._validator is None:  # pragma: no cover
-            self._validator = Draft202012Validator(schema=self.schema)
+            self._validator = Draft7Validator(schema=self.schema)
         return self._validator
 
     def validate(self, instance: Any) -> None:
