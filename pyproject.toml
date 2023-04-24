@@ -209,6 +209,7 @@ taplo_opts = [
 ]
 check_links_opts = [
   "--check-links-ignore=https://",
+  "--check-links-ignore=builtins",
   "--no-cov",
   "--check-anchors",
   "--html=build/reports/pytest-check-links.html",
@@ -330,7 +331,7 @@ actions = [["pytest"]]
 [tool.doitoml.tasks.docs.sphinx]
 doc = "Build documentation with `sphinx`"
 file_dep = ["::py_src", "::ppt", "::all_md", "::all_ipynb", "::docs_py", "::docs_etc"]
-actions = [["sphinx-build", "-W", "::sphinx_opts"]]
+actions = [["sphinx-build", "-W", "--color", "::sphinx_opts"]]
 targets = ["::docs_buildinfo"]
 
 [tool.doitoml.tasks.docs.check.links]

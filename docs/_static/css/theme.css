@@ -46,6 +46,7 @@ table.jsonschema td {
 table.jsonschema td:first-child ul {
   font-family: var(--pst-font-family-monospace);
   list-style: none;
+  font-weight: bold;
 }
 
 table.jsonschema h2 {
