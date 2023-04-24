@@ -65,10 +65,12 @@ class Version:
         error: ValidationError
 
         for error in self.validator.iter_errors(instance):
-            path = "/".join(list(map(str, error.relative_schema_path)))
+            schema_path = "/".join(list(map(str, error.relative_schema_path)))
+            data_path = "/".join(list(map(str, error.relative_path)))
             errors += [
                 {
-                    "path": f"#/{path}",
+                    "schema_path": f"#/{schema_path}",
+                    "data_path": f"#/{data_path}",
                     "message": error.message,
                 },
             ]

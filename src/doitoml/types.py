@@ -80,6 +80,13 @@ class Task(TypedDict, total=False):
     watch: List[str]
 
 
+class TemplateSet(TypedDict, total=False):
+
+    """templateable things."""
+
+    tasks: Dict[str, Any]
+
+
 ActionOrTask = Union[Action, Dict[str, Any], Task]
 
 TaskGenerator = Generator[Task, None, None]
@@ -88,8 +95,10 @@ TaskFunction = Callable[[], TaskOrTaskGenerator]
 
 PrefixedTaskGenerator = Generator[Tuple[Tuple[str, ...], Task], None, None]
 
+
 PrefixedTasks = Dict[Tuple[str, ...], Task]
 PrefixedPaths = Dict[Tuple[str, ...], Paths]
+PrefixedTemplates = Dict[str, Dict[str, TemplateSet]]
 PrefixedStrings = Dict[Tuple[str, ...], List[str]]
 PrefixedStringsOrPaths = Dict[Tuple[str, ...], List[Union[str, Path]]]
 GroupedTasks = Dict[str, PrefixedTasks]

@@ -282,20 +282,9 @@ task_dep = ["fix:black"]
 actions = [["ruff", "--fix", "::all_py"]]
 
 [tool.doitoml.tasks.fix.toml]
-doc = "Format pyproject.toml with pyproject-fmt and taplo"
+doc = "Format TOML with taplo"
 file_dep = ["::all_toml"]
-actions = [
-  [
-    "pyproject-fmt",
-    "::all_toml",
-  ],
-  [
-    "taplo",
-    "fmt",
-    "::taplo_opts",
-    "::all_toml",
-  ],
-]
+actions = [["taplo", "fmt", "::taplo_opts", "::all_toml"]]
 
 [tool.doitoml.tasks.lint.black]
 doc = "Check python formatting with `black`"

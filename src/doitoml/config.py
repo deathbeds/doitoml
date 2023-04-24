@@ -48,6 +48,7 @@ from doitoml.types import (
     PrefixedStringsOrPaths,
     PrefixedTaskGenerator,
     PrefixedTasks,
+    PrefixedTemplates,
     Strings,
     Task,
 )
@@ -87,6 +88,7 @@ class Config:
     tasks: PrefixedTasks
     env: EnvDict
     paths: PrefixedPaths
+    templates: PrefixedTemplates
     cmd: PrefixedStringsOrPaths
     update_env: Optional[bool]
     fail_quietly: Optional[bool]
@@ -112,6 +114,7 @@ class Config:
         self.paths = {}
         self.env = {}
         self.cmd = {}
+        self.templates = {}
         self.update_env = update_env
         self.fail_quietly = fail_quietly
         self.discover_config_paths = discover_config_paths
@@ -131,6 +134,7 @@ class Config:
                 "tasks": {
                     ":".join(k): self.task_to_dict(v) for k, v in self.tasks.items()
                 },
+                "templates": dict(self.templates.items()),
             },
         )
 
@@ -190,6 +194,7 @@ class Config:
         if unresolved_commands:
             message = f"Failed to resolve commands: {pformat(unresolved_commands)}"
             raise UnresolvedError(message)
+        self.init_templates()
 
         # .. then find the tasks
         self.init_tasks()
@@ -426,27 +431,36 @@ class Config:
 
         return [spec]
 
+    def init_templates(self) -> None:
+        """Copy templates (for now)."""
+        for prefix, source in self.sources.items():
+            raw_templates = source.raw_config.get("templates", {})
+            if raw_templates:
+                self.templates[prefix] = raw_templates
+
     def init_tasks(self) -> None:
         """Initialize all intermediate task representations."""
         for prefix, source in self.sources.items():
             raw_tasks = deepcopy(source.raw_config.get("tasks", {}))
-            raw_templates = source.raw_config.get("templates", {})
-            templaters = self.doitoml.entry_points.templaters
-            for templater_name, templater_kinds in raw_templates.items():
-                templater = templaters.get(templater_name)
-                if templater is None:
-                    message = (
-                        f"Templater {templater_name} not one of "
-                        f"""{", ".join(templaters.keys())}"""
-                    )
-                    raise NoTemplaterError(message)
-                templater_tasks = deepcopy(templater_kinds.get("tasks", {}))
-                for task_name, task in templater_tasks.items():
-                    templated = templater.transform_task(source, task)
-                    if isinstance(templated, dict):
-                        raw_tasks[task_name] = templated
-                    else:
-                        raw_tasks[task_name] = {t["name"]: t for t in templated}
+
+            if prefix in self.templates:
+                raw_templates = self.templates[prefix]
+                templaters = self.doitoml.entry_points.templaters
+                for templater_name, templater_kinds in raw_templates.items():
+                    templater = templaters.get(templater_name)
+                    if templater is None:
+                        message = (
+                            f"Templater {templater_name} not one of "
+                            f"""{", ".join(templaters.keys())}"""
+                        )
+                        raise NoTemplaterError(message)
+                    templater_tasks = deepcopy(templater_kinds.get("tasks", {}))
+                    for task_name, task in templater_tasks.items():
+                        templated = templater.transform_task(source, task)
+                        if isinstance(templated, dict):
+                            raw_tasks[task_name] = templated
+                        else:
+                            raw_tasks[task_name] = {t["name"]: t for t in templated}
 
             for task_prefix, task in self.resolve_one_task_or_group(
                 source,
