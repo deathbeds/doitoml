@@ -8,11 +8,13 @@ dependencies:
   - python >=3.8,<3.12
   - tomli
   # optional
+  - jinja2
   - json-e
   - jsonschema-with-format
   - pyyaml
-  - types-pyyaml
+  - types-jinja2
   - types-jsonschema
+  - types-pyyaml
   # build
   - flit >=3.8
   - pip
@@ -24,7 +26,6 @@ dependencies:
   - black
   - mypy
   - nodejs >=18,<19
-  - pyproject-fmt
   - ruff
   - ssort
   - taplo

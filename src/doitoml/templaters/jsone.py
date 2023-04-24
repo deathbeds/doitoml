@@ -24,7 +24,7 @@ if TYPE_CHECKING:
 
 class JsonE(Templater):
 
-    """A templater driven for JSON-e."""
+    """A templater driven by JSON-e."""
 
     def _expand_dict_map(
         self,

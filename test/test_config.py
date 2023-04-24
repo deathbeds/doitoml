@@ -257,3 +257,23 @@ def test_bad_action(a_pyproject_with: TPyprojectMaker) -> None:
 
     with pytest.raises(ActionError):
         DoiTOML(fail_quietly=False)
+
+
+def test_config_path_get(a_pyproject_with: TPyprojectMaker) -> None:
+    """Test custom paths for config paths."""
+    ppt = a_pyproject_with(
+        {
+            "doitoml": {
+                "config_paths": [":get::json::foo.json::"],
+                "tasks": {"a": {"actions": ["echo"]}},
+            },
+        },
+    )
+    fj = ppt.parent / "foo.json"
+    fj.write_text(
+        json.dumps({"prefix": "foo", "tasks": {"a": {"actions": ["echo"]}}}),
+        encoding="utf-8",
+    )
+    as_dict = DoiTOML(fail_quietly=False).config.to_dict()
+    task_names = set(as_dict["tasks"])
+    assert task_names == {":a", "foo:a"}

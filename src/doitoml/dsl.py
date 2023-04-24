@@ -219,7 +219,9 @@ class Getter(DSL):
         """Find a raw source and its bits."""
         groups = match.groupdict()
         path: str = groups["path"]
-        bits = groups["rest"].split("::")
+        bits: List[str] = groups["rest"].split("::")
+        if len(bits) == 1 and not bits[0]:
+            bits = []
         # find the parser
         parser_name: str = groups["parser"]
         parser = self.doitoml.entry_points.parsers.get(parser_name)

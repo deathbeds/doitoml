@@ -94,3 +94,8 @@ class ActorError(ActionError):
 class NoActorError(ActorError):
 
     """An error related to a missing actor."""
+
+
+class Jinja2Error(ActorError):
+
+    """An error related to Jinja2 templates."""

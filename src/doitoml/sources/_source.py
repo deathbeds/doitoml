@@ -20,13 +20,17 @@ class Source:
     def __init__(self, path: Path) -> None:
         self.path = path
 
+    @abc.abstractmethod
     def read(self) -> Any:
         """Read the source exists."""
-        return self.path.read_bytes()
 
     @abc.abstractmethod
     def get(self, bits: List[Any]) -> Any:
         """Get some data from a source."""
+
+    @abc.abstractmethod
+    def parse(self, data: Any) -> Any:
+        """Parse this source as something."""
 
 
 class TextSource(Source):
@@ -36,18 +40,32 @@ class TextSource(Source):
         super().__init__(path)
         self.encoding = encoding or UTF8
 
+    def read(self) -> str:
+        """Read the source exists."""
+        return self.path.read_text(encoding=self.encoding)
+
 
 class JsonLikeSource(TextSource):
 
     """A class that provides access to JSON-compatible values."""
 
     @abc.abstractmethod
-    def parse(self) -> Dict[str, Any]:  # pragma: no cover
-        """Parse this source as a dictionary."""
+    def parse(self, data: str) -> Any:
+        """Parse the data."""
+
+    def to_dict(self) -> Dict[str, Any]:
+        parsed = self.parse(self.read())
+        if isinstance(parsed, dict):
+            return parsed
+
+        message = (
+            f"Expected a dictionary from {self.path}, found {type(parsed)}: {parsed}"
+        )
+        raise ParseError(message)
 
     def get(self, bits: List[str]) -> Any:
         try:
-            current = self.parse()
+            current = self.to_dict()
         except DoitomlError as err:
             message = f"{self.__class__.__name__} failed to parse {self.path}: {err}"
             raise ParseError(message) from err

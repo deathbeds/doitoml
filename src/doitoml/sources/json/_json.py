@@ -9,9 +9,9 @@ from doitoml.sources._source import JsonLikeSource, Parser
 
 
 class JsonSource(JsonLikeSource):
-    def parse(self) -> Any:
+    def parse(self, data: str) -> Any:
         try:
-            return json.loads(self.read())
+            return json.loads(data)
         except json.JSONDecodeError as err:
             message = f"Failed to even parse {self.path}"
             raise ParseError(message) from err

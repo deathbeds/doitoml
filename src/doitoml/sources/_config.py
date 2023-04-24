@@ -74,12 +74,25 @@ class WrapperConfigSource(ConfigSource):
         self.bit_prefix = bit_prefix
         self.child_source = child_source
         self.path = child_source.path
-        self._raw_config = self.child_source.get(self.bit_prefix)
+
+    def read(self) -> Any:  # pragma: no cover
+        message = "A wrapper source cannot `read`."
+        raise NotImplementedError(message)
+
+    def parse(self, data: str) -> Any:  # noqa: ARG002
+        message = "A wrapper source cannot `parse`."  # pragma: no cover
+        raise NotImplementedError(message)  # pragma: no cover
 
     @property
     def raw_config(self) -> Dict[str, Any]:
         """Get the ``doitoml`` configuration from the prefixed child source."""
-        return self._raw_config
+        parsed = self.child_source.get(self.bit_prefix)
+        if not isinstance(parsed, dict):  # pragma: no cover
+            message = (
+                f"Expected dictionary from source {self.child_source}:{self.bit_prefix}"
+            )
+            raise ConfigError(message)
+        return parsed
 
     def get(self, bits: List[Any]) -> Any:  # pragma: no cover
         """Get a specific ``doitoml`` configuration piece."""

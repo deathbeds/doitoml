@@ -35,6 +35,7 @@ from doitoml.errors import (
     NoConfigError,
     NoTemplaterError,
     PrefixError,
+    TemplaterError,
     UnresolvedError,
 )
 from doitoml.types import (
@@ -455,6 +456,13 @@ class Config:
                         )
                         raise NoTemplaterError(message)
                     templater_tasks = deepcopy(templater_kinds.get("tasks", {}))
+
+                    if not isinstance(templater_tasks, dict):
+                        message = (
+                            f"Expected dictionary of tasks in {source}, found: "
+                            f"{templater_tasks}"
+                        )
+                        raise TemplaterError(message)
                     for task_name, task in templater_tasks.items():
                         templated = templater.transform_task(source, task)
                         if isinstance(templated, dict):

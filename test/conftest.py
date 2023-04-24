@@ -16,6 +16,14 @@ except (ImportError, AttributeError):
 
 MSG_MISSING_JSONE = {"reason": "needs ``jsone`` installed"}
 
+try:
+    __import__("jinja2")
+    HAS_JINJA2 = True
+except (ImportError, AttributeError):
+    HAS_JINJA2 = False
+
+MSG_MISSING_JINJA2 = {"reason": "needs ``jsone`` installed"}
+
 try:  # pragma: no cover
     import tomllib
 except ImportError:  # pragma: no cover

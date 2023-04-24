@@ -69,7 +69,9 @@ class Task(TypedDict, total=False):
     # meh
     title: Callable[..., str]
     task_dep: List[str]
-    uptodate: List[Callable[[], Boolish]]
+    uptodate: List[
+        Union[bool, None, str, Tuple[Callable[[], Boolish]], Callable[[], Boolish]]
+    ]
     clean: List[Path]
     # seldom
     verbosity: int

@@ -1,8 +1,8 @@
 """YAML sources."""
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
-from doitoml.errors import MissingDependencyError, ParseError
+from doitoml.errors import MissingDependencyError
 from doitoml.sources._source import JsonLikeSource, Parser
 
 try:
@@ -16,13 +16,9 @@ class YamlSource(JsonLikeSource):
 
     """A source of configuration in YAML."""
 
-    def parse(self) -> Dict[str, Any]:
+    def parse(self, data: str) -> Any:
         """Parse the path with ``pyyaml``."""
-        parsed = safe_load(self.path.open("rb"))
-        if not isinstance(parsed, dict):  # pragma: no cover
-            message = f"Expected a dictionary from {self.path}, found {type(parsed)}"
-            raise ParseError(message)
-        return parsed
+        return safe_load(data)
 
 
 class YamlParser(Parser):

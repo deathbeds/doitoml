@@ -33,17 +33,19 @@
 
 <summary><b>Why these fields? What about...</b></summary>
 
-> The [pydoit documentation](https://pydoit.org/tasks.html) provides a number of other fields: many of these only make sense in a `dodo.py`, or otherwise don't lend themselves cleanly to declarative, portable tasks.
+> The [pydoit documentation](https://pydoit.org/tasks.html) provides a number of
+> other fields: many of these only make sense in a `dodo.py`, or otherwise don't
+> lend themselves cleanly to declarative, portable tasks.
 
 </details>
 
 ### `actions`
 
-| action kind | example                                | description                                          |
-| ----------- | -------------------------------------- | ---------------------------------------------------- |
-| _string_    | `echo 1`                               | passed directly to `doit` without any manipulation   |
-| _token_     | `["echo", "1"]`                        | each token expanded by the [DSL](./dsl.md)           |
-| _actor_     | `{py="shutil.copy2", args=["a", "b"]}` | each token in `args` expanded by the [DSL](./dsl.md) |
+| action kind | example                                | description                                        |
+| ----------- | -------------------------------------- | -------------------------------------------------- |
+| _string_    | `echo 1`                               | passed directly to `doit` without any manipulation |
+| _token_     | `["echo", "1"]`                        | each token expanded by the [DSL]                   |
+| _actor_     | `{py="shutil.copy2", args=["a", "b"]}` | each token in `args` expanded by the [DSL]         |
 
 ### `doitoml` task metadata
 
@@ -55,3 +57,14 @@
 | **`env`**   | dictionary of strings      | environment variables to overload for a specific task                                             |
 | **`skip`**  | string or `bool`           | if _falsey_, this task will not appear in `doit list` or be included in `doit run`                |
 | **`log`**   | (list of) string or `Path` | file(s) to capture output of actions, e.g. `task.log` or `["task.stdout.log", "task.stderr.log"]` |
+
+## `doitoml` configuration
+
+| key                | default | field data type | field description                                                                                      |
+| ------------------ | ------- | --------------- | ------------------------------------------------------------------------------------------------------ |
+| **`config_paths`** | `[]`    | list of strings | relative paths to find more `doitoml` config sources: can use the `:get` [DSL] to extract partial data |
+| **`fail_quietly`** | `true`  | `bool`          | try to emit short, helpful errors with context                                                         |
+| **`update_env`**   | `true`  | `bool`          | use the `env` key to update the outer running environment variables                                    |
+| **`validate`**     | `true`  | `bool`          | use `jsonschema` to preflight tasks before `doit`                                                      |
+
+[dsl]: ./dsl.md

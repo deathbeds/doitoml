@@ -17,16 +17,11 @@ class PackageJson(JsonSource, ConfigSource):
     @property
     def raw_config(self) -> Dict[str, Any]:
         """Load ``doitoml`` configuration from ``pyproject.toml``."""
-        parsed = self.parse()
-
-        if not isinstance(parsed, dict):  # pragma: no cover
-            message = f"Expected a dictionary from {self.path}, found {type(parsed)}"
-            raise ParseError(message)
-        config = parsed.get(NAME, {})
-        if not isinstance(config, dict):  # pragma: no cover
-            message = f"Expected a dictionary from {self.path}, found {type(parsed)}"
-            raise ParseError(message)
-        return config
+        tool_data = self.to_dict().get(NAME, {})
+        if isinstance(tool_data, dict):
+            return tool_data
+        message = f"Expected a dictionary in {self.path}, found: {tool_data}"
+        raise ParseError(message)
 
 
 class PackageJsonParser(ConfigParser):

@@ -2,6 +2,8 @@
 
 ```
 
+## Documentation Contents
+
 ```{toctree}
 :maxdepth: 1
 
