@@ -27,12 +27,12 @@ except Exception as err:
     HAS_DOITOML = False
 
 
-def task_bootstrap() -> "Task":
-    """Bootstrap ``doitoml`` with an editable install."""
-    return {"actions": [PIP_INSTALL_E, [*PIP, "check"]]}
-
-
 if HAS_DOITOML:
     doitoml = DoiTOML()
     tasks = doitoml.tasks()
     globals().update(tasks)
+else:
+
+    def task_bootstrap() -> "Task":
+        """Bootstrap ``doitoml`` with an editable install."""
+        return {"actions": [PIP_INSTALL_E, [*PIP, "check"]]}

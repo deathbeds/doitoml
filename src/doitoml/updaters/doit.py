@@ -1,5 +1,6 @@
 """Uptodate checkers provided by ``doit``."""
-from typing import TYPE_CHECKING, Any, Dict, cast
+from pprint import pformat
+from typing import TYPE_CHECKING, Any, cast
 
 import doit.tools
 
@@ -18,11 +19,20 @@ class ConfigChanged(Updater):
     def transform_uptodate(
         self,
         source: "ConfigSource",
-        uptodate: Dict[str, Any],
-    ) -> Dict:
+        uptodate_args: Any,
+    ) -> Any:
         """Update arguments for uptodate."""
-        __import__("pprint").pprint(source)
-        return uptodate
+        new_args = uptodate_args
+        if isinstance(uptodate_args, dict):
+            items = uptodate_args.items()
+            new_args = pformat(
+                {key: self.resolve_one_arg(source, value) for key, value in items},
+            )
+        if isinstance(uptodate_args, str):
+            new_args = self.resolve_one_arg(source, uptodate_args)
+        if isinstance(uptodate_args, list):
+            new_args = [self.resolve_one_arg(source, arg) for arg in uptodate_args]
+        return pformat(new_args)
 
     def get_update_function(self, uptodate: Any) -> FnAction:
         """Create a ``doit.tools.config_changed``."""

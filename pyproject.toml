@@ -184,14 +184,15 @@ select = [
 [tool.ruff.per-file-ignores]
 "_config.py" = ["PLR0912", "C901", "PLR0913"]
 "_source.py" = ["BLE001"]
+"actors.py" = ["PLR0913"]
 "constants.py" = ["N801"]
 "docs/conf.py" = ["INP001", "A001"]
 "dodo.py" = ["BLE001"]
-"dsl.py" = ["ARG002"]
 "doitoml.py" = ["PLR0913"]
+"dsl.py" = ["ARG002"]
 "entry_points.py" = ["BLE001"]
-"test/**/*.py" = ["S101", "T201", "T203"]
 "jinja2.py" = ["ARG002"]
+"test/**/*.py" = ["S101", "T201", "T203"]
 
 [tool.doitoml]
 prefix = ""
@@ -223,6 +224,8 @@ check_links_opts = [
   "--json-report-file=build/reports/pytest-check-links.json",
   "--tb=no",
 ]
+pym = ["python3", "-m"]
+pip = ["::pym", "pip"]
 
 [tool.doitoml.paths]
 whl = ["dist/${DOITOML_WHEEL}"]
@@ -254,6 +257,34 @@ all_examples = [
 ]
 all_md = [":glob::.::*.md", ":rglob::docs::*.md::!ipynb_checkpoints"]
 docs_buildinfo = ["build/docs/.buildinfo"]
+bootstrap_txt = ["build/bootstrap.txt"]
+
+[tool.doitoml.tasks.bootstrap]
+meta = {doitoml = {log = "build/bootstrap.txt"}}
+targets = [":bootstrap_txt"]
+actions = [
+  [
+    "::pip",
+    "install",
+    "-vv",
+    "-e",
+    ".",
+    "--no-deps",
+    "--ignore-installed",
+    "--no-build-isolation",
+  ],
+  [
+    "::pip",
+    "list",
+  ],
+  [
+    "::pip",
+    "check",
+  ],
+]
+
+[[tool.doitoml.tasks.bootstrap.uptodate]]
+config_changed = [":get::toml::pyproject.toml::project::entry-points"]
 
 [tool.doitoml.tasks.build.pypi]
 doc = "Build distributions for PyPI"

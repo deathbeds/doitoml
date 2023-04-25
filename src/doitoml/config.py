@@ -574,6 +574,7 @@ class Config:
 
         if new_uptodate:
             task[DOIT_TASK.UPTODATE] = new_uptodate
+
         return []
 
     def resolve_one_uptodate(
@@ -583,9 +584,9 @@ class Config:
     ) -> Tuple[Dict[str, Any], Strings]:
         """Transform a single uptodate."""
         for key, updater in self.doitoml.entry_points.updaters.items():
-            updater_args = uptodate.get(key)
-            if updater_args:
-                return {key: updater.transform_uptodate(source, updater_args)}, []
+            args = uptodate.get(key)
+            if args:
+                return {key: updater.transform_uptodate(source, args)}, []
 
         return {}, [*uptodate.keys()]
 

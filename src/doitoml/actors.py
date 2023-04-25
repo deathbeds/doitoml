@@ -55,6 +55,7 @@ class Actor:
         cwd: Path,
         env: Dict[str, str],
         log_paths: Optional[LogPaths],
+        log_mode: str,
     ) -> List[CallableAction]:
         """Build a function that will fully resolve the action during task building."""
 
@@ -173,6 +174,7 @@ class PyActor(Actor):
         pargs: List[Any],
         kwargs: Dict[str, Any],
         log_paths: LogPaths,
+        log_mode: str,
     ) -> Optional[bool]:
         stdout, stderr = self.doitoml.ensure_parents(*log_paths)
 
@@ -181,14 +183,14 @@ class PyActor(Actor):
 
         managers: List[contextlib.AbstractContextManager] = []
         if stdout:
-            stdout_fh = stdout.open("w")
+            stdout_fh = stdout.open(log_mode)
             stdout_mgr = contextlib.redirect_stdout(stdout_fh)
             managers += [stdout_mgr]
         if stderr:
             if stderr == stdout:
                 stderr_mgr = contextlib.redirect_stderr(stdout_fh)
             else:
-                stderr_fh = stderr.open("w")
+                stderr_fh = stderr.open(log_mode)
                 stderr_mgr = contextlib.redirect_stderr(stderr_fh)
             managers += [stderr_mgr]
 
@@ -232,6 +234,7 @@ class PyActor(Actor):
         cwd: Path,
         env: Dict[str, str],
         log_paths: Optional[LogPaths],
+        log_mode: str,
     ) -> List[CallableAction]:
         """Build a python callable."""
         py = action.get("py")
@@ -253,6 +256,7 @@ class PyActor(Actor):
                     pargs,
                     kwargs,
                     cast(LogPaths, log_paths or [None, None]),
+                    log_mode,
                 )
 
             finally:  # pragma: no cover

@@ -171,11 +171,16 @@ class DoiTOML:
         dt_meta = meta.get(NAME, {})
         cwd = dt_meta.get(DOITOML_META.CWD) or self.cwd
         env = dt_meta.get(DOITOML_META.ENV, {})
-        log = dt_meta.get(DOITOML_META.LOG)
+        log_paths = dt_meta.get(DOITOML_META.LOG)
         cmd_env = dict(os.environ)
         cmd_env.update(env)
 
-        task[DOIT_TASK.ACTIONS] = self.build_subtask_actions(task, cwd, cmd_env, log)
+        task[DOIT_TASK.ACTIONS] = self.build_subtask_actions(
+            task,
+            cwd,
+            cmd_env,
+            log_paths,
+        )
         task[DOIT_TASK.UPTODATE] = self.build_subtask_uptodates(task)
 
         return cast(Task, task)
@@ -185,17 +190,24 @@ class DoiTOML:
         task: Task,
         cwd: Path,
         env: Dict[str, str],
-        log: LogPaths,
+        log_paths: LogPaths,
     ) -> List[Action]:
         """Build all actions in a subtask."""
         old_actions = task[DOIT_TASK.ACTIONS]
         new_actions: List[Any] = [(doit.tools.create_folder, [cwd])]
 
-        for i, action in enumerate(old_actions):
-            action_actions = self.build_one_action(action, cwd, env, log)
+        for idx, action in enumerate(old_actions):
+            log_mode = "a" if idx else "w"
+            action_actions = self.build_one_action(
+                action,
+                cwd,
+                env,
+                log_paths,
+                log_mode,
+            )
 
             if action_actions is None:
-                message = f"""{task["name"]} action {i} is not a recognized action
+                message = f"""{task["name"]} action {idx} is not a recognized action
                 {action}
                 """
                 raise TaskError(message)
@@ -217,7 +229,7 @@ class DoiTOML:
                     args = uptodate.get(name)
                     if args is not None:
                         new_uptodate = updater.get_update_function(args)
-            if new_uptodate is not None:
+            if new_uptodate is None:
                 message = f"Uptodate not understood: {uptodate}"
                 raise UpdaterError(message)
             new_uptodates += [new_uptodate]
@@ -230,6 +242,7 @@ class DoiTOML:
         cwd: Path,
         env: Dict[str, str],
         log_paths: LogPaths,
+        log_mode: str,
     ) -> Optional[List[Action]]:
         """Build up a single action definition."""
         is_shell = isinstance(action, str)
@@ -244,6 +257,7 @@ class DoiTOML:
                         cwd,
                         env,
                         log_paths,
+                        log_mode,
                     )
         if isinstance(action, (str, list)) and (is_shell or is_tokens):
             popen_kwargs = {"cwd": cwd, "env": env}
@@ -254,7 +268,7 @@ class DoiTOML:
             return [
                 (
                     self.logged_action,
-                    [args, log_paths, popen_kwargs],
+                    [args, log_paths, log_mode, popen_kwargs],
                 ),
             ]
         return None
@@ -263,15 +277,16 @@ class DoiTOML:
         self,
         args: List[str],
         log_paths: LogPaths,
+        log_mode: str,
         popen_kwargs: Dict[str, Any],
     ) -> bool:
         """Run a process, capturing the output to files."""
         stdout, stderr = self.ensure_parents(*log_paths)
 
-        out = stdout.open("wb") if stdout else None
+        out = stdout.open(log_mode) if stdout else None
         err = None
         if stderr:
-            err = subprocess.STDOUT if stdout == stderr else stderr.open("wb")
+            err = subprocess.STDOUT if stdout == stderr else stderr.open(log_mode)
         streams: Dict[str, Any] = {"stdout": out, "stderr": err}
 
         rc = subprocess.call(args, **streams, **popen_kwargs)  # noqa: S603
@@ -288,6 +303,4 @@ class DoiTOML:
             if not path:
                 continue
             path.parent.mkdir(parents=True, exist_ok=True)
-            if path.exists():
-                path.unlink()
         return paths
