@@ -30,7 +30,7 @@
 
 ```{eval-rst}
 .. currentmodule:: doitoml
-.. automodule:: doitoml.schema._v1_schema
+.. automodule:: doitoml.schema._v0_schema
 ```
 
 ## Errors

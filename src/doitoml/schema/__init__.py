@@ -23,7 +23,7 @@ HERE = Path(__file__).parent
 AnyMapping = Mapping[str, Any]
 
 
-__all__ = ["v1", "latest"]
+__all__ = ["v0", "latest"]
 
 
 class Version:
@@ -80,9 +80,9 @@ class Version:
             raise SchemaError(message)
 
 
-v1 = Version("1")
+v0 = Version("0")
 
-latest = v1
+latest = v0
 
 if os.environ.get("IN_SPHINX"):  # pragma: no cover
     DOITOML_SCHEMA = latest.schema

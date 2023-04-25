@@ -40,6 +40,8 @@ class ENTRY_POINTS:
     ACTOR: Literal["doitoml.actor.v0"] = "doitoml.actor.v0"
     #: extend the ``doitoml`` templater vocabulary
     TEMPLATER: Literal["doitoml.templater.v0"] = "doitoml.templater.v0"
+    #: extend the ``doitoml`` uptodate vocabulary
+    UPDATER: Literal["doitoml.updater.v0"] = "doitoml.updater.v0"
 
 
 class DOIT_TASK:
@@ -48,12 +50,14 @@ class DOIT_TASK:
 
     #: ``doit`` actions
     ACTIONS: Literal["actions"] = "actions"
+    #: field for arbitrary data in tasks
+    META: Literal["meta"] = "meta"
+    #: field for task up-to-date checks (might overload `file_dep` and `task_dep`)
+    UPTODATE: Literal["uptodate"] = "uptodate"
     #: ``doit`` task items known to be lists
     LIST_KEYS = ["file_dep", "task_dep", "targets", "actions", "clean"]
     #: ``doit`` keys that are always paths
     RELATIVE_LISTS = ["file_dep", "targets", "clean"]
-    #: field for arbitrary data in tasks
-    META: Literal["meta"] = "meta"
 
 
 class DOITOML_META:

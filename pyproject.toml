@@ -45,6 +45,8 @@ yaml = "doitoml.sources.yaml._yaml:YamlParser"
 [project.entry-points."doitoml.templater.v0"]
 json-e = "doitoml.templaters.jsone:JsonE"
 jinja2 = "doitoml.templaters.jinja2:Jinja2"
+[project.entry-points."doitoml.updater.v0"]
+config_changed = "doitoml.updaters.doit:ConfigChanged"
 
 [tool.pytest.ini_options]
 cache_dir = "build/.cache/pytest"
@@ -232,7 +234,7 @@ docs_etc = [":rglob::docs/_static::*.*", ":rglob::docs/_templates::*.*"]
 all_misc_py = ["dodo.py", "_actions.py", "::all_py_test", "::docs_py"]
 all_py = ["::all_py_src", "::all_misc_py"]
 all_ssort = ["::py_src", "::all_misc_py"]
-py_src = [":rglob::src::*.py::!/_v1*"]
+py_src = [":rglob::src::*.py::!/_v0*"]
 all_py_src = [":rglob::src::*.py"]
 all_ipynb = [":rglob::docs::*.ipynb::!ipynb_checkpoints"]
 all_py_test = [":rglob::test::*.py"]
@@ -350,22 +352,22 @@ actions = [["sphinx-autobuild", "::sphinx_opts", "--no-initial", "--watch=src"]]
 # these will get templated
 [tool.doitoml.tasks.gen.schema]
 doc = "build JSON Schema from TOML Schema"
-file_dep = ["src/doitoml/schema/v1.schema.toml"]
-targets = ["src/doitoml/schema/_v1.schema.json"]
-actions = [["taplo", "get", "-o=json", "-f", "src/doitoml/schema/v1.schema.toml"]]
-meta = {doitoml = {log = "src/doitoml/schema/_v1.schema.json"}}
+file_dep = ["src/doitoml/schema/v0.schema.toml"]
+targets = ["src/doitoml/schema/_v0.schema.json"]
+actions = [["taplo", "get", "-o=json", "-f", "src/doitoml/schema/v0.schema.toml"]]
+meta = {doitoml = {log = "src/doitoml/schema/_v0.schema.json"}}
 
 [tool.doitoml.tasks.gen.types]
 doc = "build typings from JSON Schema"
-file_dep = ["src/doitoml/schema/_v1.schema.json"]
-targets = ["src/doitoml/schema/_v1_schema.py"]
+file_dep = ["src/doitoml/schema/_v0.schema.json"]
+targets = ["src/doitoml/schema/_v0_schema.py"]
 actions = [
   [
     "jsonschema-gentypes",
     "--python-version=3.8",
     "--json-schema",
-    "src/doitoml/schema/_v1.schema.json",
+    "src/doitoml/schema/_v0.schema.json",
     "--python",
-    "src/doitoml/schema/_v1_schema.py",
+    "src/doitoml/schema/_v0_schema.py",
   ],
 ]

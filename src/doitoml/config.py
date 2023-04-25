@@ -54,7 +54,7 @@ from doitoml.types import (
     Task,
 )
 
-from .schema._v1_schema import DoitomlSchema
+from .schema._v0_schema import DoitomlSchema
 from .sources._config import ConfigParser, ConfigSource
 from .sources._source import Source
 
@@ -528,42 +528,68 @@ class Config:
         task: Task,
     ) -> PrefixedTaskGenerator:
         """Resolve a single simple task."""
-        old_actions = cast(List[Action], task[DOIT_TASK.ACTIONS])
         new_task = self.normalize_task_meta(source, task)
-        all_unresolved_specs: List[str] = []
-        new_actions: List[Action] = []
-
-        for action in old_actions:
-            action_actions, unresolved_specs = self.resolve_one_action(source, action)
-            if unresolved_specs:
-                all_unresolved_specs += unresolved_specs
-                continue
-            new_actions += action_actions
-
-        new_task["actions"] = new_actions
+        unresolved: List[Any] = []
+        unresolved += self.resolve_task_actions(source, new_task)
+        unresolved += self.resolve_task_uptodate(source, new_task)
 
         for field in DOIT_TASK.RELATIVE_LISTS:
-            specs: Strings = task.get(field, [])  # type: ignore
-            new_paths, unresolved_specs = self.resolve_one_task_field(source, specs)
-            if unresolved_specs:
-                all_unresolved_specs += unresolved_specs
-                continue
-            new_task[field] = new_paths  # type: ignore
-
-        if all_unresolved_specs:
-            message = (
-                f"{source} task {prefixes} had unresolved paths:"
-                f" {all_unresolved_specs}"
+            unresolved += self.resolve_one_task_list_field(
+                source,
+                new_task,
+                field,
             )
+
+        if unresolved:
+            message = f"{source} task {prefixes} had unresolved paths: {unresolved}"
             raise UnresolvedError(message)
 
         yield prefixes, new_task
 
-    def normalize_task_meta(
+    def resolve_task_actions(self, source: ConfigSource, task: Task) -> List[str]:
+        """Get the new actions (and unresolved paths) for a task."""
+        new_actions: List[Action] = []
+
+        for action in task[DOIT_TASK.ACTIONS]:
+            action_actions, unresolved_specs = self.resolve_one_action(source, action)
+            if unresolved_specs:
+                return unresolved_specs
+            new_actions += action_actions
+
+        task[DOIT_TASK.ACTIONS] = new_actions
+
+        return []
+
+    def resolve_task_uptodate(self, source: ConfigSource, task: Task) -> List[str]:
+        """Transform some uptodate values."""
+        new_uptodate: List[Any] = []
+        for old_uptodate in task.get(DOIT_TASK.UPTODATE, []):
+            if isinstance(old_uptodate, dict):
+                uptodate, unresolved = self.resolve_one_uptodate(source, old_uptodate)
+                if unresolved:
+                    return unresolved
+                new_uptodate += [uptodate]
+            else:
+                new_uptodate += [old_uptodate]
+
+        if new_uptodate:
+            task[DOIT_TASK.UPTODATE] = new_uptodate
+        return []
+
+    def resolve_one_uptodate(
         self,
         source: ConfigSource,
-        task: Task,
-    ) -> Task:
+        uptodate: Dict[str, Any],
+    ) -> Tuple[Dict[str, Any], Strings]:
+        """Transform a single uptodate."""
+        for key, updater in self.doitoml.entry_points.updaters.items():
+            updater_args = uptodate.get(key)
+            if updater_args:
+                return {key: updater.transform_uptodate(source, updater_args)}, []
+
+        return {}, [*uptodate.keys()]
+
+    def normalize_task_meta(self, source: ConfigSource, task: Task) -> Task:
         """Normalize task metadata."""
         new_task = deepcopy(task)
         meta = cast(dict, cast(dict, new_task).setdefault(DOIT_TASK.META, {}))
@@ -662,13 +688,23 @@ class Config:
         message = f"No actor knew how to perform {action}, tried: {tried}"
         raise NoActorError(message)
 
-    def resolve_one_task_field(
+    def resolve_one_task_list_field(
         self,
         source: ConfigSource,
-        specs: List[str],
-    ) -> Tuple[PathOrStrings, Strings]:
+        task: Task,
+        field: str,
+    ) -> Strings:
         """Expand the members of a single field."""
-        return self.resolve_some_path_specs(source, specs, source_relative=True)
+        specs: Strings = task.get(field, [])  # type: ignore
+        new_paths, unresolved_specs = self.resolve_some_path_specs(
+            source,
+            specs,
+            source_relative=True,
+        )
+        if unresolved_specs:
+            return unresolved_specs
+        task[field] = new_paths  # type: ignore
+        return []
 
     def resolve_some_path_specs(
         self,

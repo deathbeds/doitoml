@@ -18,6 +18,7 @@ if TYPE_CHECKING:
     from .sources._config import ConfigParser
     from .sources._source import Parser
     from .templaters._templater import Templater
+    from .updaters._updater import Updater
 
 
 class EntryPoints:
@@ -30,6 +31,7 @@ class EntryPoints:
     config_parsers: Dict[str, "ConfigParser"]
     actors: Dict[str, "Actor"]
     templaters: Dict[str, "Templater"]
+    updaters: Dict[str, "Updater"]
 
     def __init__(self, doitoml: "DoiTOML") -> None:
         """Create a new collection of loaded ``entry_points``."""
@@ -44,6 +46,7 @@ class EntryPoints:
         self.dsl = self.load_entry_point_group(ENTRY_POINTS.DSL)
         self.actors = self.load_entry_point_group(ENTRY_POINTS.ACTOR)
         self.templaters = self.load_entry_point_group(ENTRY_POINTS.TEMPLATER)
+        self.updater = self.load_entry_point_group(ENTRY_POINTS.UPDATER)
 
     def load_entry_point_group(self, group: str) -> Dict[str, Any]:
         """Find and load ``entry_points`` from installed packages."""
