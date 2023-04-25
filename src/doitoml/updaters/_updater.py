@@ -1,7 +1,9 @@
 """Uptodate checker base for ``doitoml``."""
 
 import abc
-from typing import TYPE_CHECKING, Any, Dict, Optional
+from typing import TYPE_CHECKING, Any, Dict
+
+from doitoml.types import FnAction
 
 if TYPE_CHECKING:
     from doitoml.doitoml import DoiTOML
@@ -23,5 +25,5 @@ class Updater:
         """Replace uptodate tokens with DSL."""
 
     @abc.abstractmethod
-    def is_uptodate(self, uptodate: Any) -> Optional[bool]:
-        """Run-time update checker."""
+    def get_update_function(self, uptodate: Any) -> FnAction:
+        """Get the run-time update checker."""

@@ -13,7 +13,7 @@ import doit.tools
 from .config import Config
 from .constants import DOIT_TASK, DOITOML_META, NAME
 from .entry_points import EntryPoints
-from .errors import DoitomlError, EnvVarError, TaskError
+from .errors import DoitomlError, EnvVarError, TaskError, UpdaterError
 from .types import (
     Action,
     GroupedTasks,
@@ -166,18 +166,33 @@ class DoiTOML:
         name = ":".join(task_name)
         task: Task = {"name": name}
         task.update(raw_task)
+
         meta = cast(dict, task.get(DOIT_TASK.META, {}))
         dt_meta = meta.get(NAME, {})
-        dt_cwd = dt_meta.get(DOITOML_META.CWD) or self.cwd
-        dt_env = dt_meta.get(DOITOML_META.ENV, {})
-        dt_log = dt_meta.get(DOITOML_META.LOG)
+        cwd = dt_meta.get(DOITOML_META.CWD) or self.cwd
+        env = dt_meta.get(DOITOML_META.ENV, {})
+        log = dt_meta.get(DOITOML_META.LOG)
         cmd_env = dict(os.environ)
-        cmd_env.update(dt_env)
-        old_actions = task.pop(DOIT_TASK.ACTIONS)
-        new_actions: List[Any] = [(doit.tools.create_folder, [dt_cwd])]
+        cmd_env.update(env)
+
+        task[DOIT_TASK.ACTIONS] = self.build_subtask_actions(task, cwd, cmd_env, log)
+        task[DOIT_TASK.UPTODATE] = self.build_subtask_uptodates(task)
+
+        return cast(Task, task)
+
+    def build_subtask_actions(
+        self,
+        task: Task,
+        cwd: Path,
+        env: Dict[str, str],
+        log: LogPaths,
+    ) -> List[Action]:
+        """Build all actions in a subtask."""
+        old_actions = task[DOIT_TASK.ACTIONS]
+        new_actions: List[Any] = [(doit.tools.create_folder, [cwd])]
 
         for i, action in enumerate(old_actions):
-            action_actions = self.build_one_action(action, dt_cwd, cmd_env, dt_log)
+            action_actions = self.build_one_action(action, cwd, env, log)
 
             if action_actions is None:
                 message = f"""{task["name"]} action {i} is not a recognized action
@@ -185,9 +200,29 @@ class DoiTOML:
                 """
                 raise TaskError(message)
             new_actions += action_actions
+        return new_actions
 
-        task[DOIT_TASK.ACTIONS] = new_actions
-        return cast(Task, task)
+    def build_subtask_uptodates(
+        self,
+        task: Task,
+    ) -> List[Any]:
+        """Expand custom updaters into actual functions."""
+        new_uptodates: List[Any] = []
+        for uptodate in task.get(DOIT_TASK.UPTODATE, []):
+            new_uptodate: Any = None
+            if not isinstance(uptodate, dict):
+                new_uptodate = uptodate
+            else:
+                for name, updater in self.entry_points.updaters.items():
+                    args = uptodate.get(name)
+                    if args is not None:
+                        new_uptodate = updater.get_update_function(args)
+            if new_uptodate is not None:
+                message = f"Uptodate not understood: {uptodate}"
+                raise UpdaterError(message)
+            new_uptodates += [new_uptodate]
+
+        return new_uptodates
 
     def build_one_action(
         self,
@@ -202,7 +237,7 @@ class DoiTOML:
             isinstance(t, (str, Path)) for t in action
         )
         if isinstance(action, dict):
-            for _actor_name, actor in self.entry_points.actors.items():
+            for actor in self.entry_points.actors.values():
                 if actor.knows(cast(dict, action)):
                     return actor.perform_action(
                         action,

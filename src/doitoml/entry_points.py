@@ -46,7 +46,7 @@ class EntryPoints:
         self.dsl = self.load_entry_point_group(ENTRY_POINTS.DSL)
         self.actors = self.load_entry_point_group(ENTRY_POINTS.ACTOR)
         self.templaters = self.load_entry_point_group(ENTRY_POINTS.TEMPLATER)
-        self.updater = self.load_entry_point_group(ENTRY_POINTS.UPDATER)
+        self.updaters = self.load_entry_point_group(ENTRY_POINTS.UPDATER)
 
     def load_entry_point_group(self, group: str) -> Dict[str, Any]:
         """Find and load ``entry_points`` from installed packages."""

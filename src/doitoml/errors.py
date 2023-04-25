@@ -61,6 +61,11 @@ class TaskError(DoitomlError):
     """An error related to generating valid tasks."""
 
 
+class UpdaterError(TaskError):
+
+    """An error related to an up-to-date checker."""
+
+
 class MetaError(TaskError):
 
     """An error related to ``doitoml`` task metadata."""
