@@ -28,6 +28,7 @@
 | **`clean`**     |    `clean `    | `bool` or list of strings or paths or function | files to delete with `doit clean` (true cleans all `targets`)                   |
 | **`verbosity`** |     `run`      | `int`                                          | custom verbosity: `0` only print on failures, `1` stream errors, `2` stream all |
 | **`meta`**      |     `run`      | dict                                           | [custom metadata](#doitoml-task-metadata) for tasks                             |
+| **`uptodate`**  |     `run`      | list of (string, `None`, dict)                 | string shell commands or custom updaters indicating a task is up-to-date        |
 
 <details>
 

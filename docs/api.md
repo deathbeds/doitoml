@@ -122,6 +122,20 @@
 .. automodule:: doitoml.actors
 ```
 
+## Updaters
+
+```{eval-rst}
+.. currentmodule:: doitoml
+.. automodule:: doitoml.updaters
+```
+
+### `doit` tools
+
+```{eval-rst}
+.. currentmodule:: doitoml
+.. automodule:: doitoml.updaters.doit_tools
+```
+
 ## Templates
 
 ```{eval-rst}

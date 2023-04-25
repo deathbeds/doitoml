@@ -22,8 +22,7 @@
         ":rglob::../docs::*.md::*.html::*.yml::*.css::*.mjs::!ipynb_checkpoints"
       ],
       "yarn_in": [
-        ":glob::.::yarn.lock",
-        "package.json"
+        ":glob::.::yarn.lock"
       ],
       "yarn_out": [
         ".yarn/install-state.gz"
@@ -40,6 +39,13 @@
     },
     "tasks": {
       "setup": {
+        "uptodate": [
+          {
+            "config_changed": [
+              ":get::json::package.json::devDependencies"
+            ]
+          }
+        ],
         "file_dep": [
           "::yarn_in"
         ],

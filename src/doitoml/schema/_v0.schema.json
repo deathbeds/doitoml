@@ -75,6 +75,9 @@
         "title": {
           "type": "string"
         },
+        "uptodate": {
+          "$ref": "#/definitions/uptodates"
+        },
         "verbosity": {
           "type": "number",
           "enum": [1, 2, 3]
@@ -143,6 +146,29 @@
         },
         {
           "$ref": "#/definitions/action-actor"
+        }
+      ]
+    },
+    "uptodates": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/uptodate"
+      }
+    },
+    "uptodate": {
+      "title": "uptodate",
+      "oneOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "string"
+        },
+        {
+          "type": "object"
+        },
+        {
+          "type": "null"
         }
       ]
     },

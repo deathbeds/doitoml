@@ -11,9 +11,7 @@ from .conftest import TPyprojectMaker
 DEFAULT_META = {"meta": {"doitoml": {"cwd": "."}}}
 
 
-def test_no_actor(
-    a_pyproject_with: TPyprojectMaker,
-) -> None:
+def test_no_actor(a_pyproject_with: TPyprojectMaker) -> None:
     """Test a missing actor."""
     a_pyproject_with({"tasks": {"foo": {"actions": [{"foo": "bar"}]}}})
 

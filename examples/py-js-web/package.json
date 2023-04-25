@@ -61,10 +61,16 @@
     },
     "tasks": {
       "install": {
+        "uptodate": [
+          {
+            "config_changed": [
+              ":get::json::package.json::devDependencies"
+            ]
+          }
+        ],
         "file_dep": [
           "::backend::venv_history",
-          "::y_lock",
-          "::pj"
+          "::y_lock"
         ],
         "targets": [
           "::y_install_state"

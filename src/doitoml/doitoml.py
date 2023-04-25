@@ -3,7 +3,7 @@ import logging
 import os
 import subprocess
 import sys
-from io import BufferedWriter
+from io import TextIOBase
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union, cast
 
@@ -13,7 +13,7 @@ import doit.tools
 from .config import Config
 from .constants import DOIT_TASK, DOITOML_META, NAME
 from .entry_points import EntryPoints
-from .errors import DoitomlError, EnvVarError, TaskError, UpdaterError
+from .errors import DoitomlError, EnvVarError, TaskError
 from .types import (
     Action,
     GroupedTasks,
@@ -225,13 +225,9 @@ class DoiTOML:
             if not isinstance(uptodate, dict):
                 new_uptodate = uptodate
             else:
-                for name, updater in self.entry_points.updaters.items():
-                    args = uptodate.get(name)
-                    if args is not None:
-                        new_uptodate = updater.get_update_function(args)
-            if new_uptodate is None:
-                message = f"Uptodate not understood: {uptodate}"
-                raise UpdaterError(message)
+                key, value = list(uptodate.items())[0]
+                updater = self.entry_points.updaters[key]
+                new_uptodate = updater.get_update_function(value)
             new_uptodates += [new_uptodate]
 
         return new_uptodates
@@ -292,7 +288,7 @@ class DoiTOML:
         rc = subprocess.call(args, **streams, **popen_kwargs)  # noqa: S603
 
         for stream in streams.values():
-            if isinstance(stream, BufferedWriter):
+            if isinstance(stream, TextIOBase):
                 stream.close()
 
         return rc == 0

@@ -93,12 +93,21 @@ class Task(TypedDict, total=False):
     name: str
     targets: List["_ArrayOfPathsItem"]
     title: str
+    uptodate: List["Uptodate"]
     verbosity: "_TaskVerbosity"
     watch: List["_ArrayOfPathsItem"]
 
 
 TokenAction = List[str]
 """ token action. """
+
+
+Uptodate = Union[bool, str, Dict[str, Any], None]
+"""
+uptodate.
+
+oneOf
+"""
 
 
 _ArrayOfPathsItem = str

@@ -1,7 +1,7 @@
 """Uptodate checker base for ``doitoml``."""
 
 import abc
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any
 
 from doitoml.types import FnAction
 
@@ -27,21 +27,3 @@ class Updater:
     @abc.abstractmethod
     def get_update_function(self, uptodate: Any) -> FnAction:
         """Get the run-time update checker."""
-
-    def resolve_one_arg(self, source: "ConfigSource", arg_value: Any) -> Optional[Any]:
-        """Resolve a single argument."""
-        if isinstance(arg_value, str):
-            found_kwarg = self.doitoml.config.resolve_one_path_spec(
-                source,
-                arg_value,
-                source_relative=False,
-            )
-            return found_kwarg
-        if isinstance(arg_value, list):
-            found_kwarg = self.doitoml.config.resolve_some_path_specs(
-                source,
-                arg_value,
-                source_relative=False,
-            )[0]
-            return found_kwarg
-        return None

@@ -1,6 +1,6 @@
 """Uptodate checkers provided by ``doit``."""
 from pprint import pformat
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any, Optional, cast
 
 import doit.tools
 
@@ -37,3 +37,30 @@ class ConfigChanged(Updater):
     def get_update_function(self, uptodate: Any) -> FnAction:
         """Create a ``doit.tools.config_changed``."""
         return cast(FnAction, doit.tools.config_changed(uptodate))
+
+    def resolve_one_arg(self, source: "ConfigSource", arg_value: Any) -> Optional[Any]:
+        """Resolve a single argument."""
+        if isinstance(arg_value, str):
+            return self.doitoml.config.resolve_one_path_spec(
+                source,
+                arg_value,
+                source_relative=False,
+            )
+        return arg_value
+
+
+class RunOnce(Updater):
+
+    """A wrapper for ``doit.tools.run_once``."""
+
+    def transform_uptodate(
+        self,
+        source: "ConfigSource",  # noqa: ARG002
+        uptodate_args: Any,  # noqa: ARG002
+    ) -> Any:
+        """Consume any input value as ``run_once`` takes no args."""
+        return None
+
+    def get_update_function(self, uptodate: Any) -> FnAction:  # noqa: ARG002
+        """Create a ``doit.tools.run_once``."""
+        return cast(FnAction, doit.tools.run_once)

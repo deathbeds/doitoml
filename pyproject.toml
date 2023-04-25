@@ -46,7 +46,8 @@ yaml = "doitoml.sources.yaml._yaml:YamlParser"
 json-e = "doitoml.templaters.jsone:JsonE"
 jinja2 = "doitoml.templaters.jinja2:Jinja2"
 [project.entry-points."doitoml.updater.v0"]
-config_changed = "doitoml.updaters.doit:ConfigChanged"
+config_changed = "doitoml.updaters.doit_tools:ConfigChanged"
+run_once = "doitoml.updaters.doit_tools:RunOnce"
 
 [tool.pytest.ini_options]
 cache_dir = "build/.cache/pytest"

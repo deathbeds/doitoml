@@ -40,6 +40,7 @@ meta = {"$ref" = "#/definitions/meta"}
 name = {type = "string"}
 targets = {"$ref" = "#/definitions/array-of-paths"}
 title = {type = "string"}
+uptodate = {"$ref" = "#/definitions/uptodates"}
 verbosity = {type = "number", enum = [1, 2, 3]}
 watch = {"$ref" = "#/definitions/array-of-paths"}
 
@@ -72,6 +73,14 @@ oneOf = [
   {"$ref" = "#/definitions/action-token"},
   {"$ref" = "#/definitions/action-actor"},
 ]
+
+[definitions.uptodates]
+type = "array"
+items = {"$ref" = "#/definitions/uptodate"}
+
+[definitions.uptodate]
+title = "uptodate"
+oneOf = [{type = "boolean"}, {type = "string"}, {type = "object"}, {type = "null"}]
 
 [definitions.action-token]
 title = "token action"
