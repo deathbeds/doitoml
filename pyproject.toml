@@ -299,7 +299,7 @@ doc = "Generate a hashfile"
 file_dep = ["::whl", "::sdist"]
 targets = ["::dist_hash"]
 actions = [
-  {py = "_actions:hash_files", args = {hashfile = "::dist_hash", files = "::all_dist"}},
+  {py = "_actions:hash_files", kwargs = {hashfile = "::dist_hash", files = "::all_dist"}},
 ]
 
 [tool.doitoml.tasks.fix.ssort]

@@ -33,7 +33,7 @@ actions = [
     "--no-isolation",
     "--sdist",
   ],
-  {py = "..:_actions:hash_files", args = {hashfile = "${pkg}/dist/SHA256SUMS", files = [
+  {py = "..:_actions:hash_files", kwargs = {hashfile = "${pkg}/dist/SHA256SUMS", files = [
     "*.tar.gz",
     "*.whl",
   ]}},
@@ -48,7 +48,7 @@ b = ["another description"]
 
 [tool.doitoml.templates.json-e.tasks.dist."each(desc,pkg)"."${pkg}"]
 actions = [
-  {py = "shutil:rmtree", args = {path = "dist/${pkg}", ignore_errors = "1"}},
+  {py = "shutil:rmtree", kwargs = {path = "dist/${pkg}", ignore_errors = "1"}},
   {py = "doit.tools:create_folder", args = [
     "dist",
   ]},
@@ -64,7 +64,7 @@ targets = ["dist/${pkg}/SHA256SUMS"]
 [tool.doitoml.tasks.release]
 meta = {doitoml = {cwd = "."}}
 actions = [
-  {py = "_actions:hash_files", args = {hashfile = "dist/SHA256SUMS", files = [
+  {py = "_actions:hash_files", kwargs = {hashfile = "dist/SHA256SUMS", files = [
     "*/*.tar.gz",
     "*/*.whl",
   ]}},

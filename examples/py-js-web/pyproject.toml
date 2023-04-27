@@ -78,7 +78,7 @@ targets = ["::dist_tgz"]
 
 [tool.doitoml.tasks.build.hashfile]
 actions = [
-  {py = "my_custom._actions:hash_files", args = {hashfile = [
+  {py = "my_custom._actions:hash_files", kwargs = {hashfile = [
     "::dist_hash",
   ], files = [
     "::all_dist",

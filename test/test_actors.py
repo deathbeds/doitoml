@@ -20,20 +20,28 @@ def test_no_actor(a_pyproject_with: TPyprojectMaker) -> None:
 
 
 @pytest.mark.parametrize(
-    ("args", "message"),
+    ("args", "kwargs", "message"),
     [
-        (["::foo"], "unresolved positional"),
-        (0, "unusuable"),
-        ({"foo": 0}, "unresolved named"),
+        (["::foo"], {}, "unresolved"),
+        ([], {"bar": "::baz"}, "unresolved"),
+        (0, {}, "unusable args"),
+        ({"foo": 0}, {}, "unusable args"),
     ],
 )
 def test_bad_py_actor(
     a_pyproject_with: TPyprojectMaker,
     args: Any,
+    kwargs: Any,
     message: str,
 ) -> None:
     """Test a badly-built actor."""
-    a_pyproject_with({"tasks": {"foo": {"actions": [{"py": "1:1", "args": args}]}}})
+    a_pyproject_with(
+        {
+            "tasks": {
+                "foo": {"actions": [{"py": "1:1", "args": args, "kwargs": kwargs}]},
+            },
+        },
+    )
 
     with pytest.raises(ActorError, match=message):
         DoiTOML(fail_quietly=False)

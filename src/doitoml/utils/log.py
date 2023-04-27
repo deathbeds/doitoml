@@ -11,7 +11,7 @@ from .path import ensure_parents
 
 def call_with_capture(
     func: Callable[[Any], Optional[bool]],
-    pargs: List[Any],
+    args: List[Any],
     kwargs: Dict[str, Any],
     log_paths: LogPaths,
     log_mode: str,
@@ -36,4 +36,4 @@ def call_with_capture(
         managers += [stderr_mgr]
 
     with stdout_mgr, stderr_mgr:
-        return func(*pargs, **kwargs)
+        return func(*args, **kwargs)

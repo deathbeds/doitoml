@@ -15,7 +15,7 @@ that accept simple, JSON-compatible values work out of the box.
 ```toml
 [tool.doitoml.tasks.copy]
 actions = [
-    { py = "shutil:copytree", args = { src = "from/path/", dst = "to/path" } }
+    { py = "shutil:copytree", kwargs = { src = "from/path/", dst = "to/path" } }
 ]
 ```
 

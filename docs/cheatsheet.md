@@ -42,11 +42,11 @@
 
 ### `actions`
 
-| action kind | example                                | description                                        |
-| ----------- | -------------------------------------- | -------------------------------------------------- |
-| _string_    | `echo 1`                               | passed directly to `doit` without any manipulation |
-| _token_     | `["echo", "1"]`                        | each token expanded by the [DSL]                   |
-| _actor_     | `{py="shutil.copy2", args=["a", "b"]}` | each token in `args` expanded by the [DSL]         |
+| action kind | example                                           | description                                        |
+| ----------- | ------------------------------------------------- | -------------------------------------------------- |
+| _string_    | `echo 1`                                          | passed directly to `doit` without any manipulation |
+| _token_     | `["echo", "1"]`                                   | each token expanded by the [DSL]                   |
+| _actor_     | `{py="shutil.copy2", args=["a"], kwargs={b="c"}}` | each token in `(kw)args` expanded by the [DSL]     |
 
 ### `doitoml` task metadata
 
