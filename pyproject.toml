@@ -194,6 +194,7 @@ select = [
 "entry_points.py" = ["BLE001"]
 "jinja2.py" = ["ARG002"]
 "test/**/*.py" = ["S101", "T201", "T203"]
+"**/utils/py.py" = ["PLR0913"]
 
 [tool.doitoml]
 prefix = ""

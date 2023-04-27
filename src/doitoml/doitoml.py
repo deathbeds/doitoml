@@ -24,6 +24,7 @@ from .types import (
     TaskFunction,
     TaskGenerator,
 )
+from .utils.path import ensure_parents
 
 MaybeLogLevel = Optional[Union[str, int]]
 
@@ -277,7 +278,7 @@ class DoiTOML:
         popen_kwargs: Dict[str, Any],
     ) -> bool:
         """Run a process, capturing the output to files."""
-        stdout, stderr = self.ensure_parents(*log_paths)
+        stdout, stderr = ensure_parents(*log_paths)
 
         out = stdout.open(log_mode) if stdout else None
         err = None
@@ -292,11 +293,3 @@ class DoiTOML:
                 stream.close()
 
         return rc == 0
-
-    def ensure_parents(self, *paths: Optional[Path]) -> Tuple[Optional[Path], ...]:
-        """Clean out some paths and ensure their parents."""
-        for path in paths:
-            if not path:
-                continue
-            path.parent.mkdir(parents=True, exist_ok=True)
-        return paths

@@ -6,6 +6,11 @@ class DoitomlError(ValueError):
     """Some kind of error in ``doitoml``."""
 
 
+class PyError(DoitomlError):
+
+    """An error related to discovering and calling arbitrary python functions."""
+
+
 class SchemaError(DoitomlError):
 
     """An error related to a non-conforming ``doitoml`` configuration."""
