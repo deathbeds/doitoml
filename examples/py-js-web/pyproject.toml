@@ -72,21 +72,21 @@ file_dep = [
 targets = ["::whl"]
 
 [tool.doitoml.task.dist.js]
-actions = [{py = "shutil:copy2", args = ["::js::dist_tgz", "::dist_tgz"]}]
+actions = [{py = {"shutil:copy2" = {args = ["::js::dist_tgz", "::dist_tgz"]}}}]
 file_dep = ["::js::dist_tgz"]
 targets = ["::dist_tgz"]
 
 [tool.doitoml.tasks.build.hashfile]
 actions = [
-  {py = "my_custom._actions:hash_files", kwargs = {hashfile = [
+  {py = {"my_custom._actions:hash_files" = {kwargs = {hashfile = [
     "::dist_hash",
   ], files = [
     "::all_dist",
-  ]}},
-  {py = "my_custom._actions:hash_files", args = [
+  ]}}}},
+  {py = {"my_custom._actions:hash_files" = {args = [
     "::dist_hash",
     "::all_dist",
-  ]},
+  ]}}},
 ]
 file_dep = ["::all_dist"]
 targets = ["::dist_hash"]

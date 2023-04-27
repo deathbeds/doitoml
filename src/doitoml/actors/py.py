@@ -21,8 +21,8 @@ class PyActor(Actor):
         """Only handles ``py`` actions."""
         if "py" not in action:
             return False
-        py = action["py"]
-        py_path, dotted, func_name = parse_dotted_py(py)
+        path_dotted_func = list(action["py"].items())[0][0]
+        py_path, dotted, func_name = parse_dotted_py(path_dotted_func)
         return None not in [dotted, func_name]
 
     def transform_action(
@@ -31,13 +31,14 @@ class PyActor(Actor):
         action: Dict[str, Any],
     ) -> List[Dict[str, Any]]:
         """Expand a dict containing `py`."""
+        path_dotted_func, args_kwargs = list(action["py"].items())[0]
         args, kwargs = resolve_py_args(
             self.doitoml,
             source,
-            action.pop("args", []),
-            action.pop("kwargs", {}),
+            args_kwargs.pop("args", []),
+            args_kwargs.pop("kwargs", {}),
         )
-        action.update(args=args, kwargs=kwargs)
+        args_kwargs.update(args=args, kwargs=kwargs)
         return [action]
 
     def perform_action(
@@ -49,6 +50,17 @@ class PyActor(Actor):
         log_mode: str,
     ) -> List[CallableAction]:
         """Build a python callable."""
-        py = action["py"]
-        args, kwargs = action["args"], action["kwargs"]
-        return [make_py_function(py, args, kwargs, cwd, env, log_paths, log_mode)]
+        path_dotted_func, args_kwargs = list(action["py"].items())[0]
+
+        args, kwargs = args_kwargs["args"], args_kwargs["kwargs"]
+        return [
+            make_py_function(
+                path_dotted_func,
+                args,
+                kwargs,
+                cwd,
+                env,
+                log_paths,
+                log_mode,
+            ),
+        ]

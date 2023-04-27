@@ -11,7 +11,7 @@ if TYPE_CHECKING:
 
 class PyUpdater(Updater):
 
-    """A wrapper for ``arbitrary python functions``."""
+    """A wrapper for arbitrary python functions."""
 
     def transform_uptodate(
         self,

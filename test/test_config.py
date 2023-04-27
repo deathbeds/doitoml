@@ -142,7 +142,7 @@ def test_task_env(a_pyproject_with: TPyprojectMaker, script_runner: Any) -> None
 
 @pytest.mark.parametrize(
     "action",
-    [["::foo"], {"py": "foo:foo"}],
+    [["::foo"], {"py": {"foo:foo": {}}}],
 )
 @pytest.mark.parametrize(
     ("stdout", "stderr"),

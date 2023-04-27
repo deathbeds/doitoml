@@ -46,7 +46,7 @@ def test_bad_py_actor(
     a_pyproject_with(
         {
             "tasks": {
-                "foo": {"actions": [{"py": "1:1", "args": args, "kwargs": kwargs}]},
+                "foo": {"actions": [{"py": {"1:1": {"args": args, "kwargs": kwargs}}}]},
             },
         },
     )
