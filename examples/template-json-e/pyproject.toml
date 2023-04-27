@@ -33,10 +33,12 @@ actions = [
     "--no-isolation",
     "--sdist",
   ],
-  {py = "..:_actions:hash_files", kwargs = {hashfile = "${pkg}/dist/SHA256SUMS", files = [
+  {py = "..:_actions:hash_files", kwargs = {hashfile = [
+    "${pkg}/dist/SHA256SUMS",
+  ], files = [
     "*.tar.gz",
     "*.whl",
-  ]}},
+  ], quiet = true}},
 ]
 file_dep = ["${pkg}/pyproject.toml"]
 name = "${split(pkg, '/')[-1]}"

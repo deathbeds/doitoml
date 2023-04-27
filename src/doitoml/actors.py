@@ -99,42 +99,40 @@ class PyActor(Actor):
             raise ActorError(message)
 
         found_kwargs = {}
-        unresolved_kwargs = {}
 
         for arg_name, arg_value in kwargs.items():
-            found_kwarg = self.resolve_one_arg(source, arg_value)
-            if found_kwarg:
-                found_kwargs[arg_name] = found_kwarg
-                continue
-            unresolved_kwargs[arg_name] = arg_value
+            found_kwargs[arg_name] = self.resolve_one_kwarg(source, arg_name, arg_value)
 
-        if unresolved_kwargs:
-            message = (
-                f"Python action {action} had unresolved named args: "
-                f"{unresolved_kwargs}"
-            )
-            raise ActorError(message)
         action.update(kwargs=found_kwargs, args=found_args)
 
         return [action]
 
-    def resolve_one_arg(self, source: "ConfigSource", arg_value: Any) -> Optional[Any]:
+    def resolve_one_kwarg(
+        self,
+        source: "ConfigSource",
+        arg_name: str,
+        arg_value: Any,
+    ) -> Optional[Any]:
         """Resolve a single argument."""
+        found_kwarg = arg_value
         if isinstance(arg_value, str):
             found_kwarg = self.doitoml.config.resolve_one_path_spec(
                 source,
                 arg_value,
                 source_relative=False,
             )
-            return found_kwarg
         if isinstance(arg_value, list):
             found_kwarg = self.doitoml.config.resolve_some_path_specs(
                 source,
                 arg_value,
                 source_relative=False,
             )[0]
-            return found_kwarg
-        return None
+
+        if arg_value is not None and found_kwarg is None:
+            message = f"Python action had unresolved named arg: {arg_name}={arg_value}"
+            raise ActorError(message)
+
+        return found_kwarg
 
     def perform_action(
         self,
