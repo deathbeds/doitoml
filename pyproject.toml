@@ -29,7 +29,7 @@ yaml = ["pyyaml"]
 [project.entry-points."doit.LOADER"]
 doitoml = "doitoml.loaders:DoitomlLoader"
 [project.entry-points."doitoml.actor.v0"]
-py = "doitoml.actors:PyActor"
+py = "doitoml.actors.py:PyActor"
 [project.entry-points."doitoml.config-parser.v0"]
 doitoml-package-json = "doitoml.sources.json.package:PackageJsonParser"
 doitoml-pyproject-toml = "doitoml.sources.toml.pyproject:PyprojectTomlParser"
@@ -48,6 +48,7 @@ jinja2 = "doitoml.templaters.jinja2:Jinja2"
 [project.entry-points."doitoml.updater.v0"]
 config_changed = "doitoml.updaters.doit_tools:ConfigChanged"
 run_once = "doitoml.updaters.doit_tools:RunOnce"
+py = "doitoml.updaters.py:PyUpdater"
 
 [tool.pytest.ini_options]
 cache_dir = "build/.cache/pytest"
@@ -185,7 +186,7 @@ select = [
 [tool.ruff.per-file-ignores]
 "_config.py" = ["PLR0912", "C901", "PLR0913"]
 "_source.py" = ["BLE001"]
-"actors.py" = ["PLR0913"]
+"**/actors/*.py" = ["PLR0913"]
 "constants.py" = ["N801"]
 "docs/conf.py" = ["INP001", "A001"]
 "dodo.py" = ["BLE001"]

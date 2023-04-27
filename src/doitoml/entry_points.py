@@ -12,7 +12,7 @@ else:  # pragma: no cover
     from importlib.metadata import entry_points
 
 if TYPE_CHECKING:
-    from .actors import Actor
+    from .actors._actor import Actor
     from .doitoml import DoiTOML
     from .dsl import DSL
     from .sources._config import ConfigParser

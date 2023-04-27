@@ -119,17 +119,31 @@
 
 ```{eval-rst}
 .. currentmodule:: doitoml
-.. automodule:: doitoml.actors
+.. automodule:: doitoml.actors._actor
+```
+
+## Custom Python Actor
+
+```{eval-rst}
+.. currentmodule:: doitoml
+.. automodule:: doitoml.actors.py
 ```
 
 ## Updaters
 
 ```{eval-rst}
 .. currentmodule:: doitoml
-.. automodule:: doitoml.updaters
+.. automodule:: doitoml.updaters._updater
 ```
 
-### `doit` tools
+### Custom Python Updater
+
+```{eval-rst}
+.. currentmodule:: doitoml
+.. automodule:: doitoml.updaters.py
+```
+
+### `doit.tools` Updaters
 
 ```{eval-rst}
 .. currentmodule:: doitoml
