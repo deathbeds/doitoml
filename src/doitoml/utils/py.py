@@ -5,17 +5,49 @@ import os
 import re
 import sys
 from pathlib import Path
-from typing import Any, Dict, Iterator, List, Optional, Tuple, cast
+from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Tuple, cast
 
 from doitoml.errors import PyError
 from doitoml.types import FnAction, LogPaths
 
 from .log import call_with_capture
 
+if TYPE_CHECKING:
+    from doitoml.doitoml import DoiTOML
+    from doitoml.sources._config import ConfigSource
+
 #: a regular expression for parsing
 RE_PY_DOT_FUNC = re.compile(
     r"^((?P<py_path>[^:]+?):)?((?P<dotted>[^:]+?):)((?P<func_name>[^:]+?))$",
 )
+
+
+def resolve_one_kwarg(
+    doitoml: "DoiTOML",
+    source: "ConfigSource",
+    arg_name: str,
+    arg_value: Any,
+) -> Optional[Any]:
+    """Resolve a single argument."""
+    found_kwarg = arg_value
+    if isinstance(arg_value, str):
+        found_kwarg = doitoml.config.resolve_one_path_spec(
+            source,
+            arg_value,
+            source_relative=False,
+        )
+    if isinstance(arg_value, list):
+        found_kwarg = doitoml.config.resolve_some_path_specs(
+            source,
+            arg_value,
+            source_relative=False,
+        )[0]
+
+    if arg_value is not None and found_kwarg is None:
+        message = f"Custom Python had unresolved named arg: {arg_name}={arg_value}"
+        raise PyError(message)
+
+    return found_kwarg
 
 
 def import_dotted(
