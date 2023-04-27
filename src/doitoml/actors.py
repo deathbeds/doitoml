@@ -4,9 +4,8 @@ import re
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional
 
-from doitoml.errors import ActorError
 from doitoml.types import LogPaths
-from doitoml.utils.py import make_py_function, parse_dotted_py, resolve_one_kwarg
+from doitoml.utils.py import make_py_function, parse_dotted_py, resolve_py_args
 
 if TYPE_CHECKING:
     from .doitoml import DoiTOML
@@ -76,40 +75,13 @@ class PyActor(Actor):
         action: Dict[str, Any],
     ) -> List[Dict[str, Any]]:
         """Expand a dict containing `py`."""
-        args = action.pop("args", [])
-        kwargs = action.pop("kwargs", {})
-
-        if not (isinstance(args, list) and isinstance(kwargs, dict)):
-            message = (
-                f"Python action {action} had unusable args: {args} or kwargs: {kwargs}"
-            )
-            raise ActorError(message)
-
-        found_args, unresolved_args = self.doitoml.config.resolve_some_path_specs(
+        args, kwargs = resolve_py_args(
+            self.doitoml,
             source,
-            args,
-            source_relative=False,
+            action.pop("args", []),
+            action.pop("kwargs", {}),
         )
-
-        if unresolved_args:
-            message = (
-                f"Python action {action} had unresolved positional args: "
-                f"{unresolved_args}"
-            )
-            raise ActorError(message)
-
-        found_kwargs = {}
-
-        for arg_name, arg_value in kwargs.items():
-            found_kwargs[arg_name] = resolve_one_kwarg(
-                self.doitoml,
-                source,
-                arg_name,
-                arg_value,
-            )
-
-        action.update(kwargs=found_kwargs, args=found_args)
-
+        action.update(args=args, kwargs=kwargs)
         return [action]
 
     def perform_action(

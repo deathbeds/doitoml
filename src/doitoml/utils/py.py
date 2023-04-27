@@ -7,7 +7,7 @@ import sys
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Tuple, cast
 
-from doitoml.errors import PyError
+from doitoml.errors import PyError, UnresolvedError
 from doitoml.types import FnAction, LogPaths
 
 from .log import call_with_capture
@@ -22,7 +22,7 @@ RE_PY_DOT_FUNC = re.compile(
 )
 
 
-def resolve_one_kwarg(
+def resolve_one_py_kwarg(
     doitoml: "DoiTOML",
     source: "ConfigSource",
     arg_name: str,
@@ -45,9 +45,49 @@ def resolve_one_kwarg(
 
     if arg_value is not None and found_kwarg is None:
         message = f"Custom Python had unresolved named arg: {arg_name}={arg_value}"
-        raise PyError(message)
+        raise UnresolvedError(message)
 
     return found_kwarg
+
+
+def resolve_py_args(
+    doitoml: "DoiTOML",
+    source: "ConfigSource",
+    args: List[Any],
+    kwargs: Dict[str, Any],
+) -> Tuple[List[Any], Dict[str, Any]]:
+    """Build positional and named arguments for custom python functions."""
+    if not isinstance(args, list):
+        message = f"Custom Python had unusable positional arguments: {args}"
+        raise PyError(message)
+
+    if not isinstance(kwargs, dict):
+        message = f"Custom Python had unusable named arguments: {kwargs}"
+        raise PyError(message)
+
+    found_args, unresolved_args = doitoml.config.resolve_some_path_specs(
+        source,
+        args,
+        source_relative=False,
+    )
+
+    if unresolved_args:
+        message = (
+            f"Custom Python had unresolved positional arguments: {unresolved_args}"
+        )
+        raise UnresolvedError(message)
+
+    found_kwargs = {}
+
+    for arg_name, arg_value in kwargs.items():
+        found_kwargs[arg_name] = resolve_one_py_kwarg(
+            doitoml,
+            source,
+            arg_name,
+            arg_value,
+        )
+
+    return found_args, found_kwargs
 
 
 def import_dotted(

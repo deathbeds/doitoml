@@ -1,9 +1,15 @@
 """Tests for (bad) ``doitoml`` ``Actors``."""
-from typing import Any, cast
+from typing import Any, Type, cast
 
 import pytest
 from doitoml import DoiTOML
-from doitoml.errors import ActorError, NoActorError, TaskError
+from doitoml.errors import (
+    DoitomlError,
+    NoActorError,
+    PyError,
+    TaskError,
+    UnresolvedError,
+)
 from doitoml.types import Task
 
 from .conftest import TPyprojectMaker
@@ -20,12 +26,13 @@ def test_no_actor(a_pyproject_with: TPyprojectMaker) -> None:
 
 
 @pytest.mark.parametrize(
-    ("args", "kwargs", "message"),
+    ("args", "kwargs", "message", "error_klass"),
     [
-        (["::foo"], {}, "unresolved"),
-        ([], {"bar": "::baz"}, "unresolved"),
-        (0, {}, "unusable args"),
-        ({"foo": 0}, {}, "unusable args"),
+        (["::foo"], {}, "unresolved", UnresolvedError),
+        ([], {"bar": "::baz"}, "unresolved", UnresolvedError),
+        (0, {}, "unusable positional", PyError),
+        ({"foo": 0}, {}, "unusable positional", PyError),
+        ([], False, "unusable named", PyError),
     ],
 )
 def test_bad_py_actor(
@@ -33,6 +40,7 @@ def test_bad_py_actor(
     args: Any,
     kwargs: Any,
     message: str,
+    error_klass: Type[DoitomlError],
 ) -> None:
     """Test a badly-built actor."""
     a_pyproject_with(
@@ -43,7 +51,7 @@ def test_bad_py_actor(
         },
     )
 
-    with pytest.raises(ActorError, match=message):
+    with pytest.raises(error_klass, match=message):
         DoiTOML(fail_quietly=False)
 
 

@@ -149,3 +149,26 @@
 .. currentmodule:: doitoml
 .. automodule:: doitoml.templaters.jsone
 ```
+
+## Utilities
+
+### Log
+
+```{eval-rst}
+.. currentmodule:: doitoml
+.. automodule:: doitoml.utils.log
+```
+
+### Custom Python
+
+```{eval-rst}
+.. currentmodule:: doitoml
+.. automodule:: doitoml.utils.path
+```
+
+### Custom Python
+
+```{eval-rst}
+.. currentmodule:: doitoml
+.. automodule:: doitoml.utils.py
+```
