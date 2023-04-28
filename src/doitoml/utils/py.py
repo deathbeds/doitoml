@@ -5,10 +5,10 @@ import os
 import re
 import sys
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Tuple, cast
+from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Tuple
 
 from doitoml.errors import PyError, UnresolvedError
-from doitoml.types import FnAction, LogPaths
+from doitoml.types import ExecutionContext, FnAction
 
 from .log import call_with_capture
 
@@ -93,12 +93,12 @@ def resolve_py_args(
 def import_dotted(
     dotted: str,
     func_name: str,
-    cwd: Path,
+    execution_context: ExecutionContext,
     py_path: Optional[str],
 ) -> Any:
     """Import a named function from a module."""
-    if py_path and cwd:
-        os.chdir(str(cwd))
+    if py_path and execution_context.cwd:
+        os.chdir(str(execution_context.cwd))
     current = __import__(dotted)
     for dot in dotted.split(".")[1:]:
         current = getattr(current, dot)
@@ -117,18 +117,17 @@ def parse_dotted_py(dotted: str) -> Tuple[Optional[str], Optional[str], Optional
 
 @contextlib.contextmanager
 def patched_paths(
-    cwd: Path,
-    env: Dict[str, str],
+    execution_context: ExecutionContext,
     py_path: Optional[str] = None,
 ) -> Iterator:
     """Ensure the ``sys.path``, ``Path.cwd`` are correct."""
     old_env = dict(os.environ)
-    os.environ.update(env)
+    os.environ.update(execution_context.env)
 
     new_cwd = Path.cwd().resolve()
     old_cwd = str(new_cwd)
 
-    new_cwd = Path(cwd).resolve()
+    new_cwd = Path(execution_context.cwd).resolve()
     os.chdir(str(new_cwd))
     py_path = py_path or "."
     import_path = (new_cwd / py_path).resolve()
@@ -147,24 +146,20 @@ def make_py_function(
     dotted: str,
     args: List[Any],
     kwargs: Dict[str, Any],
-    cwd: Path,
-    env: Dict[str, str],
-    log_paths: LogPaths,
-    log_mode: str,
+    execution_context: ExecutionContext,
 ) -> FnAction:
     """Build a function that lazily imports a dotted function and calls it."""
     py_path, dotted, func_name = parse_dotted_py(dotted)
 
     def _py_function() -> Optional[bool]:
-        with patched_paths(cwd, env, py_path):
-            func = import_dotted(str(dotted), str(func_name), cwd, py_path)
-            result = call_with_capture(
-                func,
-                args,
-                kwargs,
-                cast(LogPaths, log_paths or [None, None]),
-                log_mode,
+        with patched_paths(execution_context, py_path):
+            func = import_dotted(
+                str(dotted),
+                str(func_name),
+                execution_context,
+                py_path,
             )
+            result = call_with_capture(func, args, kwargs, execution_context)
 
         return result is not False
 

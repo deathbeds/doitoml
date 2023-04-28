@@ -4,6 +4,7 @@ verbosity = 2
 
 [tool.doitoml.tasks.hello]
 uptodate = [{run_once = true}]
+
 actions = ['echo "hello world"']
 
 [tool.__doitoml_tests__.steps.00_list]

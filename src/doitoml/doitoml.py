@@ -16,8 +16,8 @@ from .entry_points import EntryPoints
 from .errors import DoitomlError, EnvVarError, TaskError
 from .types import (
     Action,
+    ExecutionContext,
     GroupedTasks,
-    LogPaths,
     PathOrStrings,
     PrefixedTasks,
     Task,
@@ -176,36 +176,35 @@ class DoiTOML:
         cmd_env = dict(os.environ)
         cmd_env.update(env)
 
-        task[DOIT_TASK.ACTIONS] = self.build_subtask_actions(
-            task,
-            cwd,
-            cmd_env,
-            log_paths,
+        execution_context = ExecutionContext(
+            cwd=cwd,
+            log_paths=log_paths,
+            env=cmd_env,
+            log_mode="w",
         )
-        task[DOIT_TASK.UPTODATE] = self.build_subtask_uptodates(task)
+
+        task[DOIT_TASK.ACTIONS] = self.build_subtask_actions(task, execution_context)
+        task[DOIT_TASK.UPTODATE] = self.build_subtask_uptodates(task, execution_context)
 
         return cast(Task, task)
 
     def build_subtask_actions(
         self,
         task: Task,
-        cwd: Path,
-        env: Dict[str, str],
-        log_paths: LogPaths,
+        execution_context: ExecutionContext,
     ) -> List[Action]:
         """Build all actions in a subtask."""
         old_actions = task[DOIT_TASK.ACTIONS]
-        new_actions: List[Any] = [(doit.tools.create_folder, [cwd])]
+        new_actions: List[Any] = [(doit.tools.create_folder, [execution_context.cwd])]
 
         for idx, action in enumerate(old_actions):
-            log_mode = "a" if idx else "w"
-            action_actions = self.build_one_action(
-                action,
-                cwd,
-                env,
-                log_paths,
-                log_mode,
+            sub_execution_context = ExecutionContext(
+                cwd=execution_context.cwd,
+                env=execution_context.env,
+                log_paths=execution_context.log_paths,
+                log_mode="a" if idx else "w",
             )
+            action_actions = self.build_one_action(action, sub_execution_context)
 
             if action_actions is None:
                 message = f"""{task["name"]} action {idx} is not a recognized action
@@ -218,17 +217,24 @@ class DoiTOML:
     def build_subtask_uptodates(
         self,
         task: Task,
+        execution_context: ExecutionContext,
     ) -> List[Any]:
         """Expand custom updaters into actual functions."""
         new_uptodates: List[Any] = []
-        for uptodate in task.get(DOIT_TASK.UPTODATE, []):
+        for idx, uptodate in enumerate(task.get(DOIT_TASK.UPTODATE, [])):
+            sub_execution_context = ExecutionContext(
+                cwd=execution_context.cwd,
+                env=execution_context.env,
+                log_paths=execution_context.log_paths,
+                log_mode="a" if idx else "w",
+            )
             new_uptodate: Any = None
             if not isinstance(uptodate, dict):
                 new_uptodate = uptodate
             else:
                 key, value = list(uptodate.items())[0]
                 updater = self.entry_points.updaters[key]
-                new_uptodate = updater.get_update_function(value)
+                new_uptodate = updater.get_update_function(value, sub_execution_context)
             new_uptodates += [new_uptodate]
 
         return new_uptodates
@@ -236,10 +242,7 @@ class DoiTOML:
     def build_one_action(
         self,
         action: Action,
-        cwd: Path,
-        env: Dict[str, str],
-        log_paths: LogPaths,
-        log_mode: str,
+        execution_context: ExecutionContext,
     ) -> Optional[List[Action]]:
         """Build up a single action definition."""
         is_shell = isinstance(action, str)
@@ -249,23 +252,17 @@ class DoiTOML:
         if isinstance(action, dict):
             for actor in self.entry_points.actors.values():
                 if actor.knows(cast(dict, action)):
-                    return actor.perform_action(
-                        action,
-                        cwd,
-                        env,
-                        log_paths,
-                        log_mode,
-                    )
+                    return actor.perform_action(action, execution_context)
         if isinstance(action, (str, list)) and (is_shell or is_tokens):
-            popen_kwargs = {"cwd": cwd, "env": env}
-            if not any(log_paths):
+            popen_kwargs = {"cwd": execution_context.cwd, "env": execution_context.env}
+            if not any(execution_context.log_paths):
                 return [doit.tools.CmdAction(action, **popen_kwargs, shell=is_shell)]
 
             args = [action] if isinstance(action, str) else list(map(str, action))
             return [
                 (
                     self.logged_action,
-                    [args, log_paths, log_mode, popen_kwargs],
+                    [args, popen_kwargs, execution_context],
                 ),
             ]
         return None
@@ -273,17 +270,20 @@ class DoiTOML:
     def logged_action(
         self,
         args: List[str],
-        log_paths: LogPaths,
-        log_mode: str,
         popen_kwargs: Dict[str, Any],
+        execution_context: ExecutionContext,
     ) -> bool:
         """Run a process, capturing the output to files."""
-        stdout, stderr = ensure_parents(*log_paths)
+        stdout, stderr = ensure_parents(*execution_context.log_paths)
 
-        out = stdout.open(log_mode) if stdout else None
+        out = stdout.open(execution_context.log_mode) if stdout else None
         err = None
         if stderr:
-            err = subprocess.STDOUT if stdout == stderr else stderr.open(log_mode)
+            err = (
+                subprocess.STDOUT
+                if stdout == stderr
+                else stderr.open(execution_context.log_mode)
+            )
         streams: Dict[str, Any] = {"stdout": out, "stderr": err}
 
         rc = subprocess.call(args, **streams, **popen_kwargs)  # noqa: S603

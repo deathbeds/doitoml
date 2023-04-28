@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Any, Optional, cast
 
 import doit.tools
 
-from doitoml.types import FnAction
+from doitoml.types import ExecutionContext, FnAction
 
 from ._updater import Updater
 
@@ -34,7 +34,11 @@ class ConfigChanged(Updater):
             new_args = [self.resolve_one_arg(source, arg) for arg in uptodate_args]
         return pformat(new_args)
 
-    def get_update_function(self, uptodate: Any) -> FnAction:
+    def get_update_function(
+        self,
+        uptodate: Any,
+        execution_context: ExecutionContext,
+    ) -> FnAction:
         """Create a ``doit.tools.config_changed``."""
         return cast(FnAction, doit.tools.config_changed(uptodate))
 
@@ -55,12 +59,16 @@ class RunOnce(Updater):
 
     def transform_uptodate(
         self,
-        source: "ConfigSource",  # noqa: ARG002
-        uptodate_args: Any,  # noqa: ARG002
+        source: "ConfigSource",
+        uptodate_args: Any,
     ) -> Any:
         """Consume any input value as ``run_once`` takes no args."""
         return None
 
-    def get_update_function(self, uptodate: Any) -> FnAction:  # noqa: ARG002
+    def get_update_function(
+        self,
+        uptodate: Any,
+        execution_context: ExecutionContext,
+    ) -> FnAction:
         """Create a ``doit.tools.run_once``."""
         return cast(FnAction, doit.tools.run_once)

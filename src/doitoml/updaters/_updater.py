@@ -3,7 +3,7 @@
 import abc
 from typing import TYPE_CHECKING, Any
 
-from doitoml.types import FnAction
+from doitoml.types import ExecutionContext, FnAction
 
 if TYPE_CHECKING:
     from doitoml.doitoml import DoiTOML
@@ -25,5 +25,9 @@ class Updater:
         """Replace uptodate tokens with DSL."""
 
     @abc.abstractmethod
-    def get_update_function(self, uptodate: Any) -> FnAction:
+    def get_update_function(
+        self,
+        uptodate: Any,
+        execution_context: ExecutionContext,
+    ) -> FnAction:
         """Get the run-time update checker."""

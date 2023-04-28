@@ -8,7 +8,7 @@ own reusable utility packages.
 
 ### `py` action
 
-The `py` action provides a way to use arbitrary importable python names for actions, using
+The `py` action provides a way to use user-defined importable Python names for actions, using
 the `entry_point` notation of `module.submodule:function`. Many Python `stdlib` functions
 that accept simple, JSON-compatible values work out of the box.
 

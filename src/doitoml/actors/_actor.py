@@ -1,9 +1,8 @@
 """Base actor for ``doitoml``."""
 import abc
-from pathlib import Path
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional
 
-from doitoml.types import LogPaths
+from doitoml.types import ExecutionContext
 
 if TYPE_CHECKING:
     from doitoml.doitoml import DoiTOML
@@ -42,9 +41,6 @@ class Actor:
     def perform_action(
         self,
         action: Dict[str, Any],
-        cwd: Path,
-        env: Dict[str, str],
-        log_paths: LogPaths,
-        log_mode: str,
+        execution_context: ExecutionContext,
     ) -> List[CallableAction]:
         """Build a function that will fully resolve the action during task building."""

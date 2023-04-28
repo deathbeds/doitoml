@@ -1,8 +1,7 @@
 """Declarative actions for ``doitoml``."""
-from pathlib import Path
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional
 
-from doitoml.types import LogPaths
+from doitoml.types import ExecutionContext
 from doitoml.utils.py import make_py_function, parse_dotted_py, resolve_py_args
 
 if TYPE_CHECKING:
@@ -15,7 +14,7 @@ CallableAction = Callable[[], Optional[bool]]
 
 class PyActor(Actor):
 
-    """An actor for arbitrary Python functions."""
+    """An actor for user-defined Python functions."""
 
     def knows(self, action: Dict[str, Any]) -> bool:
         """Only handles ``py`` actions."""
@@ -44,23 +43,12 @@ class PyActor(Actor):
     def perform_action(
         self,
         action: Dict[str, Any],
-        cwd: Path,
-        env: Dict[str, str],
-        log_paths: LogPaths,
-        log_mode: str,
+        execution_context: ExecutionContext,
     ) -> List[CallableAction]:
         """Build a python callable."""
         path_dotted_func, args_kwargs = list(action["py"].items())[0]
 
         args, kwargs = args_kwargs["args"], args_kwargs["kwargs"]
         return [
-            make_py_function(
-                path_dotted_func,
-                args,
-                kwargs,
-                cwd,
-                env,
-                log_paths,
-                log_mode,
-            ),
+            make_py_function(path_dotted_func, args, kwargs, execution_context),
         ]

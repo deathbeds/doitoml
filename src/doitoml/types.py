@@ -1,7 +1,7 @@
 """Types for ``doitoml`` (but mostly ``doit``)."""
 from collections.abc import Callable, Generator
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, NamedTuple, Optional, Tuple, Union
 
 from typing_extensions import TypedDict
 
@@ -105,3 +105,13 @@ PrefixedStrings = Dict[Tuple[str, ...], List[str]]
 PrefixedStringsOrPaths = Dict[Tuple[str, ...], List[Union[str, Path]]]
 GroupedTasks = Dict[str, PrefixedTasks]
 LogPaths = Tuple[MaybePath, MaybePath]
+
+
+class ExecutionContext(NamedTuple):
+
+    """A collection of data relevant to starting a process or calling a function."""
+
+    cwd: Path
+    env: Dict[str, str]
+    log_paths: LogPaths
+    log_mode: str

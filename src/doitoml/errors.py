@@ -8,7 +8,7 @@ class DoitomlError(ValueError):
 
 class PyError(DoitomlError):
 
-    """An error related to discovering and calling arbitrary python functions."""
+    """An error related to discovering and calling user-defined Python functions."""
 
 
 class SchemaError(DoitomlError):
