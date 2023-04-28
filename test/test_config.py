@@ -33,7 +33,7 @@ if __name__ == "__main__":
     [
         (UnresolvedError, "resolve environment", {"env": {"a": "${b}"}}),
         (UnresolvedError, "resolve paths", {"paths": {"a": ["::b"]}}),
-        (UnresolvedError, "resolve commands", {"cmd": {"a": ["::b"]}}),
+        (UnresolvedError, "resolve commands", {"tokens": {"a": ["::b"]}}),
         (ConfigError, "not a dict", {"tasks": {"a": []}}),
         (UnresolvedError, "paths", {"tasks": {"a": {"actions": [["::b"]]}}}),
         (
@@ -115,7 +115,7 @@ def test_task_env(a_pyproject_with: TPyprojectMaker, script_runner: Any) -> None
             "doit": {"verbosity": 2, "loader": "doitoml"},
             "doitoml": {
                 "env": {"FOO": "bar0"},
-                "cmd": {"a": ["boo2"], "foo": ["python", "foo.py"]},
+                "tokens": {"a": ["boo2"], "foo": ["python", "foo.py"]},
                 "tasks": {
                     "foo": {
                         "meta": {"doitoml": {"env": {"FOO": "baz1"}}},
@@ -168,7 +168,7 @@ def test_log(
             "doit": {"verbosity": 2, "loader": "doitoml"},
             "doitoml": {
                 "env": {"FOO": "bar0"},
-                "cmd": {"foo": ["python", "foo.py"]},
+                "tokens": {"foo": ["python", "foo.py"]},
                 "tasks": {
                     "foo": {
                         "meta": {"doitoml": {"log": log}},

@@ -12,6 +12,8 @@ class DEFAULTS:
 
     """``doitoml`` config values."""
 
+    #: shell tokens
+    TOKENS: Literal["tokens"] = "tokens"
     #: the fallback config path
     CONFIG_PATH: Literal["./pyproject.toml"] = "./pyproject.toml"
     #: the key for extra sources

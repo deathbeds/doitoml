@@ -94,7 +94,7 @@ Get a version number.
 
 ## `::` Reference a path or token
 
-> Get the value of any `paths` or `cmd`, either in the same `doitoml` configuration file, or with a named prefix.
+> Get the value of any `paths` or `tokens`, either in the same `doitoml` configuration file, or with a named prefix.
 
 <div class="jp-Mermaid">
 
@@ -102,12 +102,12 @@ Get a version number.
 flowchart LR
 
 colon-colon --> namespaces --> token
-token -.-> path & cmd
+token -.-> path & tokens
 
 namespace -.-> prefix
 
 colon-colon([<code>::</code>])
-token([<code>::</code><i>cmd or path</i>])
+token([<code>::</code><i>token or path</i>])
 
 subgraph namespaces [0 or 1 namespace]
   namespace([<code>::</code><i>namespace</i>])
@@ -118,8 +118,8 @@ subgraph doitoml
   subgraph paths
     path("<code>some_path = [...]</code>")
   end
-  subgraph cmds [cmd]
-    cmd("<code>some_cmd = [...]</code>")
+  subgraph tokens [tokens]
+    tokens("<code>some_cmd = [...]</code>")
   end
 end
 ```

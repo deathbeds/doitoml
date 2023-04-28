@@ -28,7 +28,7 @@
         ".yarn/install-state.gz"
       ]
     },
-    "cmd": {
+    "tokens": {
       "prettier": [
         "yarn",
         "prettier",

@@ -84,7 +84,10 @@ class JsonE(Templater):
         return new_map
 
     def transform_task(self, source: "ConfigSource", task: Any) -> Any:
-        """Transform a task tempalte, with ``paths``, ``cmd`` and ``env`` in context."""
+        """Transform a task template.
+
+        ``paths``, ``tokens``, and ``env`` in context.
+        """
         if not task:
             message = f"Task template was unexpectedly empty {task}"
             raise JsonEError(message)

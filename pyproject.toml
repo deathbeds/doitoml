@@ -209,7 +209,7 @@ DOITOML_WHEEL = "doitoml-${DOITOML_VERSION}-py3-none-any.whl"
 PIP_DOWNLOAD_CACHE = "./build/.cache/pip"
 RUST_LOG = "error"
 
-[tool.doitoml.cmd]
+[tool.doitoml.tokens]
 sphinx_opts = ["-b", "html", "docs", "build/docs"]
 taplo_opts = [
   "--option=array_auto_collapse=true",

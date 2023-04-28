@@ -90,7 +90,7 @@ class Config:
     env: EnvDict
     paths: PrefixedPaths
     templates: PrefixedTemplates
-    cmd: PrefixedStringsOrPaths
+    tokens: PrefixedStringsOrPaths
     update_env: Optional[bool]
     fail_quietly: Optional[bool]
     discover_config_paths: Optional[bool]
@@ -114,7 +114,7 @@ class Config:
         self.tasks = {}
         self.paths = {}
         self.env = {}
-        self.cmd = {}
+        self.tokens = {}
         self.templates = {}
         self.update_env = update_env
         self.fail_quietly = fail_quietly
@@ -128,7 +128,9 @@ class Config:
             DoitomlSchema,
             {
                 "env": {k: str(v) for k, v in env.items()},
-                "cmd": {":".join(k): list(map(str, v)) for k, v in self.cmd.items()},
+                "tokens": {
+                    ":".join(k): list(map(str, v)) for k, v in self.tokens.items()
+                },
                 "paths": {
                     ":".join(k): list(map(str, v)) for k, v in self.paths.items()
                 },
@@ -390,8 +392,8 @@ class Config:
         """Find the prefixed paths declared in a single source."""
         raw_config = source.raw_config
         path_key: str
-        for path_key, path_specs in raw_config.get("cmd", {}).items():
-            found_cmds, unresolved_specs = self.resolve_some_path_specs(
+        for path_key, path_specs in raw_config.get(DEFAULTS.TOKENS, {}).items():
+            found_tokens, unresolved_specs = self.resolve_some_path_specs(
                 source,
                 path_specs,
                 source_relative=False,
@@ -400,7 +402,7 @@ class Config:
             if unresolved_specs:
                 unresolved_commands[source.prefix, path_key] = unresolved_specs
                 continue
-            self.cmd[source.prefix, path_key] = found_cmds
+            self.tokens[source.prefix, path_key] = found_tokens
             unresolved_commands.pop((source.prefix, path_key), None)
 
     def resolve_one_path_spec(

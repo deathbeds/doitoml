@@ -5,7 +5,7 @@ verbosity = 2
 [tool.doitoml]
 fail_quietly = false
 
-[tool.doitoml.cmd]
+[tool.doitoml.tokens]
 greets = ["hello", "goodbye"]
 
 [tool.doitoml.templates.jinja2.tasks.foo]
@@ -15,7 +15,7 @@ actions: [[echo, hello]]
 
 [tool.doitoml.templates.jinja2.tasks.foo2]
 yaml = """
-{% for g in cmd[":greets"] %}
+{% for g in tokens[":greets"] %}
 - name: {{ g }}
   actions: [[echo, {{ g }}]]
 {% endfor %}

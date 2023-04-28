@@ -7,10 +7,10 @@ description = "schema definitions for ``doitoml`` configuration"
 title = "doitoml Schema"
 description = "schema for ``doitoml`` configuration"
 type = "object"
-required = ["tasks", "cmd", "env", "paths"]
+required = ["tasks", "tokens", "env", "paths"]
 
 [definitions.config.properties]
-cmd = {"$ref" = "#/definitions/cmd", description = "named command tokens"}
+tokens = {"$ref" = "#/definitions/tokens", description = "named command tokens"}
 env = {"$ref" = "#/definitions/env", description = "environment variables"}
 paths = {"$ref" = "#/definitions/paths", description = "named paths"}
 tasks = {"$ref" = "#/definitions/tasks", description = "named tasks"}
@@ -96,7 +96,7 @@ title = "actor action"
 description = "a custom action"
 type = "object"
 
-[definitions.cmd]
+[definitions.tokens]
 title = "command tokens"
 type = "object"
 additionalProperties = {"$ref" = "#/definitions/array-of-strings"}

@@ -51,7 +51,7 @@ venv = ["./.venv"]
 venv_history = ["./.venv/conda-meta/history"]
 whl = ["dist/example_web-${EXAMPLE_PY_VERSION}-py3-none-any.whl"]
 
-[tool.doitoml.cmd]
+[tool.doitoml.tokens]
 conda_run = ["conda", "run", "--live-stream", "--prefix", "::venv"]
 
 [tool.doitoml.tasks.setup.env]

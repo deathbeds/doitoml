@@ -8,10 +8,10 @@
       "title": "doitoml Schema",
       "description": "schema for ``doitoml`` configuration",
       "type": "object",
-      "required": ["tasks", "cmd", "env", "paths"],
+      "required": ["tasks", "tokens", "env", "paths"],
       "properties": {
-        "cmd": {
-          "$ref": "#/definitions/cmd",
+        "tokens": {
+          "$ref": "#/definitions/tokens",
           "description": "named command tokens"
         },
         "env": {
@@ -188,7 +188,7 @@
       "description": "a custom action",
       "type": "object"
     },
-    "cmd": {
+    "tokens": {
       "title": "command tokens",
       "type": "object",
       "additionalProperties": {

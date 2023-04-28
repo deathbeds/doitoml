@@ -65,9 +65,9 @@ class PathRef(DSL):
         groups = match.groupdict()
         ref: str = groups["ref"]
         prefix: str = groups["prefix"] or source.prefix
-        cmds = self.doitoml.config.cmd.get((prefix, ref))
-        if cmds:
-            return cmds
+        tokens = self.doitoml.config.tokens.get((prefix, ref))
+        if tokens:
+            return tokens
         return self.doitoml.config.paths.get((prefix, ref))  # type: ignore
 
 

@@ -28,7 +28,10 @@ class Jinja2(Templater):
     """A templater driven by Jinja2."""
 
     def transform_task(self, source: "ConfigSource", task: Any) -> Any:
-        """Transform a task template, with ``paths``, ``cmd`` and ``env`` in context."""
+        """Transform a task template.
+
+        ``paths``, ``tokens``, and ``env`` in context.
+        """
         message: Optional[str] = None
         context = deepcopy(self.doitoml.config.to_dict())
 

@@ -45,7 +45,7 @@ class DoitomlSchema(TypedDict, total=False):
     schema for ``doitoml`` configuration
     """
 
-    cmd: Required["CommandTokens"]
+    tokens: Required["CommandTokens"]
     """ Required property """
 
     env: Required["EnvironmentVariables"]
