@@ -13,15 +13,42 @@
 
 [contributing guide]: https://github.com/deathbeds/doitoml/tree/main/CONTRIBUTING.md
 
+## Features
+
+- **declarative** automation in a **single** `pyproject.toml`, or...
+  - well-known configuration paths like `package.json`
+  - any number of prefixed TOML, JSON, or YAML files
+    - from any key inside them
+  - augment and simplify existing `dodo.py` workflows
+- reuse and transform **paths** and shell tokens
+  - use **globs** and transforms to capture relationships between transformed files
+- flexibly configure **environment** variables
+- use **templates** like Jinja2 and JSON-e for advanced use cases
+- user-defined Python-based **actions** and **up-to-date** checkers
+- control the **working directory** and **log paths** of processes and actions
+- extensibility in any part of the task definition process
+  - all functionality implemented as `entry_point`-based plugins
+
 ## Usage
+
+`doitoml` provides no additional command line abilities, and is meant to drop
+in to the existing `doit` CLI.
+
+> **Note**
+>
+> The [GitHub] repository for `doitoml` contains extensive examples of different
+> configurations, including its own `pyproject.toml`.
 
 ### A Simple Example
 
-The simplest way to use `doitoml` needs only a `pyproject.toml`, which `doit[toml]`
+The simplest way to use `doitoml` needs only a `pyproject.toml`, which `doit`
 will already check for configuration data.
 
 ```toml
 # pyproject.toml
+[project.optional-dependencies]
+dev = ["doitoml"]
+
 [tool.doit]
 loader = "doitoml"
 verbosity = 2
@@ -30,20 +57,26 @@ verbosity = 2
 actions = ['echo "Hello World!"']
 ```
 
-Running:
+After installing the dependency...
+
+```bash
+pip install -e .[dev]
+```
+
+... and running ...
 
 ```bash
 doit
 ```
 
-Will print out:
+... you would see ...
 
 ```bash
 .  hello:
 Hello World!
 ```
 
-See the [full documentation][docs] for more information about building concise,
+The [full documentation][docs] for more information about building concise,
 declarative, reproducible tasks for your project.
 
 ## Alternatives
@@ -64,3 +97,4 @@ your team do everything _The Hard Way_:
 
 [bsd-3-clause]: https://github.com/deathbeds/doitoml/tree/main/LICENSE.txt
 [docs]: https://doitoml.rtfd.io
+[github]: https://github.com/deathbeds/doitoml
