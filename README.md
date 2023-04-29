@@ -2,15 +2,13 @@
 
 > Load declarative tasks for [doit] from TOML, JSON, YAML, and other files.
 
-[doit]: https://github.com/pydoit/doit
-
 ## Install
 
-> TBD: for now, see the [contributing guide] for a development install. | `pip` |
-> `conda` (or `mamba`, `micromamba`) | |:-:|:-:| | `pip install doitoml` |
-> `conda install -c conda-forge doitoml`
-
-[contributing guide]: https://github.com/deathbeds/doitoml/tree/main/CONTRIBUTING.md
+> > **TBD** for now, see the [contributing guide] for a development install.
+>
+> |         `pip`         |   `conda` (or `mamba`, `micromamba`)   |
+> | :-------------------: | :------------------------------------: |
+> | `pip install doitoml` | `conda install -c conda-forge doitoml` |
 
 ## Features
 
@@ -95,5 +93,7 @@ do everything _The Hard Way_:
 `doitoml` is licensed under the [BSD-3-Clause] License.
 
 [bsd-3-clause]: https://github.com/deathbeds/doitoml/tree/main/LICENSE.txt
+[contributing guide]: https://github.com/deathbeds/doitoml/tree/main/CONTRIBUTING.md
 [docs]: https://doitoml.rtfd.io
+[doit]: https://github.com/pydoit/doit
 [github]: https://github.com/deathbeds/doitoml

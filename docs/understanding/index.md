@@ -3,8 +3,9 @@
 > understanding-oriented discussions
 
 ```{toctree}
-:maxdepth: 1
+:maxdepth: 2
 
-contributing
+doit-good
 extending
+contributing
 ```
