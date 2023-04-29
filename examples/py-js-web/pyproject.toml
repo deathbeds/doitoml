@@ -92,8 +92,8 @@ file_dep = ["::all_dist"]
 targets = ["::dist_hash"]
 
 [tool.__doitoml_tests__.steps.00_list]
-after = {files = {"*" = 9}}
-before = {files = {"**/*" = 15, "*" = 8}}
+after = {files = {"*" = 10}}
+before = {files = {"**/*" = 16, "*" = 9}}
 rc = 0
 run = ["doit", "list"]
 tasks = 10
