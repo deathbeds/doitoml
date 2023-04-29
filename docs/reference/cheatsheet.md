@@ -15,28 +15,28 @@
 
 > Put these in `doitoml.tasks.{task name}` to do things.
 
-| field title     | `doit` command | field data type                                | field description                                                               |
-| --------------- | :------------: | ---------------------------------------------- | ------------------------------------------------------------------------------- |
-| **`actions`**   |     `run`      | list of (_string_ or _list of strings_)        | the _shell_, _token_ or _function_ actions to peform                            |
-| **`name`**      |     _all_      | string                                         | identifier for `doit run`, etc.                                                 |
-| **`doc`**       | `list`, `info` | string                                         | diplayed with `doit list` and `info`                                            |
-| **`file_dep`**  |     `run`      | `run` list of strings or `Path`                | file dependencies which, if changed, invalidate a task status                   |
-| **`targets`**   |     `run`      | list of strings or `Path`                      | files created by a task                                                         |
-| **`title`**     |     `run`      | string or function                             | extra information to print with `doit run`                                      |
-| **`task_dep`**  |     `run`      | list of strings                                | other task ids which must have been run once before this tasks                  |
-| **`uptodate`**  |     `run`      | list of `bool` or functions                    | extra data which, if all false, invalidate a task status                        |
-| **`clean`**     |    `clean `    | `bool` or list of strings or paths or function | files to delete with `doit clean` (true cleans all `targets`)                   |
-| **`verbosity`** |     `run`      | `int`                                          | custom verbosity: `0` only print on failures, `1` stream errors, `2` stream all |
-| **`meta`**      |     `run`      | dict                                           | [custom metadata](#doitoml-task-metadata) for tasks                             |
-| **`uptodate`**  |     `run`      | list of (string, `None`, dict)                 | string shell commands or custom updaters indicating a task is up-to-date        |
+| field title     | `doit` command | field data type                                | field description                                                                 |
+| --------------- | :------------: | ---------------------------------------------- | --------------------------------------------------------------------------------- |
+| **`actions`**   |     `run`      | list of (_string_ or _list of strings_)        | the _shell_, _token_ or _function_ actions to peform                              |
+| **`name`**      |     _all_      | string                                         | identifier for `doit run`, etc.                                                   |
+| **`doc`**       | `list`, `info` | string                                         | diplayed with `doit list` and `info`                                              |
+| **`file_dep`**  |     `run`      | `run` list of strings or `Path`                | file dependencies which, if changed, invalidate a task status                     |
+| **`targets`**   |     `run`      | list of strings or `Path`                      | files created by a task                                                           |
+| **`title`**     |     `run`      | string or function                             | extra information to print with `doit run`                                        |
+| **`task_dep`**  |     `run`      | list of strings                                | other task ids which must have been run once before this task: uses `*` wildcards |
+| **`uptodate`**  |     `run`      | list of `bool` or functions                    | extra data which, if all false, invalidate a task status                          |
+| **`clean`**     |    `clean `    | `bool` or list of strings or paths or function | files to delete with `doit clean` (true cleans all `targets`)                     |
+| **`verbosity`** |     `run`      | `int`                                          | custom verbosity: `0` only print on failures, `1` stream errors, `2` stream all   |
+| **`meta`**      |     `run`      | dict                                           | [custom metadata](#doitoml-task-metadata) for tasks                               |
+| **`uptodate`**  |     `run`      | list of (string, `None`, dict)                 | string shell commands or custom updaters indicating a task is up-to-date          |
 
 <details>
 
 <summary><b>Why these fields? What about...</b></summary>
 
-> The [pydoit documentation](https://pydoit.org/tasks.html) provides a number of
-> other fields: many of these only make sense in a `dodo.py`, or otherwise don't
-> lend themselves cleanly to declarative, portable tasks.
+> The [pydoit documentation](https://pydoit.org/tasks.html) provides a number of other
+> fields: many of these only make sense in a `dodo.py`, or otherwise don't lend
+> themselves cleanly to declarative, portable tasks.
 
 </details>
 
@@ -68,4 +68,4 @@
 | **`update_env`**   | `true`  | `bool`          | use the `env` key to update the outer running environment variables                                    |
 | **`validate`**     | `true`  | `bool`          | use `jsonschema` to preflight tasks before `doit`                                                      |
 
-[dsl]: ./dsl.md
+[dsl]: ../how-to/dsl.md

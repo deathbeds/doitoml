@@ -6,8 +6,6 @@
     if (!diagrams.length) {
       return;
     }
-    import(`./{{ pathto("_static/js/mermaid.mjs", 1) }}`).then((mmd) =>
-      mmd.init()
-    );
+    import(`./{{ pathto("_static/js/mermaid.mjs", 1) }}`).then((mmd) => mmd.init());
   });
 </script>

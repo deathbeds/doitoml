@@ -37,9 +37,7 @@ function update() {
 
   async function renderOneMarmaid(parent) {
     parent.classList.remove("jp-RenderedMermaid");
-    [...parent.querySelectorAll("svg, .jp-mod-warning")].forEach((el) =>
-      el.remove()
-    );
+    [...parent.querySelectorAll("svg, .jp-mod-warning")].forEach((el) => el.remove());
     const id = `jp-mermaid-${_nextMermaidId++}`;
     let svgText = "";
     let error = "";
@@ -67,9 +65,7 @@ function update() {
     }
   }
 
-  void Promise.all(
-    [...document.querySelectorAll(".jp-Mermaid")].map(renderOneMarmaid)
-  );
+  void Promise.all([...document.querySelectorAll(".jp-Mermaid")].map(renderOneMarmaid));
 }
 
 export function init() {

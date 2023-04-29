@@ -28,7 +28,8 @@ Environment variables are shared across all `doitoml` configuration files.
 
 ## `:get` Get File Data
 
-> Read a piece of data from a path in a structured file: the result is usally cast to a JSON string, if neccessary.
+> Read a piece of data from a path in a structured file: the result is usally cast to a
+> JSON string, if neccessary.
 
 <div class="jp-Mermaid">
 
@@ -55,7 +56,8 @@ end
 
 </div>
 
-Use this to get data from a predictable location in a structured data file, such as a software package version.
+Use this to get data from a predictable location in a structured data file, such as a
+software package version.
 
 ### Examples
 
@@ -94,7 +96,8 @@ Get a version number.
 
 ## `::` Reference a path or token
 
-> Get the value of any `paths` or `tokens`, either in the same `doitoml` configuration file, or with a named prefix.
+> Get the value of any `paths` or `tokens`, either in the same `doitoml` configuration
+> file, or with a named prefix.
 
 <div class="jp-Mermaid">
 

@@ -6,10 +6,9 @@
 
 ## Install
 
-> TBD: for now, see the [contributing guide] for a development install.
-> | `pip` | `conda` (or `mamba`, `micromamba`) |
-> |:-:|:-:|
-> | `pip install doitoml` | `conda install -c conda-forge doitoml`
+> TBD: for now, see the [contributing guide] for a development install. | `pip` |
+> `conda` (or `mamba`, `micromamba`) | |:-:|:-:| | `pip install doitoml` |
+> `conda install -c conda-forge doitoml`
 
 [contributing guide]: https://github.com/deathbeds/doitoml/tree/main/CONTRIBUTING.md
 
@@ -17,7 +16,7 @@
 
 - **declarative** automation in a **single** `pyproject.toml`, or...
   - well-known configuration paths like `package.json`
-  - any number of prefixed TOML, JSON, or YAML files
+  - any number of namespaced TOML, JSON, or YAML files
     - from any key inside them
   - augment and simplify existing `dodo.py` workflows
 - reuse and transform **paths** and shell tokens
@@ -31,18 +30,21 @@
 
 ## Usage
 
-`doitoml` provides no additional command line abilities, and is meant to drop
-in to the existing `doit` CLI.
-
-> **Note**
->
-> The [GitHub] repository for `doitoml` contains extensive examples of different
-> configurations, including its own `pyproject.toml`.
+`doitoml` provides no additional command line abilities, and is meant to drop in to the
+existing `doit` CLI.
 
 ### A Simple Example
 
-The simplest way to use `doitoml` needs only a `pyproject.toml`, which `doit`
-will already check for configuration data.
+> **Note**
+>
+> The `doitoml` [GitHub] repository has many examples of different configurations,
+> including the project's own `pyproject.toml` and `package.json`.
+>
+> The [full documentation][docs] includes more information about building concise,
+> declarative, reproducible tasks for your project.
+
+The simplest way to use `doitoml` needs only a `pyproject.toml`, which `doit` will
+already check for configuration data.
 
 ```toml
 # pyproject.toml
@@ -57,7 +59,7 @@ verbosity = 2
 actions = ['echo "Hello World!"']
 ```
 
-After installing the dependency...
+After installing the `dev` extra dependency...
 
 ```bash
 pip install -e .[dev]
@@ -76,14 +78,11 @@ doit
 Hello World!
 ```
 
-The [full documentation][docs] for more information about building concise,
-declarative, reproducible tasks for your project.
-
 ## Alternatives
 
 If you don't like `doitoml`, or `doit`, or even Python, no worries! But **please**
-consider trying one of these lovely alternatives before giving up and making
-your team do everything _The Hard Way_:
+consider trying one of these lovely alternatives before giving up and making your team
+do everything _The Hard Way_:
 
 - [`doit`][doit]
 - [`go-task`](https://github.com/go-task/task)

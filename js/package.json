@@ -32,6 +32,7 @@
       "prettier": [
         "yarn",
         "prettier",
+        "--config=package.json",
         "--list-different",
         "--cache",
         "--cache-location=../build/.cache/prettier"
