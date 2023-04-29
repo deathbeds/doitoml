@@ -1,2 +1,5 @@
+build
 doit[toml]
 flit >=3.8,<4
+jsonschema[format]
+typing-extensions

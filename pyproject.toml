@@ -14,7 +14,11 @@ classifiers = [
   "Programming Language :: Python :: 3 :: Only",
   "Programming Language :: Python :: 3",
 ]
-dependencies = ["doit", "tomli", "typing-extensions"]
+dependencies = [
+  "doit",
+  "typing_extensions",
+  "tomli ; python_version<\"3.11\"",
+]
 [project.optional-dependencies]
 json-e = ["json-e"]
 jinja2 = ["jinja2"]
