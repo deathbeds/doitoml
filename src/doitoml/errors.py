@@ -6,6 +6,21 @@ class DoitomlError(ValueError):
     """Some kind of error in ``doitoml``."""
 
 
+class PyError(DoitomlError):
+
+    """An error related to discovering and calling user-defined Python functions."""
+
+
+class SchemaError(DoitomlError):
+
+    """An error related to a non-conforming ``doitoml`` configuration."""
+
+
+class MissingDependencyError(ValueError):
+
+    """An error related to a missing (optional) dependency."""
+
+
 class ConfigError(DoitomlError):
 
     """An error related to configuration."""
@@ -51,6 +66,31 @@ class TaskError(DoitomlError):
     """An error related to generating valid tasks."""
 
 
+class UpdaterError(TaskError):
+
+    """An error related to an up-to-date checker."""
+
+
+class MetaError(TaskError):
+
+    """An error related to ``doitoml`` task metadata."""
+
+
+class TemplaterError(ConfigError):
+
+    """An error related to templates."""
+
+
+class JsonEError(ConfigError):
+
+    """An error related to JSON-e."""
+
+
+class NoTemplaterError(TemplaterError):
+
+    """An error related to missing templaters."""
+
+
 class ActionError(TaskError):
 
     """An error related to task actions."""
@@ -64,3 +104,8 @@ class ActorError(ActionError):
 class NoActorError(ActorError):
 
     """An error related to a missing actor."""
+
+
+class Jinja2Error(ActorError):
+
+    """An error related to Jinja2 templates."""

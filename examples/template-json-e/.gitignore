@@ -1,0 +1,4 @@
+.doit*
+*/dist
+__pycache__
+dist

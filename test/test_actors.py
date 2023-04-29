@@ -1,16 +1,23 @@
 """Tests for (bad) ``doitoml`` ``Actors``."""
-from typing import Any
+from typing import Any, Type, cast
 
 import pytest
 from doitoml import DoiTOML
-from doitoml.errors import ActorError, NoActorError, TaskError
+from doitoml.errors import (
+    DoitomlError,
+    NoActorError,
+    PyError,
+    TaskError,
+    UnresolvedError,
+)
+from doitoml.types import Task
 
 from .conftest import TPyprojectMaker
 
+DEFAULT_META = {"meta": {"doitoml": {"cwd": "."}}}
 
-def test_no_actor(
-    a_pyproject_with: TPyprojectMaker,
-) -> None:
+
+def test_no_actor(a_pyproject_with: TPyprojectMaker) -> None:
     """Test a missing actor."""
     a_pyproject_with({"tasks": {"foo": {"actions": [{"foo": "bar"}]}}})
 
@@ -19,22 +26,32 @@ def test_no_actor(
 
 
 @pytest.mark.parametrize(
-    ("args", "message"),
+    ("args", "kwargs", "message", "error_klass"),
     [
-        (["::foo"], "unresolved positional"),
-        (0, "unusuable"),
-        ({"foo": 0}, "unresolved named"),
+        (["::foo"], {}, "unresolved", UnresolvedError),
+        ([], {"bar": "::baz"}, "unresolved", UnresolvedError),
+        (0, {}, "unusable positional", PyError),
+        ({"foo": 0}, {}, "unusable positional", PyError),
+        ([], False, "unusable named", PyError),
     ],
 )
 def test_bad_py_actor(
     a_pyproject_with: TPyprojectMaker,
     args: Any,
+    kwargs: Any,
     message: str,
+    error_klass: Type[DoitomlError],
 ) -> None:
     """Test a badly-built actor."""
-    a_pyproject_with({"tasks": {"foo": {"actions": [{"py": "1", "args": args}]}}})
+    a_pyproject_with(
+        {
+            "tasks": {
+                "foo": {"actions": [{"py": {"1:1": {"args": args, "kwargs": kwargs}}}]},
+            },
+        },
+    )
 
-    with pytest.raises(ActorError, match=message):
+    with pytest.raises(error_klass, match=message):
         DoiTOML(fail_quietly=False)
 
 
@@ -43,7 +60,8 @@ def test_bad_performance(a_pyproject_with: TPyprojectMaker) -> None:
     a_pyproject_with({"tasks": {}})
 
     doitoml = DoiTOML(fail_quietly=False)
-    doitoml.config.tasks[("", "baz")] = {"actions": [{"nope": False}]}  # type: ignore
+    task = cast(Task, {**DEFAULT_META, "actions": [{"nope": False}]})
+    doitoml.config.tasks[("", "baz")] = task
 
     tasks = doitoml.tasks()
 

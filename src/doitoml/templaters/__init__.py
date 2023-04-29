@@ -1,0 +1,1 @@
+"""Task templates for ``doitoml``."""

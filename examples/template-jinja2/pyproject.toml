@@ -1,0 +1,29 @@
+[tool.doit]
+loader = "doitoml"
+verbosity = 2
+
+[tool.doitoml]
+fail_quietly = false
+
+[tool.doitoml.tokens]
+greets = ["hello", "goodbye"]
+
+[tool.doitoml.templates.jinja2.tasks.foo]
+yaml = """
+actions: [[echo, hello]]
+"""
+
+[tool.doitoml.templates.jinja2.tasks.foo2]
+yaml = """
+{% for g in tokens[":greets"] %}
+- name: {{ g }}
+  actions: [[echo, {{ g }}]]
+{% endfor %}
+"""
+
+[tool.__doitoml_tests__.steps.00_list]
+after = {files = {"*" = 4}}
+before = {files = {"*" = 2}}
+rc = 0
+run = ["doit", "list"]
+tasks = 5

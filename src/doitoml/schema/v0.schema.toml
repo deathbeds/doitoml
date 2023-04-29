@@ -1,0 +1,112 @@
+"$id" = "https://doitoml.rtfd.io/en/latest/schema/v0.schema.json"
+"$ref" = "#/definitions/config"
+"$schema" = "http://json-schema.org/draft-07/schema#"
+description = "schema definitions for ``doitoml`` configuration"
+
+[definitions.config]
+title = "doitoml Schema"
+description = "schema for ``doitoml`` configuration"
+type = "object"
+required = ["tasks", "tokens", "env", "paths"]
+
+[definitions.config.properties]
+tokens = {"$ref" = "#/definitions/tokens", description = "named command tokens"}
+env = {"$ref" = "#/definitions/env", description = "environment variables"}
+paths = {"$ref" = "#/definitions/paths", description = "named paths"}
+tasks = {"$ref" = "#/definitions/tasks", description = "named tasks"}
+
+[definitions.array-of-strings]
+type = "array"
+items = {type = "string"}
+
+[definitions.array-of-paths]
+type = "array"
+items = {type = "string", minLength = 1}
+
+[definitions.tasks]
+type = "object"
+additionalProperties = {"$ref" = "#/definitions/task"}
+
+[definitions.task]
+title = "Task"
+type = "object"
+
+[definitions.task.properties]
+actions = {"$ref" = "#/definitions/actions"}
+calc_dep = {"$ref" = "#/definitions/array-of-paths"}
+doc = {type = "string"}
+file_dep = {"$ref" = "#/definitions/array-of-paths"}
+meta = {"$ref" = "#/definitions/meta"}
+name = {type = "string"}
+targets = {"$ref" = "#/definitions/array-of-paths"}
+title = {type = "string"}
+uptodate = {"$ref" = "#/definitions/uptodates"}
+verbosity = {type = "number", enum = [1, 2, 3]}
+watch = {"$ref" = "#/definitions/array-of-paths"}
+
+[definitions.meta]
+title = "Metadata"
+type = "object"
+properties = {doitoml = {"$ref" = "#/definitions/meta-doitoml"}}
+
+[definitions.meta-doitoml]
+title = "doitoml Metadataa"
+type = "object"
+additionalProperties = false
+required = ["cwd", "log", "source"]
+
+[definitions.meta-doitoml.properties]
+cwd = {type = "string"}
+env = {"$ref" = "#/definitions/env"}
+log = {type = "array", items = {oneOf = [{type = "string"}, {type = "null"}]}}
+skip = {type = "string"}
+source = {type = "string"}
+
+[definitions.actions]
+type = "array"
+items = {"$ref" = "#/definitions/action"}
+
+[definitions.action]
+title = "action"
+oneOf = [
+  {"$ref" = "#/definitions/action-shell"},
+  {"$ref" = "#/definitions/action-token"},
+  {"$ref" = "#/definitions/action-actor"},
+]
+
+[definitions.uptodates]
+type = "array"
+items = {"$ref" = "#/definitions/uptodate"}
+
+[definitions.uptodate]
+title = "uptodate"
+oneOf = [{type = "boolean"}, {type = "string"}, {type = "object"}, {type = "null"}]
+
+[definitions.action-token]
+title = "token action"
+type = "array"
+items = {type = "string"}
+
+[definitions.action-shell]
+title = "shell action"
+type = "string"
+
+[definitions.action-actor]
+title = "actor action"
+description = "a custom action"
+type = "object"
+
+[definitions.tokens]
+title = "command tokens"
+type = "object"
+additionalProperties = {"$ref" = "#/definitions/array-of-strings"}
+
+[definitions.env]
+title = "environment variables"
+type = "object"
+additionalProperties = {type = "string"}
+
+[definitions.paths]
+title = "path tokens"
+type = "object"
+additionalProperties = {"$ref" = "#/definitions/array-of-paths"}

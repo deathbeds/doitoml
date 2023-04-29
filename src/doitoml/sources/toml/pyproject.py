@@ -1,10 +1,9 @@
 """Handles path/task discovery in ``pyproject.toml``."""
 import re
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, cast
 
 from doitoml.constants import NAME
-from doitoml.errors import ParseError
 from doitoml.sources._config import ConfigParser, ConfigSource
 
 from ._toml import TomlSource
@@ -20,11 +19,7 @@ class PyprojectToml(TomlSource, ConfigSource):
     @property
     def raw_config(self) -> Dict[str, Any]:
         """Load ``doitoml`` configuration from ``pyproject.toml``."""
-        loaded = self.parse().get(TOOL, {}).get(NAME, {})
-        if not isinstance(loaded, dict):  # pragma: no cover
-            message = f"Expected a dictionary, found {type(loaded)}"
-            raise ParseError(message)
-        return loaded
+        return cast(Dict[str, Any], self.to_dict().get(TOOL, {}).get(NAME, {}))
 
 
 class PyprojectTomlParser(ConfigParser):

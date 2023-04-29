@@ -1,8 +1,7 @@
 """TOML sources."""
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
-from doitoml.errors import ParseError
 from doitoml.sources._source import JsonLikeSource, Parser
 
 try:  # pragma: no cover
@@ -15,13 +14,9 @@ class TomlSource(JsonLikeSource):
 
     """A source of configuration in TOML."""
 
-    def parse(self) -> Dict[str, Any]:
+    def parse(self, data: str) -> Any:
         """Parse the path with ``tomllib`` or equivalent."""
-        parsed = tomllib.load(self.path.open("rb"))
-        if not isinstance(parsed, dict):  # pragma: no cover
-            message = f"Expected a dictionary from {self.path}, found {type(parsed)}"
-            raise ParseError(message)
-        return parsed
+        return tomllib.loads(data)
 
 
 class TomlParser(Parser):

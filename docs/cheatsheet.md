@@ -1,3 +1,0 @@
-# Cheatsheet
-
-## `doit` tasks

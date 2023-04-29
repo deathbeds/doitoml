@@ -1,0 +1,91 @@
+{
+  "name": "@deathbeds/doitoml",
+  "version": "0.0.0",
+  "private": true,
+  "devDependencies": {
+    "prettier": "^2.8.7",
+    "prettier-plugin-sort-json": "^1.0.0"
+  },
+  "prettier": {
+    "printWidth": 88,
+    "proseWrap": "always"
+  },
+  "doitoml": {
+    "prefix": "js",
+    "paths": {
+      "all_prettier": [
+        ":glob::.::*.yml::*.json",
+        ":glob::..::*.md::*.json",
+        ":glob::../.binder::*.yml",
+        ":glob::../examples::*/*.json",
+        ":rglob::../src/doitoml/schema::*.json",
+        ":rglob::../docs::*.md::*.html::*.yml::*.css::*.mjs::!ipynb_checkpoints"
+      ],
+      "yarn_in": [
+        ":glob::.::yarn.lock"
+      ],
+      "yarn_out": [
+        ".yarn/install-state.gz"
+      ]
+    },
+    "tokens": {
+      "prettier": [
+        "yarn",
+        "prettier",
+        "--config=package.json",
+        "--list-different",
+        "--cache",
+        "--cache-location=../build/.cache/prettier"
+      ]
+    },
+    "tasks": {
+      "setup": {
+        "uptodate": [
+          {
+            "config_changed": [
+              ":get::json::package.json::devDependencies"
+            ]
+          }
+        ],
+        "file_dep": [
+          "::yarn_in"
+        ],
+        "targets": [
+          "::yarn_out"
+        ],
+        "actions": [
+          "yarn"
+        ]
+      },
+      "fix": {
+        "prettier": {
+          "file_dep": [
+            "::all_prettier",
+            "::yarn_out"
+          ],
+          "actions": [
+            [
+              "::prettier",
+              "--write",
+              "::all_prettier"
+            ]
+          ]
+        }
+      },
+      "lint": {
+        "prettier": {
+          "file_dep": [
+            "::all_prettier",
+            "::yarn_out"
+          ],
+          "actions": [
+            [
+              "::prettier",
+              "::all_prettier"
+            ]
+          ]
+        }
+      }
+    }
+  }
+}

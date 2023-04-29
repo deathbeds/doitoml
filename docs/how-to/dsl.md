@@ -4,6 +4,8 @@
 
 > Get the value of an environment variable. Usually executed before any other parsers.
 
+<div class="jp-Mermaid">
+
 ```{mermaid}
 flowchart LR
 
@@ -16,6 +18,8 @@ var-name([<i>a variable name</i>])
 any-after([<i>any text</i>])
 ```
 
+</div>
+
 Environment variables are shared across all `doitoml` configuration files.
 
 ### Examples
@@ -24,7 +28,10 @@ Environment variables are shared across all `doitoml` configuration files.
 
 ## `:get` Get File Data
 
-> Read a piece of data from a path in a structured file: the result is usally cast to a JSON string, if neccessary.
+> Read a piece of data from a path in a structured file: the result is usally cast to a
+> JSON string, if neccessary.
+
+<div class="jp-Mermaid">
 
 ```{mermaid}
 flowchart LR
@@ -47,10 +54,12 @@ subgraph selectors [1+ selectors]
 end
 ```
 
-Use this to get data from a predictable location in a structured data file, such as a software package version.
+</div>
+
+Use this to get data from a predictable location in a structured data file, such as a
+software package version.
 
 ### Examples
-
 
 ````{tab-set}
 
@@ -85,21 +94,23 @@ Get a version number.
 
 ````
 
-## `::` Reference a path or token 
+## `::` Reference a path or token
 
-> Get the value of any `paths` or `cmd`, either in the same `doitoml` configuration file, or with a named prefix.
+> Get the value of any `paths` or `tokens`, either in the same `doitoml` configuration
+> file, or with a named prefix.
 
+<div class="jp-Mermaid">
 
 ```{mermaid}
 flowchart LR
 
 colon-colon --> namespaces --> token
-token -.-> path & cmd
+token -.-> path & tokens
 
 namespace -.-> prefix
 
 colon-colon([<code>::</code>])
-token([<code>::</code><i>cmd or path</i>])
+token([<code>::</code><i>token or path</i>])
 
 subgraph namespaces [0 or 1 namespace]
   namespace([<code>::</code><i>namespace</i>])
@@ -110,17 +121,21 @@ subgraph doitoml
   subgraph paths
     path("<code>some_path = [...]</code>")
   end
-  subgraph cmds [cmd]
-    cmd("<code>some_cmd = [...]</code>")
+  subgraph tokens [tokens]
+    tokens("<code>some_cmd = [...]</code>")
   end
 end
 ```
+
+</div>
 
 ### Examples
 
 > TODO
 
 ## `:glob` Find files
+
+<div class="jp-Mermaid">
 
 ```{mermaid}
 flowchart LR
@@ -150,7 +165,8 @@ subgraph subs [0+ substitutions]
 end
 ```
 
-### Examples
+</div>
 
+### Examples
 
 > TODO

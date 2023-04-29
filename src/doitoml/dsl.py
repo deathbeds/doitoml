@@ -2,16 +2,18 @@
 
 import abc
 import json
+import os
 import re
 from pathlib import Path
-from typing import TYPE_CHECKING, List, Tuple, cast
+from typing import TYPE_CHECKING, Any, List, Tuple, cast
 
 from .errors import DslError
 from .types import PathOrStrings
 
-if TYPE_CHECKING:  # pragma: no cover
+if TYPE_CHECKING:
     from .doitoml import DoiTOML
     from .sources._config import ConfigSource
+    from .sources._source import Source
 
 
 class DSL:
@@ -38,6 +40,7 @@ class DSL:
         source: "ConfigSource",
         match: re.Match[str],
         raw_token: str,
+        **kwargs: Any,
     ) -> PathOrStrings:
         """Transform a token into one or more strings."""
 
@@ -56,14 +59,15 @@ class PathRef(DSL):
         source: "ConfigSource",
         match: re.Match[str],
         raw_token: str,
+        **kwargs: Any,
     ) -> PathOrStrings:
         """Expand a path name (with optional prefix) to a previously-found value."""
         groups = match.groupdict()
         ref: str = groups["ref"]
         prefix: str = groups["prefix"] or source.prefix
-        cmds = self.doitoml.config.cmd.get((prefix, ref))
-        if cmds:
-            return cmds
+        tokens = self.doitoml.config.tokens.get((prefix, ref))
+        if tokens:
+            return tokens
         return self.doitoml.config.paths.get((prefix, ref))  # type: ignore
 
 
@@ -85,6 +89,7 @@ class EnvReplacer(DSL):
         source: "ConfigSource",
         match: re.Match[str],
         raw_token: str,
+        **kwargs: Any,
     ) -> PathOrStrings:
         """Replace all environment variable with their value in ``os.environ``."""
         return [self.pattern.sub(self._replacer, raw_token)]
@@ -101,6 +106,7 @@ class Globber(DSL):
         source: "ConfigSource",
         match: re.Match[str],
         raw_token: str,
+        **kwargs: Any,
     ) -> PathOrStrings:
         """Expand a token to zero or more :class:`pathlib.Path` based on (r)glob(s).
 
@@ -142,10 +148,11 @@ class Globber(DSL):
 
         final_value = []
 
+        parent_posix = source.path.parent.as_posix()
         for path in new_value:
             as_posix = path.as_posix()
             if excludes:
-                as_posix_rel = str(path.relative_to(source.path.parent).as_posix())
+                as_posix_rel = str(Path(os.path.relpath(str(as_posix), parent_posix)))
                 if as_posix_rel and any(ex.search(as_posix_rel) for ex in excludes):
                     continue
             for pattern, repl_value in replacers:
@@ -182,12 +189,39 @@ class Getter(DSL):
         source: "ConfigSource",
         match: re.Match[str],
         raw_token: str,
+        **kwargs: Any,
     ) -> PathOrStrings:
         """Get a value from a parseable file, cast it to a string.
 
         All extra items are passed as positional arguments to the Source.
         """
+        new_source, bits = self.get_source_with_key(source, match, raw_token)
+
+        new_value = new_source.get(bits)
+
+        if isinstance(new_value, str):
+            return [new_value]
+
+        if isinstance(new_value, dict):
+            return [json.dumps(new_value)]
+
+        if isinstance(new_value, (int, float, bool)):
+            return [json.dumps(new_value)]
+
+        return [x if isinstance(x, str) else json.dumps(x) for x in new_value]
+
+    def get_source_with_key(
+        self,
+        source: "ConfigSource",
+        match: re.Match[str],
+        raw_token: str,
+    ) -> Tuple["Source", List[str]]:
+        """Find a raw source and its bits."""
         groups = match.groupdict()
+        path: str = groups["path"]
+        bits: List[str] = groups["rest"].split("::")
+        if len(bits) == 1 and not bits[0]:
+            bits = []
         # find the parser
         parser_name: str = groups["parser"]
         parser = self.doitoml.entry_points.parsers.get(parser_name)
@@ -196,20 +230,10 @@ class Getter(DSL):
             message = f"parser {parser} is not supported"
             raise DslError(message)
 
-        path: str = groups["path"]
-        bits = groups["rest"].split("::")
         get_path = (source.path.parent / path).resolve()
 
         if not get_path.exists():
             message = f"{get_path} does not exist, can't get {bits}"
             raise DslError(message)
-
-        new_value = parser(get_path).get(bits)
-
-        if isinstance(new_value, str):
-            return [new_value]
-
-        if isinstance(new_value, dict):
-            return [json.dumps(new_value)]
-
-        return [x if isinstance(x, str) else json.dumps(x) for x in new_value]
+        new_source = parser(get_path)
+        return new_source, bits

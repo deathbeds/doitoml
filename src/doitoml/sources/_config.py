@@ -2,15 +2,20 @@
 import abc
 import re
 from pathlib import Path
-from typing import Any, Dict, Tuple
+from typing import TYPE_CHECKING, Any, Dict, Generator, List, Optional, Tuple, cast
 
-from doitoml.constants import DOITOML_CONFIG_PATHS
-from doitoml.types import Paths
+from doitoml.constants import DEFAULTS
+from doitoml.errors import ConfigError
+from doitoml.types import Strings
 
 from ._source import Parser, Source
 
 #: the prefix key in ``doitoml`` configuration
 PREFIX = "prefix"
+
+if TYPE_CHECKING:
+    from doitoml import DoiTOML
+    from doitoml.dsl import Getter
 
 
 class ConfigSource(Source):
@@ -22,12 +27,27 @@ class ConfigSource(Source):
         """Get the prefix for this configuration source."""
         return self.raw_config.get(PREFIX, "")
 
-    @property
-    def extra_config_paths(self) -> Paths:
-        return [
-            (self.path.parent / path).resolve()
-            for path in self.raw_config.get(DOITOML_CONFIG_PATHS, [])
-        ]
+    def extra_config_sources(
+        self,
+        doitoml: "DoiTOML",
+    ) -> Generator["ConfigSource", None, None]:
+        getter: Optional["Getter"] = cast(
+            "Getter",
+            doitoml.entry_points.dsl.get("doitoml-colon-get"),
+        )
+
+        if getter is None:  # pragma: no cover
+            message = "Can't find getter DSL"
+            raise ConfigError(message)
+
+        for path_spec in self.raw_config.get(DEFAULTS.CONFIG_PATHS, []):
+            match = getter.pattern.search(path_spec)
+            if match:
+                child_source, bits = getter.get_source_with_key(self, match, path_spec)
+                yield WrapperConfigSource(child_source, bits)
+            else:
+                path = (self.path.parent / path_spec).resolve()
+                yield doitoml.config.load_config_source(path)
 
     @abc.abstractproperty
     def raw_config(self) -> Dict[str, Any]:
@@ -41,7 +61,48 @@ class ConfigSource(Source):
         return f"<{self.__class__.__name__} prefix='{self.prefix}' path='{self.path}'>"
 
 
+class WrapperConfigSource(ConfigSource):
+
+    """A config source which wraps another source with a specific root."""
+
+    child_source: Source
+    bit_prefix: Strings
+    _raw_config: Dict[str, Any]
+
+    def __init__(self, child_source: Source, bit_prefix: Strings) -> None:
+        """Initialize a source, remembering its child and ``get`` bits."""
+        self.bit_prefix = bit_prefix
+        self.child_source = child_source
+        self.path = child_source.path
+
+    def read(self) -> Any:  # pragma: no cover
+        message = "A wrapper source cannot `read`."
+        raise NotImplementedError(message)
+
+    def parse(self, data: str) -> Any:  # noqa: ARG002
+        message = "A wrapper source cannot `parse`."  # pragma: no cover
+        raise NotImplementedError(message)  # pragma: no cover
+
+    @property
+    def raw_config(self) -> Dict[str, Any]:
+        """Get the ``doitoml`` configuration from the prefixed child source."""
+        parsed = self.child_source.get(self.bit_prefix)
+        if not isinstance(parsed, dict):  # pragma: no cover
+            message = (
+                f"Expected dictionary from source {self.child_source}:{self.bit_prefix}"
+            )
+            raise ConfigError(message)
+        return parsed
+
+    def get(self, bits: List[Any]) -> Any:  # pragma: no cover
+        """Get a specific ``doitoml`` configuration piece."""
+        return self.child_source.get([*self.bit_prefix, *bits])
+
+
 class ConfigParser(Parser):
+
+    """A parser that knows how to find well-known sources."""
+
     @abc.abstractproperty
     def pattern(self) -> re.Pattern[str]:
         """Provide pattern of well-known file names this parser can load."""

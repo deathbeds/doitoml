@@ -1,4 +1,5 @@
 """Handles discovering, loading, and normalizing configuration."""
+import os
 from copy import deepcopy
 from pathlib import Path
 from pprint import pformat
@@ -14,28 +15,33 @@ from typing import (
     cast,
 )
 
-if TYPE_CHECKING:  # pragma: no cover
+if TYPE_CHECKING:
     from doitoml.doitoml import DoiTOML
 
 
 from doitoml.constants import (
-    DEFAULT_CONFIG_PATH,
-    DOIT_ACTIONS,
-    DOIT_PATH_RELATIVE_LISTS,
-    DOITOML_FAIL_QUIETLY,
-    DOITOML_UPDATE_ENV,
+    DEFAULTS,
+    DOIT_TASK,
+    DOITOML_META,
+    FALSEY,
+    NAME,
 )
 from doitoml.errors import (
     ActionError,
     ConfigError,
     DoitomlError,
+    MissingDependencyError,
     NoActorError,
     NoConfigError,
+    NoTemplaterError,
     PrefixError,
+    TemplaterError,
     UnresolvedError,
 )
 from doitoml.types import (
     Action,
+    LogPaths,
+    PathOrString,
     PathOrStrings,
     Paths,
     PrefixedPaths,
@@ -43,11 +49,13 @@ from doitoml.types import (
     PrefixedStringsOrPaths,
     PrefixedTaskGenerator,
     PrefixedTasks,
+    PrefixedTemplates,
     Strings,
     Task,
 )
 
-from .sources._config import ConfigSource
+from .schema._v0_schema import DoitomlSchema
+from .sources._config import ConfigParser, ConfigSource
 from .sources._source import Source
 
 Parsers = Dict[str, Type[Source]]
@@ -61,6 +69,16 @@ EnvDict = Dict[str, str]
 RETRIES = 11
 
 
+try:
+    from . import schema
+
+    HAS_JSONSCHEMA = True
+    JSONSCHEMA_ERROR = None
+except MissingDependencyError as err:
+    HAS_JSONSCHEMA = False
+    JSONSCHEMA_ERROR = f"cannot validate: {err}"
+
+
 class Config:
 
     """A composite configuration loaded from multiple ConfigSource."""
@@ -71,10 +89,12 @@ class Config:
     tasks: PrefixedTasks
     env: EnvDict
     paths: PrefixedPaths
-    cmd: PrefixedStringsOrPaths
+    templates: PrefixedTemplates
+    tokens: PrefixedStringsOrPaths
     update_env: Optional[bool]
     fail_quietly: Optional[bool]
     discover_config_paths: Optional[bool]
+    validate: bool
 
     def __init__(
         self,
@@ -84,18 +104,68 @@ class Config:
         update_env: Optional[bool] = None,
         fail_quietly: Optional[bool] = None,
         discover_config_paths: Optional[bool] = None,
+        validate: Optional[bool] = None,
     ) -> None:
         """Create empty configuration and discover sources."""
+        self.validate = HAS_JSONSCHEMA if validate is None else validate
         self.doitoml = doitoml
         self.config_paths = config_paths
         self.sources = {}
         self.tasks = {}
         self.paths = {}
         self.env = {}
-        self.cmd = {}
+        self.tokens = {}
+        self.templates = {}
         self.update_env = update_env
         self.fail_quietly = fail_quietly
         self.discover_config_paths = discover_config_paths
+
+    def to_dict(self) -> DoitomlSchema:
+        """Return a normalized subset of config data."""
+        env = dict(**self.env)
+        env.update(os.environ)
+        return cast(
+            DoitomlSchema,
+            {
+                "env": {k: str(v) for k, v in env.items()},
+                "tokens": {
+                    ":".join(k): list(map(str, v)) for k, v in self.tokens.items()
+                },
+                "paths": {
+                    ":".join(k): list(map(str, v)) for k, v in self.paths.items()
+                },
+                "tasks": {
+                    ":".join(k): self.task_to_dict(v) for k, v in self.tasks.items()
+                },
+                "templates": dict(self.templates.items()),
+            },
+        )
+
+    def task_to_dict(self, task: Task) -> Dict[str, Any]:
+        """Make a 'dumb' JSON object of a task."""
+        new_task = deepcopy(task)
+        if DOIT_TASK.ACTIONS in new_task:
+            new_actions: List[Action] = []
+            for action in new_task[DOIT_TASK.ACTIONS]:
+                if not isinstance(action, str) and isinstance(action, list):
+                    new_actions += [list(map(str, action))]
+                    continue
+                new_actions += [action]
+            new_task[DOIT_TASK.ACTIONS] = new_actions
+
+        for key in DOIT_TASK.RELATIVE_LISTS:
+            if key in new_task:
+                new_task[key] = list(map(str, new_task[key]))  # type: ignore
+
+        meta = new_task.setdefault(DOIT_TASK.META, {})  # type: ignore
+        dt_meta = meta.setdefault(NAME, {})
+
+        dt_meta[DOITOML_META.CWD] = str(dt_meta[DOITOML_META.CWD])
+        dt_log = dt_meta[DOITOML_META.LOG]
+        dt_meta[DOITOML_META.LOG] = [str(log) if log else None for log in dt_log]
+        dt_meta[DOITOML_META.SOURCE] = str(dt_meta[DOITOML_META.SOURCE])
+
+        return dict(new_task)
 
     def initialize(self) -> None:
         """Perform a few passes to configure everything."""
@@ -112,7 +182,7 @@ class Config:
             raise UnresolvedError(message)
 
         # load other top-level config values from the first config
-        for key in [DOITOML_UPDATE_ENV, DOITOML_FAIL_QUIETLY]:
+        for key in DEFAULTS.ALL_FROM_FIRST_CONFIG:
             if getattr(self, key, None) is None:
                 setattr(self, key, top_config.raw_config.get(key, True))
 
@@ -127,47 +197,55 @@ class Config:
         if unresolved_commands:
             message = f"Failed to resolve commands: {pformat(unresolved_commands)}"
             raise UnresolvedError(message)
+        self.init_templates()
 
         # .. then find the tasks
         self.init_tasks()
 
+        if self.validate:
+            self.validate_all()
+
+    def validate_all(self) -> None:
+        """Check for validation errors."""
+        schema.latest.validate(self.to_dict())
+
     def find_config_sources(self) -> ConfigSources:
         """Find all directly and referenced configuration sources."""
-        sources: ConfigSources = {}
-        unchecked = [*self.config_paths]
+        config_sources: ConfigSources = {}
+        unchecked_paths = [*self.config_paths]
 
-        if not unchecked:
-            unchecked += self.find_fallback_config_sources()
+        if not unchecked_paths:
+            unchecked_paths += self.find_fallback_config_sources()
 
-        if not unchecked:
-            path = self.doitoml.cwd / DEFAULT_CONFIG_PATH
+        if not unchecked_paths:
+            path = self.doitoml.cwd / DEFAULTS.CONFIG_PATH
             if path.exists():
-                unchecked += [path]
+                unchecked_paths += [path]
 
-        checked = []
+        while unchecked_paths:
+            config_path = unchecked_paths.pop(0)
+            config_source = self.load_config_source(Path(config_path))
+            self.find_one_config_source(config_source, config_sources)
 
-        while unchecked:
-            config_path = unchecked.pop(0)
-            checked += [config_path]
-            source = self.load_config_source(Path(config_path))
-            if source in sources.values() or not source.raw_config:
-                continue
-
-            self.claim_prefix(source, sources)
-
-            for extra_path in source.extra_config_paths:
-                if extra_path not in checked and extra_path not in unchecked:
-                    unchecked.append(extra_path)
-
-        if not sources:
-            message = "No config found in any of: " + (
-                "\n".join(
-                    [""] + [f"- {p}" for p in checked],
-                )
-            )
+        if not config_sources:
+            message = "No ``doitoml`` config found"
             raise NoConfigError(message)
 
-        return sources
+        return config_sources
+
+    def find_one_config_source(
+        self,
+        config_source: ConfigSource,
+        sources: ConfigSources,
+    ) -> None:
+        """Discover a config source and its potentially-nested extra sources."""
+        if config_source in sources.values() or not config_source.raw_config:
+            return
+
+        self.claim_prefix(config_source, sources)
+
+        for extra_source in config_source.extra_config_sources(self.doitoml):
+            self.find_one_config_source(extra_source, sources)
 
     def find_fallback_config_sources(self) -> Paths:
         """Find sources."""
@@ -191,17 +269,21 @@ class Config:
             raise PrefixError(message)
         sources[prefix] = source
 
-    def load_config_source(self, config_path: Path) -> ConfigSource:
-        """Maybe load a configuration source."""
+    def get_config_parser(self, config_path: Path) -> ConfigParser:
+        """Find the config parser for a path."""
         config_parsers = self.doitoml.entry_points.config_parsers
         tried = []
         for config_parser in config_parsers.values():
             if config_parser.pattern.search(config_path.name):
-                source = config_parser(config_path)
-                return source
+                return config_parser
             tried += [config_parser.pattern.pattern]
         message = f"Cannot load {config_path}: expected one of {tried}"
         raise ConfigError(message)
+
+    def load_config_source(self, config_path: Path) -> ConfigSource:
+        """Maybe load a configuration source."""
+        config_parser = self.get_config_parser(config_path)
+        return config_parser(config_path)
 
     def init_env(self, unresolved_env: EnvDict, retries: int) -> EnvDict:
         """Initialize the global environment variable."""
@@ -232,14 +314,16 @@ class Config:
 
     def resolve_one_env(self, source: ConfigSource, env_value: str) -> Optional[str]:
         """Resolve a single env member."""
+        new_value = env_value
         for dsl in self.doitoml.entry_points.dsl.values():
             match = dsl.pattern.search(env_value)
             if match is not None:
                 try:
-                    return str(dsl.transform_token(source, match, env_value)[0])
+                    new_value = str(dsl.transform_token(source, match, env_value)[0])
+                    break
                 except DoitomlError:
                     return None
-        return env_value
+        return new_value
 
     def init_paths(
         self,
@@ -308,8 +392,8 @@ class Config:
         """Find the prefixed paths declared in a single source."""
         raw_config = source.raw_config
         path_key: str
-        for path_key, path_specs in raw_config.get("cmd", {}).items():
-            found_cmds, unresolved_specs = self.resolve_some_path_specs(
+        for path_key, path_specs in raw_config.get(DEFAULTS.TOKENS, {}).items():
+            found_tokens, unresolved_specs = self.resolve_some_path_specs(
                 source,
                 path_specs,
                 source_relative=False,
@@ -318,7 +402,7 @@ class Config:
             if unresolved_specs:
                 unresolved_commands[source.prefix, path_key] = unresolved_specs
                 continue
-            self.cmd[source.prefix, path_key] = found_cmds
+            self.tokens[source.prefix, path_key] = found_tokens
             unresolved_commands.pop((source.prefix, path_key), None)
 
     def resolve_one_path_spec(
@@ -350,10 +434,44 @@ class Config:
 
         return [spec]
 
+    def init_templates(self) -> None:
+        """Copy templates (for now)."""
+        for prefix, source in self.sources.items():
+            raw_templates = source.raw_config.get("templates", {})
+            if raw_templates:
+                self.templates[prefix] = raw_templates
+
     def init_tasks(self) -> None:
         """Initialize all intermediate task representations."""
         for prefix, source in self.sources.items():
-            raw_tasks = source.raw_config.get("tasks", {})
+            raw_tasks = deepcopy(source.raw_config.get("tasks", {}))
+
+            if prefix in self.templates:
+                raw_templates = self.templates[prefix]
+                templaters = self.doitoml.entry_points.templaters
+                for templater_name, templater_kinds in raw_templates.items():
+                    templater = templaters.get(templater_name)
+                    if templater is None:
+                        message = (
+                            f"Templater {templater_name} not one of "
+                            f"""{", ".join(templaters.keys())}"""
+                        )
+                        raise NoTemplaterError(message)
+                    templater_tasks = deepcopy(templater_kinds.get("tasks", {}))
+
+                    if not isinstance(templater_tasks, dict):
+                        message = (
+                            f"Expected dictionary of tasks in {source}, found: "
+                            f"{templater_tasks}"
+                        )
+                        raise TemplaterError(message)
+                    for task_name, task in templater_tasks.items():
+                        templated = templater.transform_task(source, task)
+                        if isinstance(templated, dict):
+                            raw_tasks[task_name] = templated
+                        else:
+                            raw_tasks[task_name] = {t["name"]: t for t in templated}
+
             for task_prefix, task in self.resolve_one_task_or_group(
                 source,
                 (prefix,),
@@ -377,7 +495,20 @@ class Config:
         if not isinstance(task_or_group, dict):
             message = f"{source} task {prefixes} is not a dict: {task_or_group}"
             raise ConfigError(message)
-        maybe_old_actions = task_or_group.get(DOIT_ACTIONS, [])
+
+        maybe_old_actions: Optional[List[Action]] = task_or_group.get(
+            DOIT_TASK.ACTIONS,
+        )  # type: ignore
+
+        meta = cast(dict, task_or_group.get(DOIT_TASK.META))
+
+        if isinstance(meta, dict) and NAME in meta:
+            dt_meta = meta[NAME]
+            if isinstance(dt_meta, dict) and DOITOML_META.SKIP in dt_meta:
+                skip = dt_meta.get(DOITOML_META.SKIP)
+                if str(skip).strip().lower() not in FALSEY:
+                    return
+
         if maybe_old_actions:
             task = cast(Task, task_or_group)
             yield from self.resolve_one_task(source, prefixes, task)
@@ -399,36 +530,110 @@ class Config:
         task: Task,
     ) -> PrefixedTaskGenerator:
         """Resolve a single simple task."""
-        old_actions = cast(List[Action], task[DOIT_ACTIONS])  # type: ignore
-        new_task = deepcopy(task)
-        all_unresolved_specs: List[str] = []
-        new_actions: List[Action] = []
+        new_task = self.normalize_task_meta(source, task)
+        unresolved: List[Any] = []
+        unresolved += self.resolve_task_actions(source, new_task)
+        unresolved += self.resolve_task_uptodate(source, new_task)
 
-        for action in old_actions:
-            action_actions, unresolved_specs = self.resolve_one_action(source, action)
-            if unresolved_specs:
-                all_unresolved_specs += unresolved_specs
-                continue
-            new_actions += action_actions
-
-        new_task["actions"] = new_actions
-
-        for field in DOIT_PATH_RELATIVE_LISTS:
-            specs: Strings = task.get(field, [])  # type: ignore
-            new_paths, unresolved_specs = self.resolve_one_task_field(source, specs)
-            if unresolved_specs:
-                all_unresolved_specs += unresolved_specs
-                continue
-            new_task[field] = new_paths  # type: ignore
-
-        if all_unresolved_specs:
-            message = (
-                f"{source} task {prefixes} had unresolved paths:"
-                f" {all_unresolved_specs}"
+        for field in DOIT_TASK.RELATIVE_LISTS:
+            unresolved += self.resolve_one_task_list_field(
+                source,
+                new_task,
+                field,
             )
+
+        if unresolved:
+            message = f"{source} task {prefixes} had unresolved paths: {unresolved}"
             raise UnresolvedError(message)
 
         yield prefixes, new_task
+
+    def resolve_task_actions(self, source: ConfigSource, task: Task) -> List[str]:
+        """Get the new actions (and unresolved paths) for a task."""
+        new_actions: List[Action] = []
+
+        for action in task[DOIT_TASK.ACTIONS]:
+            action_actions, unresolved_specs = self.resolve_one_action(source, action)
+            if unresolved_specs:
+                return unresolved_specs
+            new_actions += action_actions
+
+        task[DOIT_TASK.ACTIONS] = new_actions
+
+        return []
+
+    def resolve_task_uptodate(self, source: ConfigSource, task: Task) -> List[str]:
+        """Transform some uptodate values."""
+        new_uptodate: List[Any] = []
+        for old_uptodate in task.get(DOIT_TASK.UPTODATE, []):
+            if isinstance(old_uptodate, dict):
+                uptodate, unresolved = self.resolve_one_uptodate(source, old_uptodate)
+                if unresolved:
+                    return unresolved
+                new_uptodate += [uptodate]
+            else:
+                new_uptodate += [old_uptodate]
+
+        if new_uptodate:
+            task[DOIT_TASK.UPTODATE] = new_uptodate
+
+        return []
+
+    def resolve_one_uptodate(
+        self,
+        source: ConfigSource,
+        uptodate: Dict[str, Any],
+    ) -> Tuple[Dict[str, Any], Strings]:
+        """Transform a single uptodate."""
+        for key, updater in self.doitoml.entry_points.updaters.items():
+            args = uptodate.get(key)
+            if args:
+                return {key: updater.transform_uptodate(source, args)}, []
+
+        return {}, [*uptodate.keys()]
+
+    def normalize_task_meta(self, source: ConfigSource, task: Task) -> Task:
+        """Normalize task metadata."""
+        new_task = deepcopy(task)
+        meta = cast(dict, cast(dict, new_task).setdefault(DOIT_TASK.META, {}))
+        dt_meta = cast(dict, meta.setdefault(NAME, {}))
+        dt_cwd = Path(dt_meta.get(DOITOML_META.CWD, source.path.parent))
+        dt_log_paths = self.build_log_paths(dt_meta.get(DOITOML_META.LOG), dt_cwd)
+        dt_meta[DOITOML_META.LOG] = dt_log_paths
+        dt_meta[DOITOML_META.CWD] = dt_cwd
+        dt_meta[DOITOML_META.SOURCE] = source
+        env = dt_meta.setdefault(DOITOML_META.ENV, {})
+        for env_key, env_value in env.items():
+            new_key_value = self.resolve_one_env(source, env_value)
+            env[env_key] = env_value if new_key_value is None else new_key_value
+        return new_task
+
+    def build_log_paths(
+        self,
+        log: Optional[Union[PathOrString, List[PathOrString]]],
+        cwd: Path,
+    ) -> LogPaths:
+        """Set up proper path behavior from log metadata."""
+        if not log:
+            return (None, None)
+        stdout_path = None
+        stderr_path = None
+        if isinstance(log, (str, Path)) and log:
+            stderr_path = stdout_path = cwd / log
+        else:
+            stdout_path, stderr_path = (
+                cwd / stream if stream else None for stream in log  # type: ignore
+            )
+
+        for path in [stderr_path, stdout_path]:
+            if path and path.is_dir():
+                message = f"A log path was a directory: {path}"
+                raise ConfigError(message)
+
+        if stderr_path is None and stdout_path is None:
+            message = f"Expected log to be a string, or {log}"
+            raise ConfigError(message)
+        return stdout_path, stderr_path
 
     def resolve_one_action(
         self,
@@ -486,13 +691,23 @@ class Config:
         message = f"No actor knew how to perform {action}, tried: {tried}"
         raise NoActorError(message)
 
-    def resolve_one_task_field(
+    def resolve_one_task_list_field(
         self,
         source: ConfigSource,
-        specs: List[str],
-    ) -> Tuple[PathOrStrings, Strings]:
+        task: Task,
+        field: str,
+    ) -> Strings:
         """Expand the members of a single field."""
-        return self.resolve_some_path_specs(source, specs, source_relative=True)
+        specs: Strings = task.get(field, [])  # type: ignore
+        new_paths, unresolved_specs = self.resolve_some_path_specs(
+            source,
+            specs,
+            source_relative=True,
+        )
+        if unresolved_specs:
+            return unresolved_specs
+        task[field] = new_paths  # type: ignore
+        return []
 
     def resolve_some_path_specs(
         self,

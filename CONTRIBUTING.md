@@ -14,10 +14,10 @@
 
 - [mambaforge](https://conda-forge.org/miniforge/)
 
-    ```bash
-    mamba env update --file .binder/environment.yml --prefix .venv
-    source activate ./.venv  # just `activate` on windows
-    ```
+  ```bash
+  mamba env update --file .binder/environment.yml --prefix .venv
+  source activate ./.venv  # just `activate` on windows
+  ```
 
 ### Setup with `pip`
 

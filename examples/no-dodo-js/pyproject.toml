@@ -1,3 +1,15 @@
 [tool.doit]
 loader = "doitoml"
 verbosity = 2
+
+[tool.__doitoml_tests__.steps.00_list]
+after = {files = {"*" = 5}}
+before = {files = {"**/*" = 3, "*" = 3}}
+rc = 0
+run = ["doit", "list"]
+tasks = 2
+
+[tool.__doitoml_tests__.steps.01_run]
+after = {files = {"*" = 6}}
+rc = 0
+run = ["doit"]

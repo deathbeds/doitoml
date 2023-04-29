@@ -3,4 +3,18 @@ loader = "doitoml"
 verbosity = 2
 
 [tool.doitoml.tasks.hello]
+uptodate = [{run_once = true}]
+
 actions = ['echo "hello world"']
+
+[tool.__doitoml_tests__.steps.00_list]
+after = {files = {"*" = 4}}
+before = {files = {"**/*" = 2, "*" = 2}}
+rc = 0
+run = ["doit", "list"]
+tasks = 2
+
+[tool.__doitoml_tests__.steps.01_run]
+after = {files = {"*" = 5}}
+rc = 0
+run = ["doit"]

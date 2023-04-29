@@ -8,19 +8,28 @@ dependencies:
   - python >=3.8,<3.12
   - tomli
   # optional
-  - orjson
-  - pysimdjson
+  - jinja2
+  - json-e
+  - jsonschema-with-format
+  - pyyaml
+  - types-jinja2
+  - types-jsonschema
+  - types-pyyaml
   # build
   - flit >=3.8
   - pip
   - python-build
   - twine
+  # codegen
+  - jsonschema-gentypes
   # lint
   - black
   - mypy
-  - pyproject-fmt
+  - nodejs >=18,<19
   - ruff
   - ssort
+  - taplo
+  - yarn >=3,<4
   # test
   - hypothesis-jsonschema
   - pytest
@@ -42,6 +51,7 @@ dependencies:
   - sphinx-autodoc-typehints
   - sphinx-copybutton
   - sphinx-design
+  - sphinx-jsonschema
   - sphinxcontrib-mermaid
   # check
   - pytest-check-links

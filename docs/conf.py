@@ -1,9 +1,30 @@
 """documentation for ``doitoml``."""
 import datetime
+import os
 import re
 from pathlib import Path
+from typing import Any, Tuple
 
 import tomli
+
+os.environ.update(IN_SPHINX="1")
+
+
+def patch_jsonschema() -> None:
+    """Apply some fixes to jsonschema tables."""
+    sphinx_jsonschema = __import__("sphinx-jsonschema")
+
+    _old_transform = sphinx_jsonschema.wide_format.WideFormat.transform
+
+    def transform_add_class(self: Any, schema: Any) -> Tuple[Any, Any]:
+        table, definitions = _old_transform(self, schema)
+        table.attributes["classes"] += ["jsonschema"]
+        return table, definitions
+
+    sphinx_jsonschema.wide_format.WideFormat.transform = transform_add_class
+
+
+patch_jsonschema()
 
 CONF_PY = Path(__file__)
 HERE = CONF_PY.parent
@@ -42,10 +63,14 @@ extensions = [
     "sphinx_copybutton",
     "sphinx_design",
     "sphinxcontrib.mermaid",
+    "sphinx-jsonschema",
 ]
 
 # content
 autoclass_content = "both"
+always_document_param_types = True
+typehints_defaults = "comma"
+typehints_use_signature_return = True
 autodoc_default_options = {
     "members": True,
     "show-inheritance": True,
@@ -59,14 +84,26 @@ intersphinx_mapping = {
 }
 
 mermaid_version = ""
-mermaid_init_js = False
+mermaid_init_js = "false"
+jsonschema_options = {
+    "lift_title": True,
+    "lift_description": True,
+    "lift_definitions": True,
+    "auto_reference": True,
+}
+
 
 # warnings
 suppress_warnings = ["autosectionlabel.*"]
 
 # theme
 templates_path = ["_templates"]
+html_static_path = ["_static"]
 html_theme = "pydata_sphinx_theme"
+html_logo = "_static/img/logo.svg"
+html_favicon = "_static/img/logo.svg"
+html_css_files = ["css/theme.css"]
+
 html_theme_options = {
     "github_url": PROJ_DATA["project"]["urls"]["Source"],
     "use_edit_page_button": REPO_INFO is not None,

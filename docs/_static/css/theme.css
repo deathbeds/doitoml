@@ -1,0 +1,54 @@
+/* variables */
+html[data-theme="light"],
+html[data-theme="dark"] {
+  --pst-color-primary: #9556cf;
+}
+
+html[data-theme="dark"] {
+  --pst-color-border: #444;
+}
+
+/* sphinx-design */
+.sd-tab-content {
+  border-top: solid 1px var(--pst-color-border);
+  box-shadow: unset;
+}
+
+/* mermaid */
+.jp-Mermaid > .mermaid,
+.jp-Mermaid:not(.jp-RenderedMermaid) {
+  display: none;
+}
+
+.jp-Mermaid > svg {
+  display: block;
+  margin: auto;
+}
+
+.jp-RenderedMermaid > .jp-mod-warning {
+  width: auto;
+  padding: 10px;
+}
+
+.jp-RenderedMermaid > .jp-mod-warning details > pre {
+  margin-top: 1em;
+}
+
+.jp-RenderedMermaid > .jp-mod-warning summary > pre {
+  display: inline-block;
+}
+
+/* jsonschema */
+table.jsonschema td {
+  padding: 0.125em;
+}
+
+table.jsonschema td:first-child ul {
+  font-family: var(--pst-font-family-monospace);
+  list-style: none;
+  font-weight: bold;
+}
+
+table.jsonschema h2 {
+  font-family: var(--pst-font-family-monospace);
+}

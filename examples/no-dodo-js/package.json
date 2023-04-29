@@ -2,6 +2,9 @@
   "doitoml": {
     "tasks": {
       "hello": {
+        "uptodate": [
+          null
+        ],
         "actions": [
           "echo \"Hello World!\""
         ]
