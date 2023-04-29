@@ -17,6 +17,7 @@
         ":glob::.::*.yml::*.json",
         ":glob::..::*.md::*.json",
         ":glob::../.binder::*.yml",
+        ":rglob::../.github::*.yml::*.md",
         ":glob::../examples::*/*.json",
         ":rglob::../src/doitoml/schema::*.json",
         ":rglob::../docs::*.md::*.html::*.yml::*.css::*.mjs::!ipynb_checkpoints"

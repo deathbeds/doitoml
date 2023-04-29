@@ -2,6 +2,7 @@
 set -eux
 
 # bootstrap the package
-doit
+doit bootstrap
 doit list
-doit preflight
+doit docs:sphinx
+doit list

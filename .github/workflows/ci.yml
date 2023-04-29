@@ -1,0 +1,138 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - "*"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHONUNBUFFERED: "1"
+  PIP_DISABLE_PIP_VERSION_CHECK: "1"
+  CI: "1"
+
+  # our stuff
+  ROBOT_RETRIES: "2"
+  CACHE_EPOCH: "4"
+  DOIT_N_BUILD: "-n4"
+  PABOT_PROCESSES: "3"
+
+jobs:
+  build:
+    name: build
+    runs-on: ${{ matrix.os }}-latest
+    strategy:
+      matrix:
+        os: [ubuntu]
+        python-version: ["3.11"]
+    defaults:
+      run:
+        shell: bash -l {0}
+    env:
+      BUILDING_IN_CI: "1"
+    outputs:
+      wheel: ${{ steps.wheel.outputs.wheel }}
+    steps:
+      - uses: actions/checkout@v3
+
+      # configure builtin providers
+      - name: setup (python)
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+          architecture: x64
+
+      # restore caches
+      - name: cache (pip)
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: |
+            ${{ env.CACHE_EPOCH }}-${{ runner.os }}-pip-build-${{ hashFiles('.github/reqs/build.txt') }}
+          restore-keys: |
+            ${{ env.CACHE_EPOCH }}-${{ runner.os }}-pip-build-
+
+      - name: setup (pip)
+        run: pip install -U pip wheel setuptools
+
+      - name: setup (pip build)
+        run: pip install -U -v -r .github/reqs/build.txt --no-build-isolation
+
+      - name: list
+        run: doit list --all --status
+
+      - name: build
+        run: doit ${{ env.DOIT_N_BUILD }} build || doit build
+
+      - name: status
+        run: doit list --all --status | sort
+        if: always()
+
+      - name: Upload (dist)
+        uses: actions/upload-artifact@v3
+        with:
+          name: doitoml-dist-${{ github.run_number }}
+          path: ./dist
+
+  test:
+    name: test (${{ matrix.os }} ${{ matrix.python-version }})
+    needs: [build]
+    runs-on: ${{ matrix.os }}-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ["ubuntu", "macos", "windows"]
+        python-version: ["3.8", "3.11"]
+    steps:
+      - name: configure line endings
+        run: |
+          git config --global core.autocrlf false
+
+      - name: checkout
+        uses: actions/checkout@v3
+
+      - name: install (conda)
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          environment-file: .binder/environment.yml
+          miniforge-variant: Mambaforge
+          use-mamba: true
+
+      - name: bootstrap (unix)
+        if: matrix.os != 'windows'
+        shell: bash -l {0}
+        run: doit bootstrap
+
+      - name: bootstrap (windows)
+        if: matrix.os == 'windows'
+        shell: cmd /C CALL {0}
+        run: doit bootstrap
+
+      - name: test (unix)
+        if: matrix.os != 'windows'
+        shell: bash -l {0}
+        run: doit test
+
+      - name: test (windows)
+        if: matrix.os == 'windows'
+        shell: cmd /C CALL {0}
+        run: doit test
+
+      - name: upload (reports)
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: |-
+            doitoml-test-${{ matrix.os }}-${{matrix.python-version }}-${{ github.run_number }}
+          path: ./build/reports
+
+      - name: Rename uncached conda packages
+        shell: bash
+        run: mv "${CONDA_PKGS_DIR}" "${CONDA_PKGS_DIR}_do_not_cache"
