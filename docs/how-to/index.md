@@ -3,8 +3,10 @@
 > goal-oriented how-to guides
 
 ```{toctree}
-:maxdepth: 1
+:maxdepth: 2
 
 dsl
+logging
+user-python
 templates
 ```

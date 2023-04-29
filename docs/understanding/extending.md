@@ -1,58 +1,59 @@
 # Extending
 
-The `doitoml` data model can be extended in a number of places, either by using existing
-extensible entry points or installing additional packages or creating your own reusable
-utility packages.
+The `doitoml` data model can be extended in a number of places, either by:
 
-## Simple Python extensions
-
-### `py` action
-
-The `py` action provides a way to use user-defined importable Python names for actions,
-using the `entry_point` notation of `module.submodule:function`.
-
-The imported function must return `None` or `True` on _success_. A return value of
-`False`, or any raised `Exception`, is considered a _failure_, and any other return
-value is an _error_.
-
-Many Python `stdlib` functions that accept simple, JSON-compatible values work out of
-the box.
-
-````{tab-set}
-
-  ~~~{tab-item} pyproject.toml
-  ```toml
-  [tool.doitoml.tasks.copy]
-  actions = [
-      { py = "shutil:copytree", kwargs = { src = "from/path/", dst = "to/path" } }
-  ]
-  ```
-  ~~~
-
-  ~~~{tab-item} package.json
-  ```json
-  {
-    "doitoml": {
-      "tasks": {
-        "copy": {
-          "actions": {
-            "py": {
-              "shutil:copytree": {
-                "kwargs": {"src": "from/path/", "dst": "to/path/"}
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-  ```
-  ~~~
-
-````
+- using existing extensible features with
+  [custom Python functions](../how-to/user-python.md)
+- creating reusable utility packages
+- installing additional packages that define new DSL, parsers, etc.
 
 ## Building new extensions
 
 See the [API](../reference/api.md) for more information: most existing functionality is
 implemented as modular components, including DSL extensions, config sources, custom
 actions, and more.
+
+### Advertising an extension
+
+Python's `entry_points` feature allows for installed third-party packages to register
+new features based on well-known strings.
+
+<details>
+
+<summary>
+  For example, here are the core plugins that define <code>doitoml</code>'s behavior.
+</summary>
+
+```toml
+[project.entry-points."doitoml.actor.v0"]
+py = "doitoml.actors.py:PyActor"
+[project.entry-points."doitoml.config-parser.v0"]
+doitoml-package-json = "doitoml.sources.json.package:PackageJsonParser"
+doitoml-pyproject-toml = "doitoml.sources.toml.pyproject:PyprojectTomlParser"
+[project.entry-points."doitoml.dsl.v0"]
+doitoml-colon-colon-path = "doitoml.dsl:PathRef"
+doitoml-colon-get = "doitoml.dsl:Getter"
+doitoml-colon-glob = "doitoml.dsl:Globber"
+doitoml-dollar-env = "doitoml.dsl:EnvReplacer"
+[project.entry-points."doitoml.parser.v0"]
+json = "doitoml.sources.json._json:JsonParser"
+toml = "doitoml.sources.toml._toml:TomlParser"
+yaml = "doitoml.sources.yaml._yaml:YamlParser"
+[project.entry-points."doitoml.templater.v0"]
+json-e = "doitoml.templaters.jsone:JsonE"
+jinja2 = "doitoml.templaters.jinja2:Jinja2"
+[project.entry-points."doitoml.updater.v0"]
+config_changed = "doitoml.updaters.doit_tools:ConfigChanged"
+run_once = "doitoml.updaters.doit_tools:RunOnce"
+py = "doitoml.updaters.py:PyUpdater"
+```
+
+</details>
+
+#### `entry_point` rank
+
+All entry points may offer a `rank` (default of `100`) that controls the order they will
+be checked. This allows third-party extensions to overload some of the built-in
+behaviors, by ensuring they run first.
+
+Ties are resolved by the `entry_point` name.
