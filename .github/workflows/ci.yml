@@ -65,6 +65,9 @@ jobs:
       - name: setup (pip build)
         run: pip install -U -v -r .github/reqs/build.txt --no-build-isolation
 
+      - name: bootstrap
+        run: doit bootstrap
+
       - name: list
         run: doit list --all --status
 

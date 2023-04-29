@@ -14,7 +14,7 @@ classifiers = [
   "Programming Language :: Python :: 3 :: Only",
   "Programming Language :: Python :: 3",
 ]
-dependencies = ["doit", "jinja2", "tomli", "typing-extensions"]
+dependencies = ["doit", "tomli", "typing-extensions"]
 [project.optional-dependencies]
 json-e = ["json-e"]
 jinja2 = ["jinja2"]

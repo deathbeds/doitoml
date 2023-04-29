@@ -1,1 +1,2 @@
 doit[toml]
+flit >=3.8,<4
