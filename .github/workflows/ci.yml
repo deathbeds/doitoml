@@ -117,7 +117,7 @@ jobs:
         run: doit bootstrap
 
       - name: full lint
-        if: matrix.os == 'linux' && matrix.python-version == '3.11'
+        if: matrix.os == 'ubuntu'
         shell: cmd /C CALL {0}
         run: doit lint
 
