@@ -56,7 +56,17 @@ conda_run = ["conda", "run", "--live-stream", "--prefix", "::venv"]
 pyproject_build = ["::conda_run", "python", "-m", "build"]
 
 [tool.doitoml.tasks.setup.env]
-actions = [["mamba", "env", "update", "--file", "::env_yml", "--prefix", "::venv"]]
+actions = [
+  [
+    "${CONDA_EXE}",
+    "env",
+    "update",
+    "--file",
+    "::env_yml",
+    "--prefix",
+    "::venv",
+  ],
+]
 file_dep = ["::env_yml"]
 targets = ["::venv_history"]
 
