@@ -1,6 +1,7 @@
 # DSL
 
-The _`doit`-specific language_ provides some declarative shortcuts to techniques that usually require more complex Python or shell.
+The _`doit`-specific language_ provides some declarative shortcuts to techniques that
+usually require more complex Python or shell.
 
 ## `${}` Get Environment Variables
 

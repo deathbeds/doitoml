@@ -69,7 +69,7 @@ jobs:
         run: doit bootstrap
 
       - name: lint
-        run: doit -n8 lint:ruff lint:black
+        run: doit -n8 lint:py:ruff lint:py:black
 
       - name: list
         run: doit list --all --status
@@ -116,7 +116,7 @@ jobs:
         shell: bash -l {0}
         run: doit bootstrap
 
-      - name: full lint
+      - name: lint
         if: matrix.os == 'ubuntu'
         shell: cmd /C CALL {0}
         run: doit lint

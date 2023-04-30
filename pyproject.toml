@@ -336,20 +336,25 @@ doc = "Format TOML with taplo"
 file_dep = ["::all_toml"]
 actions = [["taplo", "fmt", "::taplo_opts", "::all_toml"]]
 
-[tool.doitoml.tasks.lint.black]
+[tool.doitoml.tasks.lint.py.black]
 doc = "Check python formatting with `black`"
 file_dep = ["::ppt", "::all_py"]
 actions = [["black", "--quiet", "--check", "::all_py"]]
 
-[tool.doitoml.tasks.lint.ruff]
+[tool.doitoml.tasks.lint.py.ruff]
 doc = "Check python syntax with `ruff`"
 file_dep = ["::ppt", "::all_py"]
 actions = [["ruff", "::all_py"]]
 
-[tool.doitoml.tasks.lint.mypy]
+[tool.doitoml.tasks.lint.py.mypy]
 doc = "Check python types with `mypy`"
 file_dep = ["::ppt", "::all_py"]
 actions = [["mypy", "::all_py"]]
+
+[tool.doitoml.tasks.lint.ALL]
+doc = "Lint everything"
+task_dep = ["lint:py:*", "js:lint:*"]
+actions = [["echo", "OK"]]
 
 [tool.doitoml.tasks.test.preflight]
 doc = "Prepare for testing"
