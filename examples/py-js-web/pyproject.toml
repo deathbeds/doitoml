@@ -52,8 +52,7 @@ whl = ["dist/example_web-${EXAMPLE_PY_VERSION}-py3-none-any.whl"]
 
 [tool.doitoml.tokens]
 conda_run = ["conda", "run", "--live-stream", "--prefix", "::venv"]
-# TOOD: revisit when upstream python-build ships the ``pyproject-build`` CLI
-pyproject_build = ["::conda_run", "python", "-m", "build"]
+pyproject_build = ["::conda_run", "pyproject-build"]
 
 [tool.doitoml.tasks.setup.env]
 actions = [
