@@ -77,8 +77,7 @@
         ],
         "actions": [
           [
-            "::backend::conda_run",
-            "yarn"
+            "::backend::yarn_exe"
           ]
         ]
       },
@@ -95,8 +94,7 @@
           ],
           "actions": [
             [
-              "::backend::conda_run",
-              "yarn",
+              "::backend::yarn_exe",
               "build:lib"
             ]
           ]
@@ -113,8 +111,7 @@
           ],
           "actions": [
             [
-              "::backend::conda_run",
-              "yarn",
+              "::backend::yarn_exe",
               "build:dist"
             ]
           ]
