@@ -28,7 +28,7 @@ except Exception as err:
 
 
 if HAS_DOITOML:
-    doitoml = DoiTOML()
+    doitoml = DoiTOML(fail_quietly=False)
     tasks = doitoml.tasks()
     globals().update(tasks)
 else:

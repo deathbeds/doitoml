@@ -41,7 +41,6 @@ from doitoml.errors import (
 from doitoml.types import (
     Action,
     LogPaths,
-    PathOrString,
     PathOrStrings,
     Paths,
     PrefixedPaths,
@@ -410,11 +409,14 @@ class Config:
         source: ConfigSource,
         spec: str,
         source_relative: bool,
+        cwd: Optional[Path] = None,
     ) -> Optional[PathOrStrings]:
         """Resolve a single path in a task or one of the special field tables.
 
         If ``source_relative``, transform unparsed strings into a path.
         """
+        cwd = cwd or source.path.parent
+
         resolved = []
         for dsl in self.doitoml.entry_points.dsl.values():
             match = dsl.pattern.search(spec)
@@ -426,11 +428,11 @@ class Config:
 
         if resolved:
             if source_relative:
-                return [(source.path.parent / r).resolve() for r in resolved]
+                return [(cwd / r).resolve() for r in resolved]
             return resolved
 
         if source_relative:
-            return [(source.path.parent / spec).resolve()]
+            return [(cwd / spec).resolve()]
 
         return [spec]
 
@@ -598,7 +600,11 @@ class Config:
         meta = cast(dict, cast(dict, new_task).setdefault(DOIT_TASK.META, {}))
         dt_meta = cast(dict, meta.setdefault(NAME, {}))
         dt_cwd = Path(dt_meta.get(DOITOML_META.CWD, source.path.parent))
-        dt_log_paths = self.build_log_paths(dt_meta.get(DOITOML_META.LOG), dt_cwd)
+        dt_log_paths = self.build_log_paths(
+            source,
+            dt_meta.get(DOITOML_META.LOG),
+            dt_cwd,
+        )
         dt_meta[DOITOML_META.LOG] = dt_log_paths
         dt_meta[DOITOML_META.CWD] = dt_cwd
         dt_meta[DOITOML_META.SOURCE] = source
@@ -610,30 +616,48 @@ class Config:
 
     def build_log_paths(
         self,
-        log: Optional[Union[PathOrString, List[PathOrString]]],
+        source: ConfigSource,
+        log: Optional[Union[str, List[str]]],
         cwd: Path,
     ) -> LogPaths:
         """Set up proper path behavior from log metadata."""
         if not log:
             return (None, None)
-        stdout_path = None
-        stderr_path = None
-        if isinstance(log, (str, Path)) and log:
-            stderr_path = stdout_path = cwd / log
-        else:
-            stdout_path, stderr_path = (
-                cwd / stream if stream else None for stream in log  # type: ignore
+
+        if isinstance(log, str) and log:
+            log = [log, log]
+
+        maybe_paths: List[Optional[Path]] = [None, None]
+
+        for i, stream in enumerate(log):
+            if not stream:
+                continue
+            maybe_stream_path = self.resolve_one_path_spec(
+                source,
+                str(stream),
+                source_relative=True,
+                cwd=cwd,
             )
 
+            if not maybe_stream_path:  # pragma: no cover
+                message = f"Unresolved log path {stream}"
+                raise ConfigError(message)
+
+            maybe_paths[i] = Path(maybe_stream_path[0])
+
+        return self.check_log_paths(*maybe_paths)
+
+    def check_log_paths(self, stderr_path: Any, stdout_path: Any) -> LogPaths:
+        """Verify log paths."""
         for path in [stderr_path, stdout_path]:
             if path and path.is_dir():
                 message = f"A log path was a directory: {path}"
                 raise ConfigError(message)
 
         if stderr_path is None and stdout_path is None:
-            message = f"Expected log to be a string, or {log}"
+            message = "Expected log to be a string, or list of strings"
             raise ConfigError(message)
-        return stdout_path, stderr_path
+        return cast(LogPaths, (stderr_path, stdout_path))
 
     def resolve_one_action(
         self,

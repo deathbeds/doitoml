@@ -264,6 +264,7 @@ bootstrap_txt = ["build/bootstrap.txt"]
 schema_toml = ["src/doitoml/schema/v0.schema.toml"]
 schema_json = ["src/doitoml/schema/_v0.schema.json"]
 schema_py = ["src/doitoml/schema/_v0_schema.py"]
+source_date_epoch = ["build/SOURCE_DATE_EPOCH"]
 
 [tool.doitoml.tasks.bootstrap]
 meta = {doitoml = {log = "build/bootstrap.txt"}}
@@ -292,11 +293,16 @@ actions = [
 [[tool.doitoml.tasks.bootstrap.uptodate]]
 config_changed = [":get::toml::pyproject.toml::project::entry-points"]
 
+[tool.doitoml.tasks.build.source_date_epoch]
+doc = "Get SOURCE_DATE_EPOCH from git"
+actions = [["git", "log", "-1", "--pretty=%ct"]]
+meta = {doitoml = {log = "::source_date_epoch"}}
+
 [tool.doitoml.tasks.build.pypi]
 doc = "Build distributions for PyPI"
 file_dep = ["::all_py_dist"]
 targets = ["::whl", "::sdist"]
-actions = [["pyproject-build", "-nx"]]
+actions = [["flit", "build"]]
 
 [tool.doitoml.tasks.build.hashfile]
 doc = "Generate a hashfile"
@@ -392,7 +398,6 @@ doc = "build JSON Schema from TOML Schema"
 file_dep = ["::schema_toml"]
 targets = ["::schema_json"]
 actions = [{py = {"_actions:toml2json" = {args = ["::schema_toml", "::schema_json"]}}}]
-meta = {doitoml = {log = "src/doitoml/schema/_v0.schema.json"}}
 
 [tool.doitoml.tasks.gen.types]
 doc = "build typings from JSON Schema"
