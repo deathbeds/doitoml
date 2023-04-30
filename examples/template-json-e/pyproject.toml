@@ -7,7 +7,7 @@ SKIP = "c"
 
 [tool.doitoml.paths]
 all_sha256 = ["dist/SHA256SUMS"]
-pkg = [":glob::.::*/pyproject.toml::/s/::pyproject.toml::"]
+pkg = [":glob::.::*/pyproject.toml::/s/::([^/]+?)/pyproject.toml::\\1"]
 
 [tool.doitoml.templates.json-e.tasks.echo]
 actions = [
