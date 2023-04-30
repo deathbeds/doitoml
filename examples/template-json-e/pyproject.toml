@@ -29,7 +29,9 @@ doc = "env var references need to be escaped"
 meta = {doitoml = {cwd = "${pkg}", skip = "${split(pkg, '/')[-1] in split(env.SKIP, ',')}"}}
 actions = [
   [
-    "pyproject-build",
+    "python",
+    "-m",
+    "build",
     "--no-isolation",
     "--sdist",
   ],
