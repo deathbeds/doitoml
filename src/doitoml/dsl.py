@@ -149,6 +149,7 @@ class Globber(DSL):
         final_value = []
 
         parent_posix = source.path.parent.as_posix()
+        as_posix_rel = None
         for path in new_value:
             as_posix = path.as_posix()
             if excludes:

@@ -166,6 +166,13 @@
 
 ## Utilities
 
+### JSON Utilities
+
+```{eval-rst}
+.. currentmodule:: doitoml
+.. automodule:: doitoml.utils.json
+```
+
 ### Log
 
 ```{eval-rst}
@@ -173,7 +180,7 @@
 .. automodule:: doitoml.utils.log
 ```
 
-### Custom Python
+### Paths
 
 ```{eval-rst}
 .. currentmodule:: doitoml

@@ -15,6 +15,8 @@ from typing import (
     cast,
 )
 
+from doitoml.utils.json import to_json
+
 if TYPE_CHECKING:
     from doitoml.doitoml import DoiTOML
 
@@ -123,21 +125,20 @@ class Config:
         """Return a normalized subset of config data."""
         env = dict(**self.env)
         env.update(os.environ)
+
         return cast(
             DoitomlSchema,
-            {
-                "env": {k: str(v) for k, v in env.items()},
-                "tokens": {
-                    ":".join(k): list(map(str, v)) for k, v in self.tokens.items()
+            to_json(
+                {
+                    "env": env,
+                    "tokens": {":".join(k): v for k, v in self.tokens.items()},
+                    "paths": {":".join(k): v for k, v in self.paths.items()},
+                    "tasks": {
+                        ":".join(k): self.task_to_dict(v) for k, v in self.tasks.items()
+                    },
+                    "templates": self.templates,
                 },
-                "paths": {
-                    ":".join(k): list(map(str, v)) for k, v in self.paths.items()
-                },
-                "tasks": {
-                    ":".join(k): self.task_to_dict(v) for k, v in self.tasks.items()
-                },
-                "templates": dict(self.templates.items()),
-            },
+            ),
         )
 
     def task_to_dict(self, task: Task) -> Dict[str, Any]:
@@ -159,7 +160,6 @@ class Config:
         meta = new_task.setdefault(DOIT_TASK.META, {})  # type: ignore
         dt_meta = meta.setdefault(NAME, {})
 
-        dt_meta[DOITOML_META.CWD] = str(dt_meta[DOITOML_META.CWD])
         dt_log = dt_meta[DOITOML_META.LOG]
         dt_meta[DOITOML_META.LOG] = [str(log) if log else None for log in dt_log]
         dt_meta[DOITOML_META.SOURCE] = str(dt_meta[DOITOML_META.SOURCE])
