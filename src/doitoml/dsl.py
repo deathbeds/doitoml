@@ -174,7 +174,7 @@ class Getter(DSL):
         keys = sorted(self.doitoml.entry_points.parsers.keys())
 
         self._pattern = re.compile(
-            r"^:get::(?P<parser>"
+            r"^:get(?P<default>\|[^:]*)?::(?P<parser>"
             + "|".join(keys)
             + r")::(?P<path>.+?)::(?P<rest>:{0,2}.*)$",
         )
@@ -195,7 +195,13 @@ class Getter(DSL):
 
         All extra items are passed as positional arguments to the Source.
         """
-        new_source, bits = self.get_source_with_key(source, match, raw_token)
+        try:
+            new_source, bits = self.get_source_with_key(source, match, raw_token)
+        except DslError as err:
+            default = match.groupdict()["default"]
+            if default:
+                return [default[1:]]
+            raise err
 
         new_value = new_source.get(bits)
 
@@ -219,6 +225,7 @@ class Getter(DSL):
         """Find a raw source and its bits."""
         groups = match.groupdict()
         path: str = groups["path"]
+        groups["default"]
         bits: List[str] = groups["rest"].split("::")
         if len(bits) == 1 and not bits[0]:
             bits = []

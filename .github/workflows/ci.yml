@@ -75,7 +75,7 @@ jobs:
         run: doit list --all --status
 
       - name: build
-        run: doit ${{ env.DOIT_N_BUILD }} build || doit build
+        run: doit build:source_date_epoch && doit build
 
       - name: status
         run: doit list --all --status | sort

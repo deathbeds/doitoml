@@ -195,7 +195,7 @@ select = [
 "jinja2.py" = ["ARG002"]
 "test/**/*.py" = ["S101", "T201", "T203"]
 "doit_tools.py" = ["ARG002"]
-
+"_actions.py" = ["S603", "S607", "T201"]
 
 [tool.doitoml]
 prefix = ""
@@ -208,6 +208,7 @@ DOITOML_VERSION = ":get::toml::pyproject.toml::project::version"
 DOITOML_WHEEL = "doitoml-${DOITOML_VERSION}-py3-none-any.whl"
 PIP_DOWNLOAD_CACHE = "./build/.cache/pip"
 RUST_LOG = "error"
+SOURCE_DATE_EPOCH = ":get|0::json::build/source_date_epoch.json::SOURCE_DATE_EPOCH"
 
 [tool.doitoml.tokens]
 sphinx_opts = ["-b", "html", "docs", "build/docs"]
@@ -264,7 +265,7 @@ bootstrap_txt = ["build/bootstrap.txt"]
 schema_toml = ["src/doitoml/schema/v0.schema.toml"]
 schema_json = ["src/doitoml/schema/_v0.schema.json"]
 schema_py = ["src/doitoml/schema/_v0_schema.py"]
-source_date_epoch = ["build/SOURCE_DATE_EPOCH"]
+source_date_epoch = ["build/source_date_epoch.json"]
 
 [tool.doitoml.tasks.bootstrap]
 meta = {doitoml = {log = "build/bootstrap.txt"}}
@@ -295,12 +296,12 @@ config_changed = [":get::toml::pyproject.toml::project::entry-points"]
 
 [tool.doitoml.tasks.build.source_date_epoch]
 doc = "Get SOURCE_DATE_EPOCH from git"
-actions = [["git", "log", "-1", "--pretty=%ct"]]
+actions = [{py = {"_actions:source_date_epoch" = {}}}]
 meta = {doitoml = {log = "::source_date_epoch"}}
 
 [tool.doitoml.tasks.build.pypi]
 doc = "Build distributions for PyPI"
-file_dep = ["::all_py_dist"]
+file_dep = ["::all_py_dist", "::source_date_epoch"]
 targets = ["::whl", "::sdist"]
 actions = [["flit", "build"]]
 

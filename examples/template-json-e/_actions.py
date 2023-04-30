@@ -1,5 +1,6 @@
 """Python actions for ``doitoml``."""
 import json
+import subprocess
 from hashlib import sha256
 from pathlib import Path
 from typing import Generator, List, Optional, Union
@@ -91,7 +92,7 @@ def hash_files(
     hashfile.write_text(output, encoding="utf-8")
 
     if not quiet:
-        print(output)  # noqa: T201
+        print(output)
 
 
 def toml2json(src: Path, dest: Path) -> None:
@@ -109,3 +110,8 @@ def toml2json(src: Path, dest: Path) -> None:
         ),
         encoding="utf-8",
     )
+
+
+def source_date_epoch() -> None:
+    sde = subprocess.check_output(["git", "log", "-1", "--pretty=%ct"])
+    print(json.dumps({"SOURCE_DATE_EPOCH": sde.decode("utf-8").strip()}))

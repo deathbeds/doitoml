@@ -1,5 +1,8 @@
 # DSL
 
+The _`doit`-specific language_ provides some declarative shortcuts to techniques that
+usually require more complex Python or shell.
+
 ## `${}` Get Environment Variables
 
 > Get the value of an environment variable. Usually executed before any other parsers.
@@ -36,13 +39,19 @@ Environment variables are shared across all `doitoml` configuration files.
 ```{mermaid}
 flowchart LR
 
-get --> parsers --> paths --> selectors
+get --> defaults --> parsers --> paths --> selectors
 
 get([<code>:get</code>])
 
+subgraph defaults [0 or 1 default]
+    default(["<code>|</code> value"])
+end
+
 subgraph parsers [1 parser]
+  direction LR
   json([<code>::json</code>])
   toml([<code>::toml</code>])
+  yaml([<code>::yaml</code>])
 end
 
 subgraph paths [1 path]
@@ -104,25 +113,25 @@ Get a version number.
 ```{mermaid}
 flowchart LR
 
-colon-colon --> namespaces --> token
-token -.-> path & tokens
+colon-colon --> namespaces --> token_or_path
+token_or_path -.-> path & tokens
 
 namespace -.-> prefix
 
 colon-colon([<code>::</code>])
-token([<code>::</code><i>token or path</i>])
+token_or_path([<code>::</code><i>token or path</i>])
 
 subgraph namespaces [0 or 1 namespace]
   namespace([<code>::</code><i>namespace</i>])
 end
 
-subgraph doitoml
+subgraph doitoml ["<code>doitoml</code> configuration"]
   prefix("<code>prefix = ...</code>")
-  subgraph paths
+  subgraph paths ["<code>.paths</code>"]
     path("<code>some_path = [...]</code>")
   end
-  subgraph tokens [tokens]
-    tokens("<code>some_cmd = [...]</code>")
+  subgraph tokens ["<code>.tokens</code>"]
+    token("<code>some_token = [...]</code>")
   end
 end
 ```
