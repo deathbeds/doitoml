@@ -78,24 +78,24 @@ name = "all"
 targets = ["::all_sha256"]
 
 [tool.__doitoml_tests__.steps.00_list]
-after = {files = {"*" = 6}}
+after = {files = {"*" = 4}}
 before = {files = {"**/*" = 10, "*" = 4}}
 rc = 0
 run = ["doit", "list"]
 tasks = 10
 
 [tool.__doitoml_tests__.steps.01_run_skip]
-after = {files = {"*" = 7, "*/dist/SHA256SUMS" = 1}}
+after = {files = {"*" = 4, "*/dist/SHA256SUMS" = 1}}
 env = {SKIP = "a"}
 rc = 0
 run = ["doit", "build"]
 
 [tool.__doitoml_tests__.steps.02_run_build]
-after = {files = {"*" = 7, "*/dist/SHA256SUMS" = 2}}
+after = {files = {"*" = 4, "*/dist/SHA256SUMS" = 2}}
 rc = 0
 run = ["doit", "build"]
 
 [tool.__doitoml_tests__.steps.03_run_release]
-after = {files = {"*" = 7, "dist/SHA256SUMS" = 1}}
+after = {files = {"*" = 4, "dist/SHA256SUMS" = 1}}
 rc = 0
 run = ["doit", "release"]

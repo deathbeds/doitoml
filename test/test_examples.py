@@ -21,13 +21,16 @@ def _count_files(
     path: Path,
     expected_counts: Optional[Dict[str, str]],
 ) -> None:
+    """Find files matching globs, ignoring ``.doit`` bookkeeping files."""
     if not expected_counts:
         return
     observed = {}
     observed_counts = {}
     for globbish in expected_counts:
         paths = sorted(
-            p.relative_to(path) for p in path.glob(globbish) if not p.is_dir()
+            p.relative_to(path)
+            for p in path.glob(globbish)
+            if not (p.is_dir() or ".doit" in p.name)
         )
         observed[globbish] = paths
         observed_counts[globbish] = len(paths)

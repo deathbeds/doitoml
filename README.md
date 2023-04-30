@@ -23,8 +23,8 @@
 - use **templates** like Jinja2 and JSON-e for advanced use cases
 - user-defined Python-based **actions** and **up-to-date** checkers
 - control the **working directory** and **log paths** of processes and actions
-- extensibility in any part of the task definition process
-  - all functionality implemented as `entry_point`-based plugins
+- **extensibility** in any part of the task definition process
+  - all core functionality implemented as `entry_point`-based **plugins**
 
 ## Usage
 

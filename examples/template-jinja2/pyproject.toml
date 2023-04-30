@@ -1,7 +1,6 @@
 [tool.doit]
 loader = "doitoml"
 verbosity = 2
-backend = "sqlite3"
 
 [tool.doitoml]
 fail_quietly = false
@@ -23,7 +22,7 @@ yaml = """
 """
 
 [tool.__doitoml_tests__.steps.00_list]
-after = {files = {"*" = 3}}
+after = {files = {"*" = 2}}
 before = {files = {"*" = 2}}
 rc = 0
 run = ["doit", "list"]

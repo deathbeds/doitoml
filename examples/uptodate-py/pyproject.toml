@@ -1,7 +1,6 @@
 [tool.doit]
 loader = "doitoml"
 verbosity = 2
-backend = "sqlite3"
 
 [tool.doitoml.env]
 DIV2 = "10"
@@ -24,13 +23,13 @@ actions = ['echo "hello 3"']
 uptodate = [{py = {"_uptodate:env_is_divisible_by" = {args = ["DIV3", "3"]}}}]
 
 [tool.__doitoml_tests__.steps.00_list]
-after = {files = {"*" = 4}}
+after = {files = {"*" = 3}}
 before = {files = {"**/*" = 3, "*" = 3}}
 rc = 0
 run = ["doit", "list"]
 tasks = 8
 
 [tool.__doitoml_tests__.steps.01_run]
-after = {files = {"*" = 4}}
+after = {files = {"*" = 3}}
 rc = 0
 run = ["doit"]
