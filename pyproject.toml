@@ -359,15 +359,15 @@ actions = [
   ]}}},
 ]
 
-[tool.doitoml.tasks.test.pytest.unit]
+[tool.doitoml.tasks.test.unit]
 doc = "Run unit tests with pytest"
 file_dep = ["::ppt", "::all_py", "::all_py_test", "::all_examples"]
 actions = [["pytest", "-k", "not subprocess", "--cov-fail-under=0"]]
 
-[tool.doitoml.tasks.test.pytest.full]
+[tool.doitoml.tasks.test.full]
 doc = "Run all tests with pytest"
 file_dep = ["::ppt", "::all_py", "::all_py_test", "::all_examples"]
-task_dep = ["test:pytest:unit"]
+task_dep = ["test:unit"]
 actions = [["pytest"]]
 
 [tool.doitoml.tasks.docs.sphinx]
