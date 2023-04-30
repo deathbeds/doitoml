@@ -68,6 +68,9 @@ jobs:
       - name: bootstrap
         run: doit bootstrap
 
+      - name: bootstrap
+        run: doit lint
+
       - name: list
         run: doit list --all --status
 

@@ -1,5 +1,13 @@
-build
+# run
 doit[toml]
-flit >=3.8,<4
-jsonschema[format]
 typing-extensions
+# extras
+jsonschema[format]
+# build
+build
+flit >=3.8,<4
+# lint
+ssort
+ruff
+mypy
+black
