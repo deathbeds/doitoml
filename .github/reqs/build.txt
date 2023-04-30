@@ -6,6 +6,7 @@ jsonschema[format]
 # build
 build
 flit >=3.8,<4
+jsonschema-gentypes
 # lint
 ssort
 ruff
