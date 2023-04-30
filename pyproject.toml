@@ -384,7 +384,15 @@ actions = [["pytest"]]
 
 [tool.doitoml.tasks.docs.sphinx]
 doc = "Build documentation with `sphinx`"
-file_dep = ["::py_src", "::ppt", "::all_md", "::all_ipynb", "::docs_py", "::docs_etc"]
+file_dep = [
+  "::py_src",
+  "::ppt",
+  "::all_md",
+  "::all_ipynb",
+  "::docs_py",
+  "::docs_etc",
+  "::dist_hash",
+]
 actions = [["sphinx-build", "-W", "--color", "::sphinx_opts"]]
 targets = ["::docs_buildinfo"]
 
