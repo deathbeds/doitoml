@@ -35,4 +35,4 @@ else:
 
     def task_bootstrap() -> "Task":
         """Bootstrap ``doitoml`` with an editable install."""
-        return {"actions": [PIP_INSTALL_E, [*PIP, "check"]]}
+        return {"actions": [PIP_INSTALL_E]}

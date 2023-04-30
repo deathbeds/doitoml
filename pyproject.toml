@@ -264,7 +264,7 @@ bootstrap_txt = ["build/bootstrap.txt"]
 
 [tool.doitoml.tasks.bootstrap]
 meta = {doitoml = {log = "build/bootstrap.txt"}}
-targets = [":bootstrap_txt"]
+targets = ["::bootstrap_txt"]
 actions = [
   [
     "::pip",
