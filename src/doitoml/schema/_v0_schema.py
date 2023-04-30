@@ -45,9 +45,6 @@ class DoitomlSchema(TypedDict, total=False):
     schema for ``doitoml`` configuration
     """
 
-    tokens: Required["CommandTokens"]
-    """ Required property """
-
     env: Required["EnvironmentVariables"]
     """ Required property """
 
@@ -60,6 +57,9 @@ class DoitomlSchema(TypedDict, total=False):
 
     Required property
     """
+
+    tokens: Required["CommandTokens"]
+    """ Required property """
 
 
 EnvironmentVariables = Dict[str, str]

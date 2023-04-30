@@ -1,4 +1,5 @@
 """Python actions for ``doitoml``."""
+import json
 from hashlib import sha256
 from pathlib import Path
 from typing import Generator, List, Optional, Union
@@ -91,3 +92,20 @@ def hash_files(
 
     if not quiet:
         print(output)  # noqa: T201
+
+
+def toml2json(src: Path, dest: Path) -> None:
+    try:
+        import tomllib
+    except ImportError:
+        import tomli as tomllib
+
+    dest.parent.mkdir(exist_ok=True, parents=True)
+    dest.write_text(
+        json.dumps(
+            tomllib.loads(src.read_text(encoding="utf-8")),
+            indent=2,
+            sort_keys=True,
+        ),
+        encoding="utf-8",
+    )

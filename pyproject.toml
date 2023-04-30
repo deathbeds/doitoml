@@ -261,6 +261,9 @@ all_examples = [
 all_md = [":glob::.::*.md", ":rglob::docs::*.md::!ipynb_checkpoints"]
 docs_buildinfo = ["build/docs/.buildinfo"]
 bootstrap_txt = ["build/bootstrap.txt"]
+schema_toml = ["src/doitoml/schema/v0.schema.toml"]
+schema_json = ["src/doitoml/schema/_v0.schema.json"]
+schema_py = ["src/doitoml/schema/_v0_schema.py"]
 
 [tool.doitoml.tasks.bootstrap]
 meta = {doitoml = {log = "build/bootstrap.txt"}}
@@ -386,22 +389,32 @@ actions = [["sphinx-autobuild", "::sphinx_opts", "--no-initial", "--watch=src"]]
 # these will get templated
 [tool.doitoml.tasks.gen.schema]
 doc = "build JSON Schema from TOML Schema"
-file_dep = ["src/doitoml/schema/v0.schema.toml"]
-targets = ["src/doitoml/schema/_v0.schema.json"]
-actions = [["taplo", "get", "-o=json", "-f", "src/doitoml/schema/v0.schema.toml"]]
+file_dep = ["::schema_toml"]
+targets = ["::schema_json"]
+actions = [{py = {"_actions:toml2json" = {args = ["::schema_toml", "::schema_json"]}}}]
 meta = {doitoml = {log = "src/doitoml/schema/_v0.schema.json"}}
 
 [tool.doitoml.tasks.gen.types]
 doc = "build typings from JSON Schema"
-file_dep = ["src/doitoml/schema/_v0.schema.json"]
-targets = ["src/doitoml/schema/_v0_schema.py"]
+file_dep = ["::schema_toml"]
+targets = ["::schema_py"]
 actions = [
   [
     "jsonschema-gentypes",
     "--python-version=3.8",
     "--json-schema",
-    "src/doitoml/schema/_v0.schema.json",
+    "::schema_json",
     "--python",
-    "src/doitoml/schema/_v0_schema.py",
+    "::schema_py",
+  ],
+  [
+    "ruff",
+    "--fix",
+    "--quiet",
+    "::schema_py",
+  ],
+  [
+    "black",
+    "::schema_py",
   ],
 ]
