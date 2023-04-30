@@ -52,6 +52,8 @@ whl = ["dist/example_web-${EXAMPLE_PY_VERSION}-py3-none-any.whl"]
 
 [tool.doitoml.tokens]
 conda_run = ["conda", "run", "--live-stream", "--prefix", "::venv"]
+# TOOD: revisit when upstream python-build ships the ``pyproject-build`` CLI
+pyproject_build = ["::conda_run", "python", "-m", "build"]
 
 [tool.doitoml.tasks.setup.env]
 actions = [["mamba", "env", "update", "--file", "::env_yml", "--prefix", "::venv"]]
@@ -59,7 +61,7 @@ file_dep = ["::env_yml"]
 targets = ["::venv_history"]
 
 [tool.doitoml.tasks.dist.wheel]
-actions = [["::conda_run", "pyproject-build", "--no-isolation"]]
+actions = [["::pyproject_build", "--no-isolation"]]
 file_dep = [
   "::venv_history",
   "::readme",

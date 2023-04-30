@@ -356,15 +356,15 @@ actions = [
   ]}}},
 ]
 
-[tool.doitoml.tasks.test.pytest.fast]
-doc = "Run fast tests with pytest"
+[tool.doitoml.tasks.test.pytest.unit]
+doc = "Run unit tests with pytest"
 file_dep = ["::ppt", "::all_py", "::all_py_test", "::all_examples"]
-actions = [["pytest", "-k", "not slow", "--cov-fail-under=0"]]
+actions = [["pytest", "-k", "not subprocess", "--cov-fail-under=0"]]
 
 [tool.doitoml.tasks.test.pytest.full]
-doc = "Run fast tests with pytest"
+doc = "Run all tests with pytest"
 file_dep = ["::ppt", "::all_py", "::all_py_test", "::all_examples"]
-task_dep = ["test:pytest:fast"]
+task_dep = ["test:pytest:unit"]
 actions = [["pytest"]]
 
 [tool.doitoml.tasks.docs.sphinx]

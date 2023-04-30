@@ -121,12 +121,22 @@ jobs:
         shell: cmd /C CALL {0}
         run: doit bootstrap
 
-      - name: test (unix)
+      - name: "test: unit (unix)"
+        if: matrix.os != 'windows'
+        shell: bash -l {0}
+        run: doit test:unit
+
+      - name: "test: unit (windows)"
+        if: matrix.os == 'windows'
+        shell: cmd /C CALL {0}
+        run: doit test:unit
+
+      - name: "test: full (unix)"
         if: matrix.os != 'windows'
         shell: bash -l {0}
         run: doit test
 
-      - name: test (windows)
+      - name: "test: full (windows)"
         if: matrix.os == 'windows'
         shell: cmd /C CALL {0}
         run: doit test
