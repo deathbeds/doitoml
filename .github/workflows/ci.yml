@@ -68,8 +68,8 @@ jobs:
       - name: bootstrap
         run: doit bootstrap
 
-      - name: bootstrap
-        run: doit lint
+      - name: lint
+        run: doit -n8 lint:ruff lint:black
 
       - name: list
         run: doit list --all --status
@@ -115,6 +115,11 @@ jobs:
         if: matrix.os != 'windows'
         shell: bash -l {0}
         run: doit bootstrap
+
+      - name: full lint
+        if: matrix.os == 'linux' && matrix.python-version == '3.11'
+        shell: cmd /C CALL {0}
+        run: doit lint
 
       - name: bootstrap (windows)
         if: matrix.os == 'windows'
