@@ -118,7 +118,7 @@ jobs:
 
       - name: lint
         if: matrix.os == 'ubuntu'
-        shell: cmd /C CALL {0}
+        shell: bash -l {0}
         run: doit lint
 
       - name: bootstrap (windows)

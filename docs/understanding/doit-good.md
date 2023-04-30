@@ -48,7 +48,8 @@ processes, try to store it in exactly one place, and either reuse it from there,
 check other files against it.
 
 ```{hint}
-For example, in a Python project, storing the package's version in _exactly_ `pyproject.toml#/project/version` and nowhere else ensures that no automation or build scripts go stale.
+For example, in a Python project, storing the package's version in _exactly_ `pyproject.toml#/project/version` and nowhere else ensures that no automation or build
+scripts go stale.
 ```
 
 ## Use `file_dep` and `targets`
@@ -60,6 +61,11 @@ well-known files save time and effort.
 Using [custom logging](../how-to/logging.md) is a good way to get predictablly-named
 file outputs from otherwise hard-to-observe tasks.
 ```
+
+One of the key benefits of knowing this dependency tree up-front is being able to use
+`doit --process=2` (or `-n2`). This utilizes modern, multi-core systems without too much
+coordination or needless re-work due to long, but avoidable, command errors about
+missing files, or worse, incorrect build ordering based on stale data.
 
 ## Avoid configurable task options
 
