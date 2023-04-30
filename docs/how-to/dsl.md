@@ -1,7 +1,6 @@
 # DSL
 
-The _`doit`-specific language_ provides some declarative shortcuts to techniques that
-usually require more complex Python or shell.
+The _`doit`-specific language_ provides some declarative shortcuts to techniques that usually require more complex Python or shell.
 
 ## `${}` Get Environment Variables
 
@@ -44,7 +43,7 @@ get --> defaults --> parsers --> paths --> selectors
 get([<code>:get</code>])
 
 subgraph defaults [0 or 1 default]
-    default(["<code>|</code> value"])
+    default(["<code>|</code> <i>value</i>"])
 end
 
 subgraph parsers [1 parser]
