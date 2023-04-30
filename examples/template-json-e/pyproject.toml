@@ -80,6 +80,18 @@ targets = ["::all_sha256"]
 [tool.__doitoml_tests__.steps.00_list]
 after = {files = {"*" = 4}}
 before = {files = {"**/*" = 10, "*" = 4}}
+task_names = [
+  "build",
+  "build:a",
+  "build:b",
+  "dist",
+  "dist:a",
+  "dist:b",
+  "echo",
+  "echo:",
+  "release",
+  "release:all",
+]
 rc = 0
 run = ["doit", "list"]
 tasks = 10
@@ -89,13 +101,47 @@ after = {files = {"*" = 4, "*/dist/SHA256SUMS" = 1}}
 env = {SKIP = "a"}
 rc = 0
 run = ["doit", "build"]
+task_names = [
+  "build",
+  "build:b",
+  "dist",
+  "dist:b",
+  "echo",
+  "echo:",
+  "release",
+  "release:all",
+]
 
 [tool.__doitoml_tests__.steps.02_run_build]
 after = {files = {"*" = 4, "*/dist/SHA256SUMS" = 2}}
 rc = 0
 run = ["doit", "build"]
+task_names = [
+  "build",
+  "build:a",
+  "build:b",
+  "dist",
+  "dist:a",
+  "dist:b",
+  "echo",
+  "echo:",
+  "release",
+  "release:all",
+]
 
 [tool.__doitoml_tests__.steps.03_run_release]
 after = {files = {"*" = 4, "dist/SHA256SUMS" = 1}}
 rc = 0
 run = ["doit", "release"]
+task_names = [
+  "build",
+  "build:a",
+  "build:b",
+  "dist",
+  "dist:a",
+  "dist:b",
+  "echo",
+  "echo:",
+  "release",
+  "release:all",
+]
