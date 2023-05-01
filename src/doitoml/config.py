@@ -507,8 +507,9 @@ class Config:
         if isinstance(meta, dict) and NAME in meta:
             dt_meta = meta[NAME]
             if isinstance(dt_meta, dict) and DOITOML_META.SKIP in dt_meta:
-                skip = dt_meta.get(DOITOML_META.SKIP)
-                if str(skip).strip().lower() not in FALSEY:
+                skip = str(dt_meta.get(DOITOML_META.SKIP, "0"))
+                found = self.resolve_one_path_spec(source, skip, source_relative=False)
+                if found and str(found[0]).strip().lower() not in FALSEY:
                     return
 
         if maybe_old_actions:

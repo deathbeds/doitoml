@@ -19,10 +19,7 @@ env:
   CI: "1"
 
   # our stuff
-  ROBOT_RETRIES: "2"
   CACHE_EPOCH: "4"
-  DOIT_N_BUILD: "-n4"
-  PABOT_PROCESSES: "3"
 
 jobs:
   build:
@@ -131,6 +128,8 @@ jobs:
       matrix:
         os: ["ubuntu", "macos", "windows"]
         python-version: ["3.8", "3.11"]
+    env:
+      SKIP_CODEGEN: 1
     steps:
       - name: configure line endings
         run: |

@@ -5,6 +5,7 @@ channels:
 dependencies:
   # run deps
   - doit
+  - pip
   - python >=3.8,<3.12
   - tomli
   # run deps
@@ -13,11 +14,10 @@ dependencies:
   - json-e
   - jsonschema-with-format
   - pyyaml
-  - jsonschema-gentypes
   # optional deps
   # build deps
   - flit >=3.8
-  - pip
+  - jsonschema-gentypes
   # build deps
   # docs deps
   - docutils >=0.19
