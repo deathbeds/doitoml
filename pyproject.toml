@@ -14,7 +14,7 @@ classifiers = [
   "Programming Language :: Python :: 3 :: Only",
   "Programming Language :: Python :: 3",
 ]
-dependencies = ["doit", "jinja2", "tomli", "typing-extensions"]
+dependencies = ["doit", "typing_extensions", "tomli ; python_version<\"3.11\""]
 [project.optional-dependencies]
 json-e = ["json-e"]
 jinja2 = ["jinja2"]
@@ -70,7 +70,6 @@ addopts = [
   "--cov=doitoml",
   "--cov-branch",
   "--cov-context=test",
-  "--cov-fail-under=100",
   "--no-cov-on-fail",
   # misc
   "-vv",
@@ -184,18 +183,18 @@ select = [
   "YTT",
 ]
 [tool.ruff.per-file-ignores]
+"_actions.py" = ["S603", "S607", "T201", "S101", "PLR2004"]
 "_config.py" = ["PLR0912", "C901"]
 "_source.py" = ["BLE001"]
 "constants.py" = ["N801"]
 "docs/conf.py" = ["INP001", "A001"]
 "dodo.py" = ["BLE001"]
+"doit_tools.py" = ["ARG002"]
 "doitoml.py" = ["PLR0913"]
 "dsl.py" = ["ARG002"]
 "entry_points.py" = ["BLE001"]
 "jinja2.py" = ["ARG002"]
 "test/**/*.py" = ["S101", "T201", "T203"]
-"doit_tools.py" = ["ARG002"]
-
 
 [tool.doitoml]
 prefix = ""
@@ -208,6 +207,9 @@ DOITOML_VERSION = ":get::toml::pyproject.toml::project::version"
 DOITOML_WHEEL = "doitoml-${DOITOML_VERSION}-py3-none-any.whl"
 PIP_DOWNLOAD_CACHE = "./build/.cache/pip"
 RUST_LOG = "error"
+SOURCE_DATE_EPOCH = ":get|0::json::build/source_date_epoch.json::SOURCE_DATE_EPOCH"
+SKIP_CODEGEN = "0"
+COV_FAIL_UNDER = "100"
 
 [tool.doitoml.tokens]
 sphinx_opts = ["-b", "html", "docs", "build/docs"]
@@ -261,10 +263,17 @@ all_examples = [
 all_md = [":glob::.::*.md", ":rglob::docs::*.md::!ipynb_checkpoints"]
 docs_buildinfo = ["build/docs/.buildinfo"]
 bootstrap_txt = ["build/bootstrap.txt"]
+schema_toml = ["src/doitoml/schema/v0.schema.toml"]
+schema_json = ["src/doitoml/schema/_v0.schema.json"]
+schema_py = ["src/doitoml/schema/_v0_schema.py"]
+source_date_epoch = ["build/source_date_epoch.json"]
+env_binder = [".binder/environment.yml"]
+env_docs = ["docs/environment.yml"]
+env_test = [".github/environment.yml"]
 
 [tool.doitoml.tasks.bootstrap]
 meta = {doitoml = {log = "build/bootstrap.txt"}}
-targets = [":bootstrap_txt"]
+targets = ["::bootstrap_txt"]
 actions = [
   [
     "::pip",
@@ -289,11 +298,16 @@ actions = [
 [[tool.doitoml.tasks.bootstrap.uptodate]]
 config_changed = [":get::toml::pyproject.toml::project::entry-points"]
 
+[tool.doitoml.tasks.build.source_date_epoch]
+doc = "Get SOURCE_DATE_EPOCH from git"
+actions = [{py = {"_actions:source_date_epoch" = {}}}]
+meta = {doitoml = {log = "::source_date_epoch"}}
+
 [tool.doitoml.tasks.build.pypi]
 doc = "Build distributions for PyPI"
-file_dep = ["::all_py_dist"]
+file_dep = ["::all_py_dist", "::source_date_epoch"]
 targets = ["::whl", "::sdist"]
-actions = [["pyproject-build", "-nx"]]
+actions = [["flit", "build"]]
 
 [tool.doitoml.tasks.build.hashfile]
 doc = "Generate a hashfile"
@@ -326,20 +340,25 @@ doc = "Format TOML with taplo"
 file_dep = ["::all_toml"]
 actions = [["taplo", "fmt", "::taplo_opts", "::all_toml"]]
 
-[tool.doitoml.tasks.lint.black]
+[tool.doitoml.tasks.lint.py.black]
 doc = "Check python formatting with `black`"
 file_dep = ["::ppt", "::all_py"]
 actions = [["black", "--quiet", "--check", "::all_py"]]
 
-[tool.doitoml.tasks.lint.ruff]
+[tool.doitoml.tasks.lint.py.ruff]
 doc = "Check python syntax with `ruff`"
 file_dep = ["::ppt", "::all_py"]
 actions = [["ruff", "::all_py"]]
 
-[tool.doitoml.tasks.lint.mypy]
+[tool.doitoml.tasks.lint.py.mypy]
 doc = "Check python types with `mypy`"
 file_dep = ["::ppt", "::all_py"]
 actions = [["mypy", "::all_py"]]
+
+[tool.doitoml.tasks.lint.ALL]
+doc = "Lint everything"
+task_dep = ["lint:py:*", "js:lint:*"]
+actions = [["echo", "OK"]]
 
 [tool.doitoml.tasks.test.preflight]
 doc = "Prepare for testing"
@@ -356,20 +375,29 @@ actions = [
   ]}}},
 ]
 
-[tool.doitoml.tasks.test.pytest.fast]
-doc = "Run fast tests with pytest"
+[tool.doitoml.tasks.test.unit]
+doc = "Run unit tests with pytest"
 file_dep = ["::ppt", "::all_py", "::all_py_test", "::all_examples"]
-actions = [["pytest", "-k", "not slow", "--cov-fail-under=0"]]
+task_dep = ["test:preflight"]
+actions = [["pytest", "-k", "not subprocess"]]
 
-[tool.doitoml.tasks.test.pytest.full]
-doc = "Run fast tests with pytest"
+[tool.doitoml.tasks.test.full]
+doc = "Run all tests with pytest"
 file_dep = ["::ppt", "::all_py", "::all_py_test", "::all_examples"]
-task_dep = ["test:pytest:fast"]
-actions = [["pytest"]]
+task_dep = ["test:unit"]
+actions = [["pytest", "--cov-fail-under=${COV_FAIL_UNDER}"]]
 
 [tool.doitoml.tasks.docs.sphinx]
 doc = "Build documentation with `sphinx`"
-file_dep = ["::py_src", "::ppt", "::all_md", "::all_ipynb", "::docs_py", "::docs_etc"]
+file_dep = [
+  "::py_src",
+  "::ppt",
+  "::all_md",
+  "::all_ipynb",
+  "::docs_py",
+  "::docs_etc",
+  "::dist_hash",
+]
 actions = [["sphinx-build", "-W", "--color", "::sphinx_opts"]]
 targets = ["::docs_buildinfo"]
 
@@ -385,23 +413,76 @@ actions = [["sphinx-autobuild", "::sphinx_opts", "--no-initial", "--watch=src"]]
 
 # these will get templated
 [tool.doitoml.tasks.gen.schema]
+meta = {doitoml = {skip = "${SKIP_CODEGEN}"}}
 doc = "build JSON Schema from TOML Schema"
-file_dep = ["src/doitoml/schema/v0.schema.toml"]
-targets = ["src/doitoml/schema/_v0.schema.json"]
-actions = [["taplo", "get", "-o=json", "-f", "src/doitoml/schema/v0.schema.toml"]]
-meta = {doitoml = {log = "src/doitoml/schema/_v0.schema.json"}}
+file_dep = ["::schema_toml"]
+targets = ["::schema_json"]
+actions = [{py = {"_actions:toml2json" = {args = ["::schema_toml", "::schema_json"]}}}]
 
 [tool.doitoml.tasks.gen.types]
+meta = {doitoml = {skip = "${SKIP_CODEGEN}"}}
 doc = "build typings from JSON Schema"
-file_dep = ["src/doitoml/schema/_v0.schema.json"]
-targets = ["src/doitoml/schema/_v0_schema.py"]
+file_dep = ["::schema_toml"]
+targets = ["::schema_py"]
 actions = [
   [
     "jsonschema-gentypes",
     "--python-version=3.8",
     "--json-schema",
-    "src/doitoml/schema/_v0.schema.json",
+    "::schema_json",
     "--python",
-    "src/doitoml/schema/_v0_schema.py",
+    "::schema_py",
   ],
+  [
+    "ruff",
+    "--fix",
+    "--quiet",
+    "::schema_py",
+  ],
+  [
+    "black",
+    "::schema_py",
+  ],
+]
+
+[tool.doitoml.tasks.env.docs]
+file_dep = ["::env_binder"]
+targets = ["::env_docs"]
+actions = [
+  {py = {"_actions:replace_between" = {args = [
+    "::env_binder",
+    "::env_docs",
+    "# run deps",
+  ]}}},
+  {py = {"_actions:replace_between" = {args = [
+    "::env_binder",
+    "::env_docs",
+    "# build deps",
+  ]}}},
+  {py = {"_actions:replace_between" = {args = [
+    "::env_binder",
+    "::env_docs",
+    "# docs deps",
+  ]}}},
+  {py = {"_actions:replace_between" = {args = [
+    "::env_binder",
+    "::env_docs",
+    "# optional deps",
+  ]}}},
+]
+
+[tool.doitoml.tasks.env.test]
+file_dep = ["::env_binder"]
+targets = ["::env_test"]
+actions = [
+  {py = {"_actions:replace_between" = {args = [
+    "::env_binder",
+    "::env_test",
+    "# run deps",
+  ]}}},
+  {py = {"_actions:replace_between" = {args = [
+    "::env_binder",
+    "::env_test",
+    "# optional deps",
+  ]}}},
 ]

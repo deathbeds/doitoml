@@ -4,7 +4,7 @@ While the baseline `doit` and `doitoml` features work very well for running well
 CLI functions with _tokens_ or raw _shell_ actions, sometimes a little programmability
 can go a long, portable way.
 
-### Use a Python function as an action
+## Use a Python function as an action
 
 The `py` action offers user-defined importable Python names for actions, using the
 `entry_point` notation of `module.submodule:function`.

@@ -1,37 +1,40 @@
 channels:
   - conda-forge
   - nodefaults
+
 dependencies:
-  # run
+  # run deps
   - doit
-  - jinja2
+  - pip
   - python >=3.8,<3.12
   - tomli
-  # optional
+  # run deps
+  # optional deps
   - jinja2
   - json-e
   - jsonschema-with-format
   - pyyaml
-  - types-jinja2
-  - types-jsonschema
-  - types-pyyaml
-  # build
+  # optional deps
+  # build deps
   - flit >=3.8
-  - pip
-  - python-build
-  - twine
-  # codegen
   - jsonschema-gentypes
-  # lint
+  # build deps
+  # publish deps
+  - twine
+  # publish deps
+  # lint deps
   - black
   - mypy
   - nodejs >=18,<19
   - ruff
   - ssort
   - taplo
+  - types-jinja2
+  - types-jsonschema
+  - types-pyyaml
   - yarn >=3,<4
-  # test
-  - hypothesis-jsonschema
+  # lint deps
+  # test deps
   - pytest
   - pytest-console-scripts
   - pytest-cov
@@ -39,11 +42,14 @@ dependencies:
   - pytest-json-report
   - pytest-xdist
   - tomli-w
-  # demo
+  - python-build
+  # test deps
+  # demo deps
   - ipywidgets >=8
   - jupyterlab-markup
   - jupyterlab >=3.6.1,<4
-  # docs
+  # demo deps
+  # docs deps
   - docutils >=0.19
   - myst-nb
   - pydata-sphinx-theme
@@ -53,5 +59,9 @@ dependencies:
   - sphinx-design
   - sphinx-jsonschema
   - sphinxcontrib-mermaid
-  # check
+  # docs deps
+  # check deps
   - pytest-check-links
+  # check deps
+
+name: doitoml-demo

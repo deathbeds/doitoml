@@ -19,10 +19,7 @@ env:
   CI: "1"
 
   # our stuff
-  ROBOT_RETRIES: "2"
   CACHE_EPOCH: "4"
-  DOIT_N_BUILD: "-n4"
-  PABOT_PROCESSES: "3"
 
 jobs:
   build:
@@ -32,13 +29,6 @@ jobs:
       matrix:
         os: [ubuntu]
         python-version: ["3.11"]
-    defaults:
-      run:
-        shell: bash -l {0}
-    env:
-      BUILDING_IN_CI: "1"
-    outputs:
-      wheel: ${{ steps.wheel.outputs.wheel }}
     steps:
       - uses: actions/checkout@v3
 
@@ -65,11 +55,17 @@ jobs:
       - name: setup (pip build)
         run: pip install -U -v -r .github/reqs/build.txt --no-build-isolation
 
+      - name: bootstrap
+        run: doit bootstrap
+
+      - name: lint
+        run: doit -n8 lint:py:ruff lint:py:black
+
       - name: list
         run: doit list --all --status
 
       - name: build
-        run: doit ${{ env.DOIT_N_BUILD }} build || doit build
+        run: doit build:source_date_epoch && doit build
 
       - name: status
         run: doit list --all --status | sort
@@ -81,6 +77,48 @@ jobs:
           name: doitoml-dist-${{ github.run_number }}
           path: ./dist
 
+  docs:
+    name: docs
+    runs-on: ${{ matrix.os }}-latest
+    strategy:
+      matrix:
+        os: [ubuntu]
+        python-version: ["3.11"]
+    defaults:
+      run:
+        shell: bash -l {0}
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: install (conda)
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          environment-file: .binder/environment.yml
+          miniforge-variant: Mambaforge
+          use-mamba: true
+
+      - name: bootstrap
+        run: doit bootstrap && doit build:source_date_epoch
+
+      - name: list
+        run: doit list --all --status
+
+      - name: lint
+        run: doit lint
+
+      - name: build
+        run: doit build
+
+      - name: docs
+        run: doit docs:sphinx
+
+      - name: check
+        run: doit docs
+
+      - name: status
+        run: doit list --all --status | sort
+        if: always()
+
   test:
     name: test (${{ matrix.os }} ${{ matrix.python-version }})
     needs: [build]
@@ -90,6 +128,8 @@ jobs:
       matrix:
         os: ["ubuntu", "macos", "windows"]
         python-version: ["3.8", "3.11"]
+    env:
+      SKIP_CODEGEN: 1
     steps:
       - name: configure line endings
         run: |
@@ -101,7 +141,7 @@ jobs:
       - name: install (conda)
         uses: conda-incubator/setup-miniconda@v2
         with:
-          environment-file: .binder/environment.yml
+          environment-file: .github/environment.yml
           miniforge-variant: Mambaforge
           use-mamba: true
 
@@ -115,14 +155,26 @@ jobs:
         shell: cmd /C CALL {0}
         run: doit bootstrap
 
-      - name: test (unix)
+      - name: "test: unit (unix)"
+        if: matrix.os != 'windows'
+        shell: bash -l {0}
+        run: doit test:unit
+
+      - name: "test: unit (windows)"
+        if: matrix.os == 'windows'
+        shell: cmd /C CALL {0}
+        run: doit test:unit
+
+      - name: "test: full (unix)"
         if: matrix.os != 'windows'
         shell: bash -l {0}
         run: doit test
 
-      - name: test (windows)
+      - name: "test: full (windows)"
         if: matrix.os == 'windows'
         shell: cmd /C CALL {0}
+        env:
+          COV_FAIL_UNDER: "95"
         run: doit test
 
       - name: upload (reports)

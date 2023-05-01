@@ -42,7 +42,7 @@ def test_dsl_fail(
     ("key", "raw_token", "expected"),
     [
         (ENV, "foo-${BAR}", ["foo-bar"]),
-        (GLOB, ":glob::.::*.txt::!bar.*", ["foo.txt"]),
+        (GLOB, ":glob::.::*.txt::!bar.*", ["./foo.txt"]),
         (GET, ":get::json::baz.json::foo::0", ["bar"]),
         (GET, ":get::json::baz.json::foo::0::0", ["b"]),
         (GET, ":get::json::baz.json::foo", ["bar", '{"1": 2}', "[false, null]"]),
@@ -63,8 +63,8 @@ def test_dsl_success(
     dsl = empty_doitoml.entry_points.dsl[key]
     match = dsl.pattern.search(raw_token)
     assert match is not None
-    observed = [
-        str(t.relative_to(tmp_path)) if isinstance(t, Path) else t
-        for t in dsl.transform_token(source, match, raw_token)
+    rel_expected = [
+        (tmp_path / t).as_posix() if t.startswith("./") else t for t in expected
     ]
-    assert observed == expected
+    observed = list(dsl.transform_token(source, match, raw_token))
+    assert observed == rel_expected

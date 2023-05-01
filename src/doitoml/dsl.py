@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, List, Tuple, cast
 
 from .errors import DslError
-from .types import PathOrStrings
+from .types import Strings
 
 if TYPE_CHECKING:
     from .doitoml import DoiTOML
@@ -41,7 +41,7 @@ class DSL:
         match: re.Match[str],
         raw_token: str,
         **kwargs: Any,
-    ) -> PathOrStrings:
+    ) -> Strings:
         """Transform a token into one or more strings."""
 
 
@@ -60,7 +60,7 @@ class PathRef(DSL):
         match: re.Match[str],
         raw_token: str,
         **kwargs: Any,
-    ) -> PathOrStrings:
+    ) -> Strings:
         """Expand a path name (with optional prefix) to a previously-found value."""
         groups = match.groupdict()
         ref: str = groups["ref"]
@@ -90,7 +90,7 @@ class EnvReplacer(DSL):
         match: re.Match[str],
         raw_token: str,
         **kwargs: Any,
-    ) -> PathOrStrings:
+    ) -> Strings:
         """Replace all environment variable with their value in ``os.environ``."""
         return [self.pattern.sub(self._replacer, raw_token)]
 
@@ -107,7 +107,7 @@ class Globber(DSL):
         match: re.Match[str],
         raw_token: str,
         **kwargs: Any,
-    ) -> PathOrStrings:
+    ) -> Strings:
         """Expand a token to zero or more :class:`pathlib.Path` based on (r)glob(s).
 
         Chunks are delimited by ``::``. The first chunk is a relative path.
@@ -149,15 +149,18 @@ class Globber(DSL):
         final_value = []
 
         parent_posix = source.path.parent.as_posix()
+
         for path in new_value:
             as_posix = path.as_posix()
             if excludes:
-                as_posix_rel = str(Path(os.path.relpath(str(as_posix), parent_posix)))
+                as_posix_rel = Path(
+                    os.path.relpath(str(as_posix), parent_posix),
+                ).as_posix()
                 if as_posix_rel and any(ex.search(as_posix_rel) for ex in excludes):
                     continue
             for pattern, repl_value in replacers:
                 as_posix = pattern.sub(repl_value, as_posix)
-            final_value += [Path(as_posix)]
+            final_value += [as_posix]
 
         return sorted(set(final_value))
 
@@ -174,7 +177,7 @@ class Getter(DSL):
         keys = sorted(self.doitoml.entry_points.parsers.keys())
 
         self._pattern = re.compile(
-            r"^:get::(?P<parser>"
+            r"^:get(?P<default>\|[^:]*)?::(?P<parser>"
             + "|".join(keys)
             + r")::(?P<path>.+?)::(?P<rest>:{0,2}.*)$",
         )
@@ -190,12 +193,18 @@ class Getter(DSL):
         match: re.Match[str],
         raw_token: str,
         **kwargs: Any,
-    ) -> PathOrStrings:
+    ) -> Strings:
         """Get a value from a parseable file, cast it to a string.
 
         All extra items are passed as positional arguments to the Source.
         """
-        new_source, bits = self.get_source_with_key(source, match, raw_token)
+        try:
+            new_source, bits = self.get_source_with_key(source, match, raw_token)
+        except DslError as err:
+            default = match.groupdict()["default"]
+            if default:
+                return [default[1:]]
+            raise err
 
         new_value = new_source.get(bits)
 
@@ -219,6 +228,7 @@ class Getter(DSL):
         """Find a raw source and its bits."""
         groups = match.groupdict()
         path: str = groups["path"]
+        groups["default"]
         bits: List[str] = groups["rest"].split("::")
         if len(bits) == 1 and not bits[0]:
             bits = []

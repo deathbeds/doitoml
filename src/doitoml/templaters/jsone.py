@@ -95,5 +95,5 @@ class JsonE(Templater):
         dollar_map = new_task.get("$map", None)
         if dollar_map is not None:
             new_task["$map"] = self._expand_map(source, dollar_map)
-        context = deepcopy(self.doitoml.config.to_dict())
+        context = self.doitoml.config.to_dict()
         return jsone.render(new_task, context)

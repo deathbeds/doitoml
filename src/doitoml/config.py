@@ -15,6 +15,8 @@ from typing import (
     cast,
 )
 
+from doitoml.utils.json import to_json
+
 if TYPE_CHECKING:
     from doitoml.doitoml import DoiTOML
 
@@ -41,12 +43,9 @@ from doitoml.errors import (
 from doitoml.types import (
     Action,
     LogPaths,
-    PathOrString,
     PathOrStrings,
     Paths,
-    PrefixedPaths,
     PrefixedStrings,
-    PrefixedStringsOrPaths,
     PrefixedTaskGenerator,
     PrefixedTasks,
     PrefixedTemplates,
@@ -88,9 +87,9 @@ class Config:
     sources: ConfigSources
     tasks: PrefixedTasks
     env: EnvDict
-    paths: PrefixedPaths
+    paths: PrefixedStrings
     templates: PrefixedTemplates
-    tokens: PrefixedStringsOrPaths
+    tokens: PrefixedStrings
     update_env: Optional[bool]
     fail_quietly: Optional[bool]
     discover_config_paths: Optional[bool]
@@ -124,21 +123,20 @@ class Config:
         """Return a normalized subset of config data."""
         env = dict(**self.env)
         env.update(os.environ)
+
         return cast(
             DoitomlSchema,
-            {
-                "env": {k: str(v) for k, v in env.items()},
-                "tokens": {
-                    ":".join(k): list(map(str, v)) for k, v in self.tokens.items()
+            to_json(
+                {
+                    "env": env,
+                    "tokens": {":".join(k): v for k, v in self.tokens.items()},
+                    "paths": {":".join(k): v for k, v in self.paths.items()},
+                    "tasks": {
+                        ":".join(k): self.task_to_dict(v) for k, v in self.tasks.items()
+                    },
+                    "templates": self.templates,
                 },
-                "paths": {
-                    ":".join(k): list(map(str, v)) for k, v in self.paths.items()
-                },
-                "tasks": {
-                    ":".join(k): self.task_to_dict(v) for k, v in self.tasks.items()
-                },
-                "templates": dict(self.templates.items()),
-            },
+            ),
         )
 
     def task_to_dict(self, task: Task) -> Dict[str, Any]:
@@ -160,7 +158,6 @@ class Config:
         meta = new_task.setdefault(DOIT_TASK.META, {})  # type: ignore
         dt_meta = meta.setdefault(NAME, {})
 
-        dt_meta[DOITOML_META.CWD] = str(dt_meta[DOITOML_META.CWD])
         dt_log = dt_meta[DOITOML_META.LOG]
         dt_meta[DOITOML_META.LOG] = [str(log) if log else None for log in dt_log]
         dt_meta[DOITOML_META.SOURCE] = str(dt_meta[DOITOML_META.SOURCE])
@@ -380,7 +377,7 @@ class Config:
                 unresolved_paths[source.prefix, path_key] = unresolved_specs
                 continue
             self.paths[source.prefix, path_key] = sorted(
-                {Path(p) for p in found_paths},
+                {Path(p).as_posix() for p in found_paths},
             )
             unresolved_paths.pop((source.prefix, path_key), None)
 
@@ -410,11 +407,14 @@ class Config:
         source: ConfigSource,
         spec: str,
         source_relative: bool,
-    ) -> Optional[PathOrStrings]:
+        cwd: Optional[Path] = None,
+    ) -> Optional[Strings]:
         """Resolve a single path in a task or one of the special field tables.
 
         If ``source_relative``, transform unparsed strings into a path.
         """
+        cwd = cwd or source.path.parent
+
         resolved = []
         for dsl in self.doitoml.entry_points.dsl.values():
             match = dsl.pattern.search(spec)
@@ -426,11 +426,11 @@ class Config:
 
         if resolved:
             if source_relative:
-                return [(source.path.parent / r).resolve() for r in resolved]
+                return [(cwd / r).resolve().as_posix() for r in resolved]
             return resolved
 
         if source_relative:
-            return [(source.path.parent / spec).resolve()]
+            return [(cwd / spec).resolve().as_posix()]
 
         return [spec]
 
@@ -505,8 +505,9 @@ class Config:
         if isinstance(meta, dict) and NAME in meta:
             dt_meta = meta[NAME]
             if isinstance(dt_meta, dict) and DOITOML_META.SKIP in dt_meta:
-                skip = dt_meta.get(DOITOML_META.SKIP)
-                if str(skip).strip().lower() not in FALSEY:
+                skip = str(dt_meta.get(DOITOML_META.SKIP, "0"))
+                found = self.resolve_one_path_spec(source, skip, source_relative=False)
+                if found and str(found[0]).strip().lower() not in FALSEY:
                     return
 
         if maybe_old_actions:
@@ -598,7 +599,11 @@ class Config:
         meta = cast(dict, cast(dict, new_task).setdefault(DOIT_TASK.META, {}))
         dt_meta = cast(dict, meta.setdefault(NAME, {}))
         dt_cwd = Path(dt_meta.get(DOITOML_META.CWD, source.path.parent))
-        dt_log_paths = self.build_log_paths(dt_meta.get(DOITOML_META.LOG), dt_cwd)
+        dt_log_paths = self.build_log_paths(
+            source,
+            dt_meta.get(DOITOML_META.LOG),
+            dt_cwd,
+        )
         dt_meta[DOITOML_META.LOG] = dt_log_paths
         dt_meta[DOITOML_META.CWD] = dt_cwd
         dt_meta[DOITOML_META.SOURCE] = source
@@ -610,30 +615,48 @@ class Config:
 
     def build_log_paths(
         self,
-        log: Optional[Union[PathOrString, List[PathOrString]]],
+        source: ConfigSource,
+        log: Optional[Union[str, List[str]]],
         cwd: Path,
     ) -> LogPaths:
         """Set up proper path behavior from log metadata."""
         if not log:
             return (None, None)
-        stdout_path = None
-        stderr_path = None
-        if isinstance(log, (str, Path)) and log:
-            stderr_path = stdout_path = cwd / log
-        else:
-            stdout_path, stderr_path = (
-                cwd / stream if stream else None for stream in log  # type: ignore
+
+        if isinstance(log, str) and log:
+            log = [log, log]
+
+        maybe_paths: List[Optional[Path]] = [None, None]
+
+        for i, stream in enumerate(log):
+            if not stream:
+                continue
+            maybe_stream_path = self.resolve_one_path_spec(
+                source,
+                str(stream),
+                source_relative=True,
+                cwd=cwd,
             )
 
+            if not maybe_stream_path:  # pragma: no cover
+                message = f"Unresolved log path {stream}"
+                raise ConfigError(message)
+
+            maybe_paths[i] = Path(maybe_stream_path[0])
+
+        return self.check_log_paths(*maybe_paths)
+
+    def check_log_paths(self, stderr_path: Any, stdout_path: Any) -> LogPaths:
+        """Verify log paths."""
         for path in [stderr_path, stdout_path]:
             if path and path.is_dir():
                 message = f"A log path was a directory: {path}"
                 raise ConfigError(message)
 
         if stderr_path is None and stdout_path is None:
-            message = f"Expected log to be a string, or {log}"
+            message = "Expected log to be a string, or list of strings"
             raise ConfigError(message)
-        return stdout_path, stderr_path
+        return cast(LogPaths, (stderr_path, stdout_path))
 
     def resolve_one_action(
         self,

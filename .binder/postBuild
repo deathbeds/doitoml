@@ -4,5 +4,3 @@ set -eux
 # bootstrap the package
 doit bootstrap
 doit list
-doit docs:sphinx
-doit list

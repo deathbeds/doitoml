@@ -19,7 +19,6 @@ dependencies = ["fastapi"]
 "Source" = "https://github.com/deathbeds/doitoml/tree/main/examples/py-js-web"
 
 [tool.doit]
-backend = "sqlite3"
 default_tasks = ["backend:dist"]
 loader = "doitoml"
 par_type = "thread"
@@ -50,17 +49,30 @@ sdist = ["dist/example-web-${EXAMPLE_PY_VERSION}.tar.gz"]
 venv = ["./.venv"]
 venv_history = ["./.venv/conda-meta/history"]
 whl = ["dist/example_web-${EXAMPLE_PY_VERSION}-py3-none-any.whl"]
+yarn_py = ["_yarn.py"]
 
 [tool.doitoml.tokens]
 conda_run = ["conda", "run", "--live-stream", "--prefix", "::venv"]
+pyproject_build = ["::conda_run", "pyproject-build"]
+yarn_exe = ["::conda_run", "python", "::yarn_py"]
 
 [tool.doitoml.tasks.setup.env]
-actions = [["mamba", "env", "update", "--file", "::env_yml", "--prefix", "::venv"]]
+actions = [
+  [
+    "${CONDA_EXE}",
+    "env",
+    "update",
+    "--file",
+    "::env_yml",
+    "--prefix",
+    "::venv",
+  ],
+]
 file_dep = ["::env_yml"]
 targets = ["::venv_history"]
 
 [tool.doitoml.tasks.dist.wheel]
-actions = [["::conda_run", "pyproject-build", "--no-isolation"]]
+actions = [["::pyproject_build", "--no-isolation"]]
 file_dep = [
   "::venv_history",
   "::readme",
@@ -92,11 +104,12 @@ file_dep = ["::all_dist"]
 targets = ["::dist_hash"]
 
 [tool.__doitoml_tests__.steps.00_list]
-after = {files = {"*" = 9}}
-before = {files = {"**/*" = 15, "*" = 8}}
+after = {files = {"*" = 10}}
+before = {files = {"**/*" = 17, "*" = 10}}
 rc = 0
 run = ["doit", "list"]
 tasks = 10
+skip_os = ["nt"]
 
 [tool.__doitoml_tests__.steps.01_run]
 rc = 0

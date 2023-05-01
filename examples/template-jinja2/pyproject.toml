@@ -22,7 +22,7 @@ yaml = """
 """
 
 [tool.__doitoml_tests__.steps.00_list]
-after = {files = {"*" = 4}}
+after = {files = {"*" = 2}}
 before = {files = {"*" = 2}}
 rc = 0
 run = ["doit", "list"]

@@ -6,7 +6,6 @@ __pycache__/
 *.log
 build/
 dist/
-examples/**/yarn.lock
 untitled*
 Untitled*
 .pnp.cjs

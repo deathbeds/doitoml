@@ -1,0 +1,35 @@
+channels:
+  - conda-forge
+  - nodefaults
+
+dependencies:
+  # run deps
+  - doit
+  - pip
+  - python >=3.8,<3.12
+  - tomli
+  # run deps
+  # optional deps
+  - jinja2
+  - json-e
+  - jsonschema-with-format
+  - pyyaml
+  # optional deps
+  # build deps
+  - flit >=3.8
+  - pip
+  - python-build
+  - twine
+  # build deps
+  # test deps
+  - hypothesis-jsonschema
+  - pytest
+  - pytest-console-scripts
+  - pytest-cov
+  - pytest-html
+  - pytest-json-report
+  - pytest-xdist
+  - tomli-w
+  # test deps
+
+name: doitoml-test

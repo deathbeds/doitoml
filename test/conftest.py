@@ -63,7 +63,7 @@ def a_data_example(
     os.chdir(str(dest))
     yield dest, ppt_data["tool"].get("__doitoml_tests__", {})
     os.chdir(str(old_cwd))
-    shutil.rmtree(dest)
+    shutil.rmtree(dest, ignore_errors=True)
 
 
 @pytest.fixture()
@@ -82,7 +82,7 @@ def a_self_test_skeleton(tmp_path: Path) -> Generator[Path, None, None]:
     os.chdir(str(dest))
     yield dest
     os.chdir(str(old_cwd))
-    shutil.rmtree(dest)
+    shutil.rmtree(dest, ignore_errors=True)
 
 
 @pytest.fixture()
