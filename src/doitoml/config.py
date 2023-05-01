@@ -15,12 +15,6 @@ from typing import (
     cast,
 )
 
-from doitoml.utils.json import to_json
-
-if TYPE_CHECKING:
-    from doitoml.doitoml import DoiTOML
-
-
 from doitoml.constants import (
     DEFAULTS,
     DOIT_TASK,
@@ -52,10 +46,15 @@ from doitoml.types import (
     Strings,
     Task,
 )
+from doitoml.utils.json import to_json
 
-from .schema._v0_schema import DoitomlSchema
 from .sources._config import ConfigParser, ConfigSource
 from .sources._source import Source
+
+if TYPE_CHECKING:
+    from .doitoml import DoiTOML
+    from .schema._v0_schema import DoitomlSchema
+
 
 Parsers = Dict[str, Type[Source]]
 
@@ -119,25 +118,24 @@ class Config:
         self.fail_quietly = fail_quietly
         self.discover_config_paths = discover_config_paths
 
-    def to_dict(self) -> DoitomlSchema:
+    def to_dict(self) -> "DoitomlSchema":
         """Return a normalized subset of config data."""
         env = dict(**self.env)
         env.update(os.environ)
 
-        return cast(
-            DoitomlSchema,
-            to_json(
-                {
-                    "env": env,
-                    "tokens": {":".join(k): v for k, v in self.tokens.items()},
-                    "paths": {":".join(k): v for k, v in self.paths.items()},
-                    "tasks": {
-                        ":".join(k): self.task_to_dict(v) for k, v in self.tasks.items()
-                    },
-                    "templates": self.templates,
+        as_dict: "DoitomlSchema" = to_json(
+            {
+                "env": env,
+                "tokens": {":".join(k): v for k, v in self.tokens.items()},
+                "paths": {":".join(k): v for k, v in self.paths.items()},
+                "tasks": {
+                    ":".join(k): self.task_to_dict(v) for k, v in self.tasks.items()
                 },
-            ),
+                "templates": self.templates,
+            },
         )
+
+        return as_dict
 
     def task_to_dict(self, task: Task) -> Dict[str, Any]:
         """Make a 'dumb' JSON object of a task."""
