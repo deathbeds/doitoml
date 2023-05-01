@@ -32,13 +32,6 @@ jobs:
       matrix:
         os: [ubuntu]
         python-version: ["3.11"]
-    defaults:
-      run:
-        shell: bash -l {0}
-    env:
-      BUILDING_IN_CI: "1"
-    outputs:
-      wheel: ${{ steps.wheel.outputs.wheel }}
     steps:
       - uses: actions/checkout@v3
 
@@ -86,6 +79,48 @@ jobs:
         with:
           name: doitoml-dist-${{ github.run_number }}
           path: ./dist
+
+  docs:
+    name: docs
+    runs-on: ${{ matrix.os }}-latest
+    strategy:
+      matrix:
+        os: [ubuntu]
+        python-version: ["3.11"]
+    defaults:
+      run:
+        shell: bash -l {0}
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: install (conda)
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          environment-file: .github/environment.yml
+          miniforge-variant: Mambaforge
+          use-mamba: true
+
+      - name: bootstrap
+        run: doit bootstrap
+
+      - name: lint
+        run: doit lint
+
+      - name: list
+        run: doit list --all --status
+
+      - name: lint
+        run: doit lint
+
+      - name: docs
+        run: doit docs:sphinx
+
+      - name: check
+        run: doit docs:check
+
+      - name: status
+        run: doit list --all --status | sort
+        if: always()
 
   test:
     name: test (${{ matrix.os }} ${{ matrix.python-version }})

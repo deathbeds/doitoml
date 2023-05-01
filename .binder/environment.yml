@@ -13,14 +13,11 @@ dependencies:
   - json-e
   - jsonschema-with-format
   - pyyaml
-  - types-jinja2
-  - types-jsonschema
-  - types-pyyaml
+  - jsonschema-gentypes
   # optional deps
   # build deps
   - flit >=3.8
   - pip
-  - jsonschema-gentypes
   # build deps
   # publish deps
   - twine
@@ -32,6 +29,9 @@ dependencies:
   - ruff
   - ssort
   - taplo
+  - types-jinja2
+  - types-jsonschema
+  - types-pyyaml
   - yarn >=3,<4
   # lint deps
   # test deps

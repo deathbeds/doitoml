@@ -13,9 +13,7 @@ dependencies:
   - json-e
   - jsonschema-with-format
   - pyyaml
-  - types-jinja2
-  - types-jsonschema
-  - types-pyyaml
+  - jsonschema-gentypes
   # optional deps
   # build deps
   - flit >=3.8
