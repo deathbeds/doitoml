@@ -3,7 +3,10 @@ import json
 import subprocess
 from hashlib import sha256
 from pathlib import Path
+from pprint import pformat
 from typing import Generator, List, Optional, Union
+
+UTF8 = {"encoding": "utf-8"}
 
 PathOrString = Union[Path, str]
 Rootish = Optional[Union[PathOrString, List[PathOrString]]]
@@ -89,7 +92,7 @@ def hash_files(
     if not hashfile.parent.exists():
         hashfile.parent.mkdir(parents=True)
 
-    hashfile.write_text(output, encoding="utf-8")
+    hashfile.write_text(output, **UTF8)
 
     if not quiet:
         print(output)
@@ -103,15 +106,26 @@ def toml2json(src: Path, dest: Path) -> None:
 
     dest.parent.mkdir(exist_ok=True, parents=True)
     dest.write_text(
-        json.dumps(
-            tomllib.loads(src.read_text(encoding="utf-8")),
-            indent=2,
-            sort_keys=True,
-        ),
-        encoding="utf-8",
+        json.dumps(tomllib.loads(src.read_text(**UTF8)), indent=2, sort_keys=True),
+        **UTF8,
     )
 
 
 def source_date_epoch() -> None:
+    """Get the source date epoch by shelling out to ``git``."""
     sde = subprocess.check_output(["git", "log", "-1", "--pretty=%ct"])
     print(json.dumps({"SOURCE_DATE_EPOCH": sde.decode("utf-8").strip()}))
+
+
+def replace_between(src: Path, dest: Path, sep: str) -> Optional[bool]:
+    """Copy the text between a separator from a source to a destination path."""
+    print("...", sep, "\n   ...", src, "\n     ...", dest)
+    src_chunks = src.read_text(**UTF8).split(sep)
+    dest_chunks = dest.read_text(**UTF8).split(sep)
+    assert len(src_chunks) == 3, pformat(src_chunks)
+    assert len(dest_chunks) == 3, pformat(dest_chunks)
+    dest.write_text(
+        "".join([dest_chunks[0], sep, src_chunks[1], sep, dest_chunks[2]]),
+        **UTF8,
+    )
+    return True

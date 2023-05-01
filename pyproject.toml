@@ -184,18 +184,18 @@ select = [
   "YTT",
 ]
 [tool.ruff.per-file-ignores]
+"_actions.py" = ["S603", "S607", "T201", "S101", "PLR2004"]
 "_config.py" = ["PLR0912", "C901"]
 "_source.py" = ["BLE001"]
 "constants.py" = ["N801"]
 "docs/conf.py" = ["INP001", "A001"]
 "dodo.py" = ["BLE001"]
+"doit_tools.py" = ["ARG002"]
 "doitoml.py" = ["PLR0913"]
 "dsl.py" = ["ARG002"]
 "entry_points.py" = ["BLE001"]
 "jinja2.py" = ["ARG002"]
 "test/**/*.py" = ["S101", "T201", "T203"]
-"doit_tools.py" = ["ARG002"]
-"_actions.py" = ["S603", "S607", "T201"]
 
 [tool.doitoml]
 prefix = ""
@@ -266,6 +266,9 @@ schema_toml = ["src/doitoml/schema/v0.schema.toml"]
 schema_json = ["src/doitoml/schema/_v0.schema.json"]
 schema_py = ["src/doitoml/schema/_v0_schema.py"]
 source_date_epoch = ["build/source_date_epoch.json"]
+env_binder = [".binder/environment.yml"]
+env_docs = ["docs/environment.yml"]
+env_test = [".github/environment.yml"]
 
 [tool.doitoml.tasks.bootstrap]
 meta = {doitoml = {log = "build/bootstrap.txt"}}
@@ -436,4 +439,41 @@ actions = [
     "black",
     "::schema_py",
   ],
+]
+
+[tool.doitoml.tasks.env.docs]
+file_dep = ["::env_binder"]
+targets = ["::env_docs"]
+actions = [
+  {py = {"_actions:replace_between" = {args = [
+    "::env_binder",
+    "::env_docs",
+    "# run deps",
+  ]}}},
+  {py = {"_actions:replace_between" = {args = [
+    "::env_binder",
+    "::env_docs",
+    "# build deps",
+  ]}}},
+  {py = {"_actions:replace_between" = {args = [
+    "::env_binder",
+    "::env_docs",
+    "# docs deps",
+  ]}}},
+]
+
+[tool.doitoml.tasks.env.test]
+file_dep = ["::env_binder"]
+targets = ["::env_test"]
+actions = [
+  {py = {"_actions:replace_between" = {args = [
+    "::env_binder",
+    "::env_test",
+    "# run deps",
+  ]}}},
+  {py = {"_actions:replace_between" = {args = [
+    "::env_binder",
+    "::env_test",
+    "# optional deps",
+  ]}}},
 ]

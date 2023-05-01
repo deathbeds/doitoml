@@ -1,10 +1,10 @@
 channels:
   - conda-forge
   - nodefaults
+
 dependencies:
   # run deps
   - doit
-  - jinja2
   - python >=3.8,<3.12
   - tomli
   # run deps
@@ -20,12 +20,11 @@ dependencies:
   # build deps
   - flit >=3.8
   - pip
-  - python-build
-  - twine
-  # build deps
-  # codegen deps
   - jsonschema-gentypes
-  # codegen deps
+  # build deps
+  # publish deps
+  - twine
+  # publish deps
   # lint deps
   - black
   - mypy
@@ -36,7 +35,6 @@ dependencies:
   - yarn >=3,<4
   # lint deps
   # test deps
-  - hypothesis-jsonschema
   - pytest
   - pytest-console-scripts
   - pytest-cov
@@ -44,6 +42,7 @@ dependencies:
   - pytest-json-report
   - pytest-xdist
   - tomli-w
+  - python-build
   # test deps
   # demo deps
   - ipywidgets >=8
@@ -65,4 +64,4 @@ dependencies:
   - pytest-check-links
   # check deps
 
-# end
+name: doitoml-demo

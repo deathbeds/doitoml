@@ -1,0 +1,28 @@
+channels:
+  - conda-forge
+  - nodefaults
+
+dependencies:
+  # run deps
+  - doit
+  - python >=3.8,<3.12
+  - tomli
+  # run deps
+  # build deps
+  - flit >=3.8
+  - pip
+  - jsonschema-gentypes
+  # build deps
+  # docs deps
+  - docutils >=0.19
+  - myst-nb
+  - pydata-sphinx-theme
+  - sphinx-autobuild
+  - sphinx-autodoc-typehints
+  - sphinx-copybutton
+  - sphinx-design
+  - sphinx-jsonschema
+  - sphinxcontrib-mermaid
+  # docs deps
+
+name: doitoml-docs

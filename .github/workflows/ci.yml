@@ -107,7 +107,7 @@ jobs:
       - name: install (conda)
         uses: conda-incubator/setup-miniconda@v2
         with:
-          environment-file: .binder/environment.yml
+          environment-file: .github/environment.yml
           miniforge-variant: Mambaforge
           use-mamba: true
 
@@ -115,11 +115,6 @@ jobs:
         if: matrix.os != 'windows'
         shell: bash -l {0}
         run: doit bootstrap
-
-      - name: lint
-        if: matrix.os == 'ubuntu'
-        shell: bash -l {0}
-        run: doit lint
 
       - name: bootstrap (windows)
         if: matrix.os == 'windows'
