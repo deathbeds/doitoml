@@ -45,9 +45,7 @@ from doitoml.types import (
     LogPaths,
     PathOrStrings,
     Paths,
-    PrefixedPaths,
     PrefixedStrings,
-    PrefixedStringsOrPaths,
     PrefixedTaskGenerator,
     PrefixedTasks,
     PrefixedTemplates,
@@ -89,9 +87,9 @@ class Config:
     sources: ConfigSources
     tasks: PrefixedTasks
     env: EnvDict
-    paths: PrefixedPaths
+    paths: PrefixedStrings
     templates: PrefixedTemplates
-    tokens: PrefixedStringsOrPaths
+    tokens: PrefixedStrings
     update_env: Optional[bool]
     fail_quietly: Optional[bool]
     discover_config_paths: Optional[bool]
@@ -379,7 +377,7 @@ class Config:
                 unresolved_paths[source.prefix, path_key] = unresolved_specs
                 continue
             self.paths[source.prefix, path_key] = sorted(
-                {Path(p) for p in found_paths},
+                {Path(p).as_posix() for p in found_paths},
             )
             unresolved_paths.pop((source.prefix, path_key), None)
 

@@ -67,7 +67,7 @@ class PathRef(DSL):
         prefix: str = groups["prefix"] or source.prefix
         tokens = self.doitoml.config.tokens.get((prefix, ref))
         if tokens:
-            return [t.as_posix() if isinstance(t, Path) else t for t in tokens]
+            return tokens
         return self.doitoml.config.paths.get((prefix, ref))  # type: ignore
 
 
@@ -149,11 +149,13 @@ class Globber(DSL):
         final_value = []
 
         parent_posix = source.path.parent.as_posix()
-        as_posix_rel = None
+
         for path in new_value:
             as_posix = path.as_posix()
             if excludes:
-                as_posix_rel = str(Path(os.path.relpath(str(as_posix), parent_posix)))
+                as_posix_rel = Path(
+                    os.path.relpath(str(as_posix), parent_posix),
+                ).as_posix()
                 if as_posix_rel and any(ex.search(as_posix_rel) for ex in excludes):
                     continue
             for pattern, repl_value in replacers:
