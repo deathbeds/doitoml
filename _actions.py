@@ -117,14 +117,14 @@ def source_date_epoch() -> None:
     print(json.dumps({"SOURCE_DATE_EPOCH": sde.decode("utf-8").strip()}))
 
 
-def replace_between(src: Path, dest: Path, sep: str) -> Optional[bool]:
+def replace_between(src: str, dest: str, sep: str) -> Optional[bool]:
     """Copy the text between a separator from a source to a destination path."""
-    print("...", sep, "\n   ...", src, "\n     ...", dest)
-    src_chunks = src.read_text(**UTF8).split(sep)
-    dest_chunks = dest.read_text(**UTF8).split(sep)
+    print("  ...", sep, "\n    +--", src, "\n    +->", dest)
+    src_chunks = Path(src).read_text(**UTF8).split(sep)
+    dest_chunks = Path(dest).read_text(**UTF8).split(sep)
     assert len(src_chunks) == 3, pformat(src_chunks)
     assert len(dest_chunks) == 3, pformat(dest_chunks)
-    dest.write_text(
+    Path(dest).write_text(
         "".join([dest_chunks[0], sep, src_chunks[1], sep, dest_chunks[2]]),
         **UTF8,
     )

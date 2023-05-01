@@ -378,6 +378,7 @@ actions = [
 [tool.doitoml.tasks.test.unit]
 doc = "Run unit tests with pytest"
 file_dep = ["::ppt", "::all_py", "::all_py_test", "::all_examples"]
+task_dep = ["test:preflight"]
 actions = [["pytest", "-k", "not subprocess", "--cov-fail-under=0"]]
 
 [tool.doitoml.tasks.test.full]
