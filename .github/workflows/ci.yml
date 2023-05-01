@@ -98,16 +98,16 @@ jobs:
           use-mamba: true
 
       - name: bootstrap
-        run: doit bootstrap
-
-      - name: lint
-        run: doit lint
+        run: doit bootstrap && doit build:source_date_epoch
 
       - name: list
         run: doit list --all --status
 
       - name: lint
         run: doit lint
+
+      - name: build
+        run: doit build
 
       - name: docs
         run: doit docs:sphinx
