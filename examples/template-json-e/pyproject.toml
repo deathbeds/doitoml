@@ -52,7 +52,9 @@ b = ["another description"]
 
 [tool.doitoml.templates.json-e.tasks.dist."each(desc,pkg)"."${pkg}"]
 actions = [
-  {py = {"shutil:rmtree" = {kwargs = {path = "dist/${pkg}", ignore_errors = "1"}}}},
+  {py = {"shutil:rmtree" = {args = [
+    "dist/${pkg}",
+  ], kwargs = {ignore_errors = true}}}},
   {py = {"doit.tools:create_folder" = {args = [
     "dist",
   ]}}},
