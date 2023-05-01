@@ -158,7 +158,7 @@ class Globber(DSL):
                     continue
             for pattern, repl_value in replacers:
                 as_posix = pattern.sub(repl_value, as_posix)
-            final_value += [Path(as_posix)]
+            final_value += [as_posix]
 
         return sorted(set(final_value))
 
