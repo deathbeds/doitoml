@@ -410,7 +410,7 @@ class Config:
         spec: str,
         source_relative: bool,
         cwd: Optional[Path] = None,
-    ) -> Optional[PathOrStrings]:
+    ) -> Optional[Strings]:
         """Resolve a single path in a task or one of the special field tables.
 
         If ``source_relative``, transform unparsed strings into a path.
@@ -428,11 +428,11 @@ class Config:
 
         if resolved:
             if source_relative:
-                return [(cwd / r).resolve() for r in resolved]
+                return [(cwd / r).resolve().as_posix() for r in resolved]
             return resolved
 
         if source_relative:
-            return [(cwd / spec).resolve()]
+            return [(cwd / spec).resolve().as_posix()]
 
         return [spec]
 

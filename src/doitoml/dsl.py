@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, List, Tuple, cast
 
 from .errors import DslError
-from .types import PathOrStrings
+from .types import Strings
 
 if TYPE_CHECKING:
     from .doitoml import DoiTOML
@@ -41,7 +41,7 @@ class DSL:
         match: re.Match[str],
         raw_token: str,
         **kwargs: Any,
-    ) -> PathOrStrings:
+    ) -> Strings:
         """Transform a token into one or more strings."""
 
 
@@ -60,14 +60,14 @@ class PathRef(DSL):
         match: re.Match[str],
         raw_token: str,
         **kwargs: Any,
-    ) -> PathOrStrings:
+    ) -> Strings:
         """Expand a path name (with optional prefix) to a previously-found value."""
         groups = match.groupdict()
         ref: str = groups["ref"]
         prefix: str = groups["prefix"] or source.prefix
         tokens = self.doitoml.config.tokens.get((prefix, ref))
         if tokens:
-            return tokens
+            return [t.as_posix() if isinstance(t, Path) else t for t in tokens]
         return self.doitoml.config.paths.get((prefix, ref))  # type: ignore
 
 
@@ -90,7 +90,7 @@ class EnvReplacer(DSL):
         match: re.Match[str],
         raw_token: str,
         **kwargs: Any,
-    ) -> PathOrStrings:
+    ) -> Strings:
         """Replace all environment variable with their value in ``os.environ``."""
         return [self.pattern.sub(self._replacer, raw_token)]
 
@@ -107,7 +107,7 @@ class Globber(DSL):
         match: re.Match[str],
         raw_token: str,
         **kwargs: Any,
-    ) -> PathOrStrings:
+    ) -> Strings:
         """Expand a token to zero or more :class:`pathlib.Path` based on (r)glob(s).
 
         Chunks are delimited by ``::``. The first chunk is a relative path.
@@ -191,7 +191,7 @@ class Getter(DSL):
         match: re.Match[str],
         raw_token: str,
         **kwargs: Any,
-    ) -> PathOrStrings:
+    ) -> Strings:
         """Get a value from a parseable file, cast it to a string.
 
         All extra items are passed as positional arguments to the Source.
