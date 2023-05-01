@@ -2,12 +2,13 @@ channels:
   - conda-forge
   - nodefaults
 dependencies:
-  # run
+  # run deps
   - doit
   - jinja2
   - python >=3.8,<3.12
   - tomli
-  # optional
+  # run deps
+  # optional deps
   - jinja2
   - json-e
   - jsonschema-with-format
@@ -15,14 +16,17 @@ dependencies:
   - types-jinja2
   - types-jsonschema
   - types-pyyaml
-  # build
+  # optional deps
+  # build deps
   - flit >=3.8
   - pip
   - python-build
   - twine
-  # codegen
+  # build deps
+  # codegen deps
   - jsonschema-gentypes
-  # lint
+  # codegen deps
+  # lint deps
   - black
   - mypy
   - nodejs >=18,<19
@@ -30,7 +34,8 @@ dependencies:
   - ssort
   - taplo
   - yarn >=3,<4
-  # test
+  # lint deps
+  # test deps
   - hypothesis-jsonschema
   - pytest
   - pytest-console-scripts
@@ -39,11 +44,13 @@ dependencies:
   - pytest-json-report
   - pytest-xdist
   - tomli-w
-  # demo
+  # test deps
+  # demo deps
   - ipywidgets >=8
   - jupyterlab-markup
   - jupyterlab >=3.6.1,<4
-  # docs
+  # demo deps
+  # docs deps
   - docutils >=0.19
   - myst-nb
   - pydata-sphinx-theme
@@ -53,5 +60,9 @@ dependencies:
   - sphinx-design
   - sphinx-jsonschema
   - sphinxcontrib-mermaid
-  # check
+  # docs deps
+  # check deps
   - pytest-check-links
+  # check deps
+
+# end
