@@ -113,7 +113,7 @@ jobs:
         run: doit docs:sphinx
 
       - name: check
-        run: doit docs:check
+        run: doit docs
 
       - name: status
         run: doit list --all --status | sort
