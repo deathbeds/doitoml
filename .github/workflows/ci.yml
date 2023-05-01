@@ -96,7 +96,7 @@ jobs:
       - name: install (conda)
         uses: conda-incubator/setup-miniconda@v2
         with:
-          environment-file: .github/environment.yml
+          environment-file: .binder/environment.yml
           miniforge-variant: Mambaforge
           use-mamba: true
 
