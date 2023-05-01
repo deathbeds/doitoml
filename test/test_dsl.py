@@ -63,6 +63,8 @@ def test_dsl_success(
     dsl = empty_doitoml.entry_points.dsl[key]
     match = dsl.pattern.search(raw_token)
     assert match is not None
-    rel_expected = [str(tmp_path / t) if t.startswith("./") else t for t in expected]
+    rel_expected = [
+        (tmp_path / t).as_posix() if t.startswith("./") else t for t in expected
+    ]
     observed = list(dsl.transform_token(source, match, raw_token))
     assert observed == rel_expected
