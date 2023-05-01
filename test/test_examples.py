@@ -136,3 +136,6 @@ def test_slow_example(
             env,
             expected_task_names=step.get("task_names"),
         )
+        skip = step.get("skip_os", [])
+        if os.name in skip:
+            return

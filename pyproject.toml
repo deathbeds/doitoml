@@ -70,7 +70,6 @@ addopts = [
   "--cov=doitoml",
   "--cov-branch",
   "--cov-context=test",
-  "--cov-fail-under=100",
   "--no-cov-on-fail",
   # misc
   "-vv",
@@ -210,6 +209,7 @@ PIP_DOWNLOAD_CACHE = "./build/.cache/pip"
 RUST_LOG = "error"
 SOURCE_DATE_EPOCH = ":get|0::json::build/source_date_epoch.json::SOURCE_DATE_EPOCH"
 SKIP_CODEGEN = "0"
+COV_FAIL_UNDER = "100"
 
 [tool.doitoml.tokens]
 sphinx_opts = ["-b", "html", "docs", "build/docs"]
@@ -379,13 +379,13 @@ actions = [
 doc = "Run unit tests with pytest"
 file_dep = ["::ppt", "::all_py", "::all_py_test", "::all_examples"]
 task_dep = ["test:preflight"]
-actions = [["pytest", "-k", "not subprocess", "--cov-fail-under=0"]]
+actions = [["pytest", "-k", "not subprocess"]]
 
 [tool.doitoml.tasks.test.full]
 doc = "Run all tests with pytest"
 file_dep = ["::ppt", "::all_py", "::all_py_test", "::all_examples"]
 task_dep = ["test:unit"]
-actions = [["pytest"]]
+actions = [["pytest", "--cov-fail-under=${COV_FAIL_UNDER}"]]
 
 [tool.doitoml.tasks.docs.sphinx]
 doc = "Build documentation with `sphinx`"

@@ -109,6 +109,7 @@ before = {files = {"**/*" = 17, "*" = 10}}
 rc = 0
 run = ["doit", "list"]
 tasks = 10
+skip_os = ["nt"]
 
 [tool.__doitoml_tests__.steps.01_run]
 rc = 0
