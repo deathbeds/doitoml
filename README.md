@@ -2,13 +2,15 @@
 
 > Load declarative tasks for [doit] from TOML, JSON, YAML, and other files.
 
+|            docs             |                                          install                                           |                build                 |
+| :-------------------------: | :----------------------------------------------------------------------------------------: | :----------------------------------: |
+| [![docs][docs-badge]][docs] | [![install from pypi][pypi-badge]][pypi] [![install from conda-forge][conda-badge]][conda] | [![build][workflow-badge]][workflow] |
+
 ## Install
 
-> > **TBD** for now, see the [contributing guide] for a development install.
->
-> |         `pip`         |   `conda` (or `mamba`, `micromamba`)   |
-> | :-------------------: | :------------------------------------: |
-> | `pip install doitoml` | `conda install -c conda-forge doitoml` |
+|         `pip`         |   `conda` (or `mamba`, `micromamba`)   |
+| :-------------------: | :------------------------------------: |
+| `pip install doitoml` | `conda install -c conda-forge doitoml` |
 
 ## Features
 
@@ -97,3 +99,12 @@ do everything _The Hard Way_:
 [docs]: https://doitoml.rtfd.io
 [doit]: https://github.com/pydoit/doit
 [github]: https://github.com/deathbeds/doitoml
+[docs-badge]: https://readthedocs.org/projects/doitoml/badge/?version=latest
+[conda-badge]: https://img.shields.io/conda/vn/conda-forge/doitoml
+[conda]: https://anaconda.org/conda-forge/doitoml
+[pypi-badge]: https://img.shields.io/pypi/v/doitoml
+[pypi]: https://pypi.org/project/doitoml
+[workflow-badge]:
+  https://github.com/deathbeds/doitoml/actions/workflows/ci.yml/badge.svg?branch=main
+[workflow]:
+  https://github.com/deathbeds/doitoml/actions/workflows/ci.yml?query=branch%3Amain
