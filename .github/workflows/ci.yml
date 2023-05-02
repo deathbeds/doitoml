@@ -135,7 +135,7 @@ jobs:
         os: ["ubuntu", "macos", "windows"]
         python-version: ["3.8", "3.11"]
     env:
-      SKIP_CODEGEN: 1
+      DOITOML_SKIP_CODEGEN: 1
     steps:
       - name: configure line endings
         run: |

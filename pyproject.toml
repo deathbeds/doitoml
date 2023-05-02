@@ -14,12 +14,12 @@ classifiers = [
   "Programming Language :: Python :: 3 :: Only",
   "Programming Language :: Python :: 3",
 ]
-dependencies = ["doit", "typing_extensions", "tomli ; python_version<\"3.11\""]
+dependencies = ["doit >=0.36.0", "typing_extensions", "tomli ; python_version<\"3.11\""]
 [project.optional-dependencies]
-json-e = ["json-e"]
-jinja2 = ["jinja2"]
-jsonschema = ["jsonschema[format]"]
-yaml = ["pyyaml"]
+json-e = ["json-e >=4"]
+jinja2 = ["jinja2 >=3"]
+jsonschema = ["jsonschema >=4"]
+yaml = ["pyyaml >=5"]
 [project.urls]
 "Bug Tracker" = "https://github.com/deathbeds/doitoml/issues"
 "Changelog" = "https://github.com/deathbeds/doitoml/blob/main/CHANGELOG.md"
@@ -210,7 +210,7 @@ DOITOML_WHEEL = "doitoml-${DOITOML_VERSION}-py3-none-any.whl"
 PIP_DOWNLOAD_CACHE = "./build/.cache/pip"
 RUST_LOG = "error"
 SOURCE_DATE_EPOCH = ":get|0::json::build/source_date_epoch.json::SOURCE_DATE_EPOCH"
-SKIP_CODEGEN = "0"
+DOITOML_SKIP_CODEGEN = "0"
 COV_FAIL_UNDER = "100"
 
 [tool.doitoml.tokens]
@@ -381,13 +381,14 @@ actions = [
 doc = "Run unit tests with pytest"
 file_dep = ["::ppt", "::all_py", "::all_py_test", "::all_examples"]
 task_dep = ["test:preflight"]
-actions = [["pytest", "-k", "not subprocess"]]
+actions = [["pytest"]]
 
 [tool.doitoml.tasks.test.full]
 doc = "Run all tests with pytest"
 file_dep = ["::ppt", "::all_py", "::all_py_test", "::all_examples"]
 task_dep = ["test:unit"]
 actions = [["pytest", "--cov-fail-under=${COV_FAIL_UNDER}"]]
+meta = {doitoml = {env = {DOITOML_TEST_FULL_EXAMPLES = 1}}}
 
 [tool.doitoml.tasks.docs.sphinx]
 doc = "Build documentation with `sphinx`"
@@ -415,14 +416,14 @@ actions = [["sphinx-autobuild", "::sphinx_opts", "--no-initial", "--watch=src"]]
 
 # these will get templated
 [tool.doitoml.tasks.gen.schema]
-meta = {doitoml = {skip = "${SKIP_CODEGEN}"}}
+meta = {doitoml = {skip = "${DOITOML_SKIP_CODEGEN}"}}
 doc = "build JSON Schema from TOML Schema"
 file_dep = ["::schema_toml"]
 targets = ["::schema_json"]
 actions = [{py = {"_actions:toml2json" = {args = ["::schema_toml", "::schema_json"]}}}]
 
 [tool.doitoml.tasks.gen.types]
-meta = {doitoml = {skip = "${SKIP_CODEGEN}"}}
+meta = {doitoml = {skip = "${DOITOML_SKIP_CODEGEN}"}}
 doc = "build typings from JSON Schema"
 file_dep = ["::schema_toml"]
 targets = ["::schema_py"]

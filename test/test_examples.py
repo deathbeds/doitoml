@@ -12,9 +12,10 @@ except ImportError:  # pragma: no cover
     import tomli as tomllib
 
 
-from .conftest import (
-    TDataExample,
-)
+from .conftest import TDataExample
+
+#: run all examples, whcih use additional resources
+TEST_FULL_EXAMPLES = bool(json.loads(os.environ.get("DOITOML_TEST_FULL_EXAMPLES", "0")))
 
 
 def _count_files(
@@ -107,7 +108,7 @@ def test_example_task_counts(a_data_example: TDataExample, script_runner: Any) -
         break
 
 
-def test_slow_example(
+def test_example(
     a_data_example: TDataExample,
     script_runner: Any,
 ) -> None:
@@ -138,4 +139,6 @@ def test_slow_example(
         )
         skip = step.get("skip_os", [])
         if os.name in skip:
+            return
+        if not TEST_FULL_EXAMPLES:
             return

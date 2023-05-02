@@ -6,6 +6,8 @@
 | :-------------------------: | :----------------------------------------------------------------------------------------: | :----------------------------------: |
 | [![docs][docs-badge]][docs] | [![install from pypi][pypi-badge]][pypi] [![install from conda-forge][conda-badge]][conda] | [![build][workflow-badge]][workflow] |
 
+> See the [full documentation][docs] for more information.
+
 ## Install
 
 |         `pip`         |   `conda` (or `mamba`, `micromamba`)   |
@@ -31,7 +33,8 @@
 ## Usage
 
 `doitoml` provides no additional command line abilities, and is meant to drop in to the
-existing `doit` CLI.
+existing [`doit run`](https://pydoit.org/cmd-run.html) CLI and
+[other commands](https://pydoit.org/cmd-other.html).
 
 ### A Simple Example
 

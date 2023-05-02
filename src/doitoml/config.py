@@ -288,11 +288,11 @@ class Config:
                 env[env_key] = new_key_value
                 unresolved_env.pop(env_key, None)
 
-    def resolve_one_env(self, source: ConfigSource, env_value: str) -> Optional[str]:
+    def resolve_one_env(self, source: ConfigSource, env_value: Any) -> Optional[str]:
         """Resolve a single env member."""
-        new_value = env_value
+        new_value = str(env_value)
         for dsl in self.doitoml.entry_points.dsl.values():
-            match = dsl.pattern.search(env_value)
+            match = dsl.pattern.search(new_value)
             if match is not None:
                 try:
                     new_value = str(dsl.transform_token(source, match, env_value)[0])
