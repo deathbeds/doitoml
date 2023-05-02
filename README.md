@@ -17,18 +17,30 @@
 ## Features
 
 - **declarative** automation in a **single** `pyproject.toml`, or...
-  - well-known configuration paths like `package.json`
-  - any number of namespaced TOML, JSON, or YAML files
+  - other well-known configuration paths like `package.json`
+  - any number of namespaced TOML, JSON, [YAML](#extras) files
     - from any key inside them
   - augment and simplify existing `dodo.py` workflows
 - reuse and transform **paths** and shell tokens
   - use **globs** and transforms to capture relationships between transformed files
 - flexibly configure **environment** variables
-- use **templates** like Jinja2 and JSON-e for advanced use cases
 - user-defined Python-based **actions** and **up-to-date** checkers
 - control the **working directory** and **log paths** of processes and actions
+- use [**templates**](#extras) like Jinja2 and JSON-e for advanced use cases
 - **extensibility** in any part of the task definition process
   - all core functionality implemented as `entry_point`-based **plugins**
+
+### Extras
+
+These features require additional `pip` or `conda` packages
+
+|                 `pip` | `conda`                   | feature                        |
+| --------------------: | ------------------------- | ------------------------------ |
+|        `doitoml[all]` | `doitoml-with-all`        | all optional features          |
+|     `doitoml[jinja2]` | `doitoml-with-jinja2`     | Jinja2 task templates          |
+|     `doitoml[json-e]` | `doitoml-with-json-e`     | JSON-e task templates          |
+| `doitoml[jsonschema]` | `doitoml-with-jsonschema` | extra configuration validation |
+|       `doitoml[yaml]` | `doitoml-with-yaml`       | YAML-based task sources        |
 
 ## Usage
 
