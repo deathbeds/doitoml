@@ -1,8 +1,13 @@
 # Changelog
 
+## 0.1.2 (unreleased)
+
+- adds `doitoml[test]`
+
 ## 0.1.1
 
-- fix schema import
+- fixes schema import
+- adds `doitoml[all]`
 
 ## 0.1.0
 

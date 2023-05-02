@@ -4,7 +4,7 @@ requires = ["flit_core<4,>=3.7.1"]
 
 [project]
 name = "doitoml"
-version = "0.1.1"
+version = "0.1.2"
 description = "Load declarative tasks for doit from TOML, JSON, YAML, and other files."
 readme = "README.md"
 authors = [{name = "doitoml contributors", email = "deathbeds@googlegroups.com"}]
@@ -21,6 +21,15 @@ json-e = ["json-e >=4"]
 jinja2 = ["jinja2 >=3"]
 jsonschema = ["jsonschema >=4"]
 yaml = ["pyyaml >=5"]
+test = [
+  "build",
+  "pytest-console-scripts",
+  "pytest-cov",
+  "pytest-html-report",
+  "pytest-json-report",
+  "pytest-xdist",
+  "tomli-w",
+]
 [project.urls]
 "Bug Tracker" = "https://github.com/deathbeds/doitoml/issues"
 "Changelog" = "https://github.com/deathbeds/doitoml/blob/main/CHANGELOG.md"
