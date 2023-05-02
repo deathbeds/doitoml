@@ -23,7 +23,7 @@
 
 ```{eval-rst}
 .. currentmodule:: doitoml
-.. automodule:: doitoml.schema
+.. automodule:: doitoml.schema.validator
 ```
 
 ### Schema Types

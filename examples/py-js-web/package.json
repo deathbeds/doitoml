@@ -70,10 +70,11 @@
         ],
         "file_dep": [
           "::backend::venv_history",
-          "::y_lock"
+          "::pj"
         ],
         "targets": [
-          "::y_install_state"
+          "::y_install_state",
+          "::y_lock"
         ],
         "actions": [
           [

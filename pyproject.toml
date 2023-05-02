@@ -87,6 +87,7 @@ exclude_lines = [
   "if TYPE_CHECKING:",
   "pragma: no cover",
 ]
+
 [tool.coverage.run]
 data_file = "build/reports/coverage/.coverage"
 
@@ -199,6 +200,7 @@ select = [
 [tool.doitoml]
 prefix = ""
 config_paths = ["js/package.json"]
+validate = true
 
 [tool.doitoml.env]
 BLACK_CACHE_DIR = "./build/.cache/black"
