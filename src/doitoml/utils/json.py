@@ -3,6 +3,8 @@ import json
 import pathlib
 from typing import Any
 
+from doitoml.sources._source import Source
+
 
 class DoitomlEncoder(json.JSONEncoder):
 
@@ -13,10 +15,13 @@ class DoitomlEncoder(json.JSONEncoder):
 
     def default(self, obj: Any) -> Any:
         """Handle a single object."""
-        if not isinstance(obj, pathlib.Path):  # pragma: no cover
-            return json.JSONEncoder.default(self, obj)
+        if isinstance(obj, pathlib.Path):
+            return obj.as_posix()
 
-        return obj.as_posix()
+        if isinstance(obj, Source):
+            return obj.path.as_posix() if obj.path else None
+
+        return json.JSONEncoder.default(self, obj)  # pragma: no cover
 
 
 def to_json(obj: Any) -> Any:

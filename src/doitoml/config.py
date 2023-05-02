@@ -1,5 +1,6 @@
 """Handles discovering, loading, and normalizing configuration."""
 import os
+import warnings
 from copy import deepcopy
 from pathlib import Path
 from pprint import pformat
@@ -15,20 +16,14 @@ from typing import (
     cast,
 )
 
-from doitoml.utils.json import to_json
-
-if TYPE_CHECKING:
-    from doitoml.doitoml import DoiTOML
-
-
-from doitoml.constants import (
+from .constants import (
     DEFAULTS,
     DOIT_TASK,
     DOITOML_META,
     FALSEY,
     NAME,
 )
-from doitoml.errors import (
+from .errors import (
     ActionError,
     ConfigError,
     DoitomlError,
@@ -40,7 +35,10 @@ from doitoml.errors import (
     TemplaterError,
     UnresolvedError,
 )
-from doitoml.types import (
+from .schema._v0_schema import DoitomlSchema
+from .sources._config import ConfigParser, ConfigSource
+from .sources._source import Source
+from .types import (
     Action,
     LogPaths,
     PathOrStrings,
@@ -52,10 +50,11 @@ from doitoml.types import (
     Strings,
     Task,
 )
+from .utils.json import to_json
 
-from .schema._v0_schema import DoitomlSchema
-from .sources._config import ConfigParser, ConfigSource
-from .sources._source import Source
+if TYPE_CHECKING:
+    from .doitoml import DoiTOML
+
 
 Parsers = Dict[str, Type[Source]]
 
@@ -66,16 +65,6 @@ EnvDict = Dict[str, str]
 
 
 RETRIES = 11
-
-
-try:
-    from . import schema
-
-    HAS_JSONSCHEMA = True
-    JSONSCHEMA_ERROR = None
-except MissingDependencyError as err:
-    HAS_JSONSCHEMA = False
-    JSONSCHEMA_ERROR = f"cannot validate: {err}"
 
 
 class Config:
@@ -93,7 +82,7 @@ class Config:
     update_env: Optional[bool]
     fail_quietly: Optional[bool]
     discover_config_paths: Optional[bool]
-    validate: bool
+    validate: Optional[bool]
 
     def __init__(
         self,
@@ -106,7 +95,7 @@ class Config:
         validate: Optional[bool] = None,
     ) -> None:
         """Create empty configuration and discover sources."""
-        self.validate = HAS_JSONSCHEMA if validate is None else validate
+        self.validate = validate
         self.doitoml = doitoml
         self.config_paths = config_paths
         self.sources = {}
@@ -124,45 +113,17 @@ class Config:
         env = dict(**self.env)
         env.update(os.environ)
 
-        return cast(
-            DoitomlSchema,
-            to_json(
-                {
-                    "env": env,
-                    "tokens": {":".join(k): v for k, v in self.tokens.items()},
-                    "paths": {":".join(k): v for k, v in self.paths.items()},
-                    "tasks": {
-                        ":".join(k): self.task_to_dict(v) for k, v in self.tasks.items()
-                    },
-                    "templates": self.templates,
-                },
-            ),
+        as_dict: DoitomlSchema = to_json(
+            {
+                "env": env,
+                "tokens": {":".join(k): v for k, v in self.tokens.items()},
+                "paths": {":".join(k): v for k, v in self.paths.items()},
+                "templates": self.templates,
+                "tasks": {":".join(k): v for k, v in self.tasks.items()},
+            },
         )
 
-    def task_to_dict(self, task: Task) -> Dict[str, Any]:
-        """Make a 'dumb' JSON object of a task."""
-        new_task = deepcopy(task)
-        if DOIT_TASK.ACTIONS in new_task:
-            new_actions: List[Action] = []
-            for action in new_task[DOIT_TASK.ACTIONS]:
-                if not isinstance(action, str) and isinstance(action, list):
-                    new_actions += [list(map(str, action))]
-                    continue
-                new_actions += [action]
-            new_task[DOIT_TASK.ACTIONS] = new_actions
-
-        for key in DOIT_TASK.RELATIVE_LISTS:
-            if key in new_task:
-                new_task[key] = list(map(str, new_task[key]))  # type: ignore
-
-        meta = new_task.setdefault(DOIT_TASK.META, {})  # type: ignore
-        dt_meta = meta.setdefault(NAME, {})
-
-        dt_log = dt_meta[DOITOML_META.LOG]
-        dt_meta[DOITOML_META.LOG] = [str(log) if log else None for log in dt_log]
-        dt_meta[DOITOML_META.SOURCE] = str(dt_meta[DOITOML_META.SOURCE])
-
-        return dict(new_task)
+        return as_dict
 
     def initialize(self) -> None:
         """Perform a few passes to configure everything."""
@@ -199,12 +160,30 @@ class Config:
         # .. then find the tasks
         self.init_tasks()
 
-        if self.validate:
-            self.validate_all()
+        self.maybe_validate()
 
-    def validate_all(self) -> None:
-        """Check for validation errors."""
-        schema.latest.validate(self.to_dict())
+    def maybe_validate(self) -> None:
+        """Validate if requested, or."""
+        if self.validate is False:
+            return
+
+        try:
+            from .schema.validator import latest
+
+            has_jsonschema = True
+            jsonschema_error = None
+        except MissingDependencyError as err:
+            has_jsonschema = False
+            jsonschema_error = str(err)
+
+        if not has_jsonschema:  # pragma: no cover
+            message = (
+                f"Validation was requested, but cannot validate: {jsonschema_error}"
+            )
+            warnings.warn(message, stacklevel=1)
+            return
+
+        latest.validate(self.to_dict())
 
     def find_config_sources(self) -> ConfigSources:
         """Find all directly and referenced configuration sources."""
@@ -309,11 +288,11 @@ class Config:
                 env[env_key] = new_key_value
                 unresolved_env.pop(env_key, None)
 
-    def resolve_one_env(self, source: ConfigSource, env_value: str) -> Optional[str]:
+    def resolve_one_env(self, source: ConfigSource, env_value: Any) -> Optional[str]:
         """Resolve a single env member."""
-        new_value = env_value
+        new_value = str(env_value)
         for dsl in self.doitoml.entry_points.dsl.values():
-            match = dsl.pattern.search(env_value)
+            match = dsl.pattern.search(new_value)
             if match is not None:
                 try:
                     new_value = str(dsl.transform_token(source, match, env_value)[0])

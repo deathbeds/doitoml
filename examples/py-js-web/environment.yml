@@ -10,7 +10,7 @@ dependencies:
   # build
   - flit
   - python-build
-  - yarn >=3,<4
+  - yarn ==3.5
   # test
   - pytest-cov
   - pytest-html

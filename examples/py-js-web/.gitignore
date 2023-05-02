@@ -8,3 +8,5 @@ dist
 lib
 node_modules
 static
+# a real project _would_ check this ins
+yarn.lock

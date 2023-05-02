@@ -2,34 +2,51 @@
 
 > Load declarative tasks for [doit] from TOML, JSON, YAML, and other files.
 
+|            docs             |                                          install                                           |                build                 |
+| :-------------------------: | :----------------------------------------------------------------------------------------: | :----------------------------------: |
+| [![docs][docs-badge]][docs] | [![install from pypi][pypi-badge]][pypi] [![install from conda-forge][conda-badge]][conda] | [![build][workflow-badge]][workflow] |
+
+> See the [full documentation][docs] for more information.
+
 ## Install
 
-> > **TBD** for now, see the [contributing guide] for a development install.
->
-> |         `pip`         |   `conda` (or `mamba`, `micromamba`)   |
-> | :-------------------: | :------------------------------------: |
-> | `pip install doitoml` | `conda install -c conda-forge doitoml` |
+|         `pip`         |   `conda` (or `mamba`, `micromamba`)   |
+| :-------------------: | :------------------------------------: |
+| `pip install doitoml` | `conda install -c conda-forge doitoml` |
 
 ## Features
 
 - **declarative** automation in a **single** `pyproject.toml`, or...
-  - well-known configuration paths like `package.json`
-  - any number of namespaced TOML, JSON, or YAML files
+  - other well-known configuration paths like `package.json`
+  - any number of namespaced TOML, JSON, [YAML](#extras) files
     - from any key inside them
   - augment and simplify existing `dodo.py` workflows
 - reuse and transform **paths** and shell tokens
   - use **globs** and transforms to capture relationships between transformed files
 - flexibly configure **environment** variables
-- use **templates** like Jinja2 and JSON-e for advanced use cases
 - user-defined Python-based **actions** and **up-to-date** checkers
 - control the **working directory** and **log paths** of processes and actions
+- use [**templates**](#extras) like Jinja2 and JSON-e for advanced use cases
 - **extensibility** in any part of the task definition process
   - all core functionality implemented as `entry_point`-based **plugins**
+
+### Extras
+
+These features require additional `pip` or `conda` packages
+
+|                 `pip` | `conda`                   | feature                        |
+| --------------------: | ------------------------- | ------------------------------ |
+|        `doitoml[all]` | `doitoml-with-all`        | all optional features          |
+|     `doitoml[jinja2]` | `doitoml-with-jinja2`     | Jinja2 task templates          |
+|     `doitoml[json-e]` | `doitoml-with-json-e`     | JSON-e task templates          |
+| `doitoml[jsonschema]` | `doitoml-with-jsonschema` | extra configuration validation |
+|       `doitoml[yaml]` | `doitoml-with-yaml`       | YAML-based task sources        |
 
 ## Usage
 
 `doitoml` provides no additional command line abilities, and is meant to drop in to the
-existing `doit` CLI.
+existing [`doit run`](https://pydoit.org/cmd-run.html) CLI and
+[other commands](https://pydoit.org/cmd-other.html).
 
 ### A Simple Example
 
@@ -97,3 +114,12 @@ do everything _The Hard Way_:
 [docs]: https://doitoml.rtfd.io
 [doit]: https://github.com/pydoit/doit
 [github]: https://github.com/deathbeds/doitoml
+[docs-badge]: https://readthedocs.org/projects/doitoml/badge/?version=latest
+[conda-badge]: https://img.shields.io/conda/vn/conda-forge/doitoml
+[conda]: https://anaconda.org/conda-forge/doitoml
+[pypi-badge]: https://img.shields.io/pypi/v/doitoml
+[pypi]: https://pypi.org/project/doitoml
+[workflow-badge]:
+  https://github.com/deathbeds/doitoml/actions/workflows/ci.yml/badge.svg?branch=main
+[workflow]:
+  https://github.com/deathbeds/doitoml/actions/workflows/ci.yml?query=branch%3Amain

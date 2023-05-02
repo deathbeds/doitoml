@@ -117,6 +117,12 @@ html_theme_options = {
             "url": PROJ_DATA["project"]["urls"]["PyPI"],
             "icon": "fa-brands fa-python",
         },
+        {
+            "name": "conda-forge",
+            "url": "https://github.com/conda-forge/doitoml-feedstock#about-doitoml",
+            "icon": "_static/img/anvil.svg",
+            "type": "local",
+        },
     ],
     "footer_end": ["mermaid10"],
 }

@@ -29,6 +29,8 @@ jobs:
       matrix:
         os: [ubuntu]
         python-version: ["3.11"]
+    outputs:
+      wheel: ${{ steps.wheel.outputs.wheel }}
     steps:
       - uses: actions/checkout@v3
 
@@ -71,11 +73,15 @@ jobs:
         run: doit list --all --status | sort
         if: always()
 
-      - name: Upload (dist)
+      - name: upload (dist)
         uses: actions/upload-artifact@v3
         with:
           name: doitoml-dist-${{ github.run_number }}
           path: ./dist
+      - id: wheel
+        name: get wheel name
+        run: |
+          echo "wheel=$(ls dist/*.whl)" >> $GITHUB_OUTPUT
 
   docs:
     name: docs
@@ -129,7 +135,7 @@ jobs:
         os: ["ubuntu", "macos", "windows"]
         python-version: ["3.8", "3.11"]
     env:
-      SKIP_CODEGEN: 1
+      DOITOML_SKIP_CODEGEN: 1
     steps:
       - name: configure line endings
         run: |
@@ -188,3 +194,36 @@ jobs:
       - name: Rename uncached conda packages
         shell: bash
         run: mv "${CONDA_PKGS_DIR}" "${CONDA_PKGS_DIR}_do_not_cache"
+
+  smoke:
+    runs-on: ${{ matrix.os }}-latest
+    needs: [build]
+    name: smoke (${{ matrix.os }} ${{ matrix.python-version }})
+    strategy:
+      max-parallel: 2
+      fail-fast: false
+      matrix:
+        os: ["ubuntu", "macos", "windows"]
+        python-version: ["3.11"]
+    steps:
+      - name: download (dist)
+        uses: actions/download-artifact@v3
+        with:
+          name: doitoml-dist-${{ github.run_number }}
+          path: ./dist
+
+      - name: setup (python)
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+          architecture: x64
+
+      - name: install dist
+        run: |
+          ls "${{ needs.build.outputs.wheel }}" || dir "${{ needs.build.outputs.wheel }}"
+          pip install -vv "${{ needs.build.outputs.wheel }}"
+          pip check
+
+      - name: cli smoke test
+        run: |
+          python -c "__import__('doitoml')"

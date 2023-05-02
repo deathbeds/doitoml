@@ -104,8 +104,8 @@ file_dep = ["::all_dist"]
 targets = ["::dist_hash"]
 
 [tool.__doitoml_tests__.steps.00_list]
-after = {files = {"*" = 10}}
-before = {files = {"**/*" = 17, "*" = 10}}
+after = {files = {"*" = 9}}
+before = {files = {"**/*" = 16, "*" = 9}}
 rc = 0
 run = ["doit", "list"]
 tasks = 10
@@ -117,6 +117,7 @@ run = ["doit"]
 
 [tool.__doitoml_tests__.steps.01_run.after.files]
 "*" = 12
+"yarn.lock" = 1
 "dist/*.tar.gz" = 1
 "dist/*.whl" = 1
 "dist/SHA256SUMS" = 1

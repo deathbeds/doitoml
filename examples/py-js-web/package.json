@@ -16,7 +16,8 @@
   "doitoml": {
     "env": {
       "EXAMPLE_JS_VERSION": ":get::json::package.json::version",
-      "EXAMPLE_JS_DIST": "deathbeds-example-frontend-${EXAMPLE_JS_VERSION}.tgz"
+      "EXAMPLE_JS_DIST": "deathbeds-example-frontend-${EXAMPLE_JS_VERSION}.tgz",
+      "YARN_ENABLE_IMMUTABLE_INSTALLS": "false"
     },
     "prefix": "frontend",
     "paths": {
@@ -70,10 +71,11 @@
         ],
         "file_dep": [
           "::backend::venv_history",
-          "::y_lock"
+          "::pj"
         ],
         "targets": [
-          "::y_install_state"
+          "::y_install_state",
+          "::y_lock"
         ],
         "actions": [
           [
