@@ -26,6 +26,11 @@ class ConfigError(DoitomlError):
     """An error related to configuration."""
 
 
+class UnsafePathError(ConfigError):
+
+    """An error related to unsafe paths."""
+
+
 class NoConfigError(ConfigError):
 
     """An error when no configuration at all is found."""

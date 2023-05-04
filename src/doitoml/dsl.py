@@ -52,7 +52,7 @@ class PathRef(DSL):
     #: paths go before all other built-in DSL
     rank = 80
 
-    pattern = re.compile(r"^::((?P<prefix>[^:]+)::)?(?P<ref>[^:]+)$")
+    pattern = re.compile(r"^::((?P<prefix>[^:]*)::)?(?P<ref>[^:]+)$")
 
     def transform_token(
         self,

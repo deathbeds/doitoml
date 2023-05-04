@@ -34,6 +34,7 @@ from .errors import (
     PrefixError,
     TemplaterError,
     UnresolvedError,
+    UnsafePathError,
 )
 from .schema._v0_schema import DoitomlSchema
 from .sources._config import ConfigParser, ConfigSource
@@ -83,6 +84,7 @@ class Config:
     fail_quietly: Optional[bool]
     discover_config_paths: Optional[bool]
     validate: Optional[bool]
+    safe_paths: List[str]
 
     def __init__(
         self,
@@ -93,6 +95,7 @@ class Config:
         fail_quietly: Optional[bool] = None,
         discover_config_paths: Optional[bool] = None,
         validate: Optional[bool] = None,
+        safe_paths: Optional[List[str]] = None,
     ) -> None:
         """Create empty configuration and discover sources."""
         self.validate = validate
@@ -107,6 +110,7 @@ class Config:
         self.update_env = update_env
         self.fail_quietly = fail_quietly
         self.discover_config_paths = discover_config_paths
+        self.safe_paths = safe_paths or []
 
     def to_dict(self) -> DoitomlSchema:
         """Return a normalized subset of config data."""
@@ -129,6 +133,10 @@ class Config:
         """Perform a few passes to configure everything."""
         # first find the env
         self.sources = self.find_config_sources()
+
+        self.safe_paths = sorted(
+            {s.path.parent.as_posix() for s in self.sources.values()},
+        )
 
         top_config = [*self.sources.values()][0]
 
@@ -319,6 +327,19 @@ class Config:
 
         return unresolved_paths
 
+    def check_safe_path(self, path: str) -> str:
+        """Check if some paths are safe."""
+        if any(path.startswith(safe) for safe in self.safe_paths):
+            return path
+
+        nl = "\n  -"
+        message = (
+            f"The path is outside the known `safe_paths`: {path}"
+            "\n"
+            f"""{nl}{nl.join(self.safe_paths)}"""
+        )
+        raise UnsafePathError(message)
+
     def init_commands(
         self,
         unresolved_commands: PrefixedStrings,
@@ -405,11 +426,14 @@ class Config:
 
         if resolved:
             if source_relative:
-                return [(cwd / r).resolve().as_posix() for r in resolved]
+                return [
+                    self.check_safe_path((cwd / r).resolve().as_posix())
+                    for r in resolved
+                ]
             return resolved
 
         if source_relative:
-            return [(cwd / spec).resolve().as_posix()]
+            return [self.check_safe_path((cwd / spec).resolve().as_posix())]
 
         return [spec]
 
@@ -577,7 +601,14 @@ class Config:
         new_task = deepcopy(task)
         meta = cast(dict, cast(dict, new_task).setdefault(DOIT_TASK.META, {}))
         dt_meta = cast(dict, meta.setdefault(NAME, {}))
-        dt_cwd = Path(dt_meta.get(DOITOML_META.CWD, source.path.parent))
+        raw_cwd = self.resolve_one_path_spec(
+            source,
+            dt_meta.get(DOITOML_META.CWD, str(source.path.parent)),
+            source_relative=True,
+        )
+        dt_cwd = Path(
+            self.check_safe_path(raw_cwd[0] if raw_cwd else str(source.path.parent)),
+        )
         dt_log_paths = self.build_log_paths(
             source,
             dt_meta.get(DOITOML_META.LOG),
@@ -621,7 +652,7 @@ class Config:
                 message = f"Unresolved log path {stream}"
                 raise ConfigError(message)
 
-            maybe_paths[i] = Path(maybe_stream_path[0])
+            maybe_paths[i] = Path(self.check_safe_path(maybe_stream_path[0]))
 
         return self.check_log_paths(*maybe_paths)
 
