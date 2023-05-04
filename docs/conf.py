@@ -119,7 +119,7 @@ html_theme_options = {
         },
         {
             "name": "conda-forge",
-            "url": "https://github.com/conda-forge/doitoml-feedstock#about-doitoml",
+            "url": "https://github.com/conda-forge/doitoml-split-feedstock",
             "icon": "_static/img/anvil.svg",
             "type": "local",
         },

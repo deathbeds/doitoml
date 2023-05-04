@@ -144,3 +144,43 @@ actions = [
     {py = {"../my_actions:greetings:greet" = {args = ["hello", "world"] } }
 ]
 ```
+
+### Importing `dodo`
+
+In a project with `doit`'s default `dodo.py` layout, the `dodo` module itself can be
+imported...
+
+```toml
+# pyproject.toml
+[tool.doitoml.tasks.greet]
+actions=[{ py = {"dodo:greet": { kwargs = { whom = "world" } } } }]
+
+[tool.doitoml.tasks.greet]
+actions=[{ py = {"dodo:dump": { } } }]
+```
+
+... and even explore a `DoiTOML` instance.
+
+```py
+# dodo.py
+from doitoml import DoiTOML
+doitoml = DoiTOML()
+globals().update(doitoml.tasks())
+
+def greet(whom):
+    print(f"Hello {whom}")
+    return True
+
+def dump():
+    from pygments import highlight
+    from pygments.lexers import YamlLexer
+    from pygments.formatters import TerminalFormatter
+    from yaml import safe_dump
+    print(
+        highlight(
+            safe_dump(doitoml.config.to_dict()),
+            YamlLexer(),
+            TerminalFormatter(bg="dark")
+        )
+    )
+```
