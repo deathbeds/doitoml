@@ -508,9 +508,8 @@ class Config:
         if isinstance(meta, dict) and NAME in meta:
             dt_meta = meta[NAME]
             if isinstance(dt_meta, dict) and DOITOML_META.SKIP in dt_meta:
-                skip = str(dt_meta.get(DOITOML_META.SKIP, "0"))
-                found = self.resolve_one_path_spec(source, skip, source_relative=False)
-                if found and str(found[0]).strip().lower() not in FALSEY:
+                skip = dt_meta.get(DOITOML_META.SKIP, "0")
+                if self.maybe_skip_task(source, skip):
                     return
 
         if maybe_old_actions:
@@ -526,6 +525,13 @@ class Config:
                 subtask_or_group,
             ):
                 yield subtask_prefixes, subtask
+
+    def maybe_skip_task(self, source: ConfigSource, skip: Any) -> bool:
+        """Maybe skip discovery of task (and all its children)."""
+        found = self.resolve_one_path_spec(source, skip, source_relative=False)
+        if found and str(found[0]).strip().lower() not in FALSEY:
+            return True
+        return False
 
     def resolve_one_task(
         self,
