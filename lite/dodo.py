@@ -62,10 +62,12 @@ if LITE:
 
 @IPython.core.magic.register_line_magic
 def doit(line):
+    """`%doit` emulates the ``doit`` CLI"""
     from doit.doit_cmd import DoitMain
     DoitMain.BIN_NAME = "doit"
     DoitMain().run(shlex.split(line))
 
 @IPython.core.magic.register_line_magic
 def md(line):
+    """`%md` prints out the given markdown file"""
     display(Markdown(Path(line.strip()).read_text(encoding="utf-8")))

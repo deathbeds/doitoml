@@ -25,6 +25,7 @@ dependencies:
   # lint deps
   - black
   - mypy
+  - nbqa
   - nodejs >=18,<19
   - ruff
   - ssort

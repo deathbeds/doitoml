@@ -139,7 +139,6 @@ status = true
 subtasks = true
 
 [tool.ruff]
-# fix = true
 ignore = [
   "D211",
   "D213",
@@ -267,7 +266,10 @@ all_py = ["::all_py_src", "::all_misc_py"]
 all_ssort = ["::py_src", "::all_misc_py", "::demo_py"]
 py_src = [":rglob::src::*.py::!/_v0*"]
 all_py_src = [":rglob::src::*.py"]
-all_ipynb = [":rglob::docs::*.ipynb::!ipynb_checkpoints"]
+all_ipynb = [
+  ":rglob::docs::*.ipynb::!ipynb_checkpoints",
+  ":glob::lite::*.ipynb::!ipynb_checkpoints",
+]
 all_py_test = [":rglob::test::*.py"]
 ppt = ["pyproject.toml"]
 all_ppt = ["::ppt", ":glob::examples::*/pyproject.toml", "lite/pyproject.toml"]
@@ -362,6 +364,23 @@ actions = [["ruff", "--fix", "::all_py"]]
 doc = "Format TOML with taplo"
 file_dep = ["::all_toml"]
 actions = [["taplo", "fmt", "::taplo_opts", "::all_toml"]]
+
+[tool.doitoml.tasks.fix.ipynb]
+doc = "Format notebooks with nbqa"
+file_dep = ["::all_ipynb"]
+actions = [
+  [
+    "nbqa",
+    "black",
+    "::all_ipynb",
+  ],
+  [
+    "nbqa",
+    "ruff",
+    "--fix-only",
+    "::all_ipynb",
+  ],
+]
 
 [tool.doitoml.tasks.lint.py.black]
 doc = "Check python formatting with `black`"
