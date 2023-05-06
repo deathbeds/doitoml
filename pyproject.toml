@@ -81,7 +81,6 @@ addopts = [
   "--json-report",
   "--json-report-file=build/reports/pytest.json",
   # xdist
-  "-n=auto",
   "--dist=worksteal",
   # cov
   "--cov=doitoml",
@@ -89,7 +88,6 @@ addopts = [
   "--cov-context=test",
   "--no-cov-on-fail",
   # misc
-  "-vv",
   "--ff",
   "--tb=long",
 ]
@@ -239,9 +237,8 @@ taplo_opts = [
   "--option=column_width=88",
 ]
 check_links_opts = [
-  "--check-links-ignore=https://",
-  "--check-links-ignore=builtins",
-  "--check-links-ignore=genindex",
+  "--check-links-ignore",
+  "(https://|builtins|genindex)",
   "--links-ext=html",
   "--no-cov",
   "--check-anchors",
@@ -250,6 +247,7 @@ check_links_opts = [
   "no:importnb",
   "--json-report-file=build/reports/pytest-check-links.json",
   "--tb=no",
+  "-n=10",
 ]
 pym = ["python3", "-m"]
 pip = ["::pym", "pip"]
@@ -422,13 +420,13 @@ actions = [
 doc = "Run unit tests with pytest"
 file_dep = ["::ppt", "::all_py", "::all_py_test", "::all_examples", "::lite::config"]
 task_dep = ["test:preflight"]
-actions = [["pytest"]]
+actions = [["pytest", "-n=auto", "-vv"]]
 
 [tool.doitoml.tasks.test.full]
 doc = "Run all tests with pytest"
 file_dep = ["::ppt", "::all_py", "::all_py_test", "::all_examples"]
 task_dep = ["test:unit"]
-actions = [["pytest", "--cov-fail-under=${COV_FAIL_UNDER}"]]
+actions = [["pytest", "-n=auto", "-vv", "--cov-fail-under=${COV_FAIL_UNDER}"]]
 meta = {doitoml = {env = {DOITOML_TEST_FULL_EXAMPLES = 1}}}
 
 [tool.doitoml.tasks.docs.sphinx]
