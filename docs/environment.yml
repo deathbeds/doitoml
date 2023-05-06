@@ -19,6 +19,11 @@ dependencies:
   - flit >=3.8
   - jsonschema-gentypes
   # build deps
+  # demo deps
+  - ipywidgets >=8
+  - jupyterlab-markup
+  - jupyterlab >=3.6.3,<4
+  # demo deps
   # docs deps
   - docutils >=0.19
   - jupyterlite-pyodide-kernel

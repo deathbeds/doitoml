@@ -241,6 +241,7 @@ taplo_opts = [
 check_links_opts = [
   "--check-links-ignore=https://",
   "--check-links-ignore=builtins",
+  "--check-links-ignore=static/.*html",
   "--no-cov",
   "--check-anchors",
   "--html=build/reports/pytest-check-links.html",
@@ -491,6 +492,11 @@ actions = [
     "::env_binder",
     "::env_docs",
     "# optional deps",
+  ]}}},
+  {py = {"_actions:replace_between" = {args = [
+    "::env_binder",
+    "::env_docs",
+    "# demo deps",
   ]}}},
 ]
 
