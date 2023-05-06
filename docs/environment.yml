@@ -36,6 +36,7 @@ dependencies:
   - sphinx-design
   - sphinx-jsonschema
   - sphinxcontrib-mermaid
+  - importnb
   # docs deps
 
 name: doitoml-docs
