@@ -3,7 +3,7 @@ import datetime
 import os
 import re
 from pathlib import Path
-from typing import Any, Tuple
+from typing import Any, Dict, Tuple
 
 import tomli
 
@@ -127,6 +127,8 @@ html_theme_options = {
     ],
     "footer_end": ["mermaid10"],
 }
+
+html_sidebars: Dict[str, Any] = {"demo": []}
 
 if REPO_INFO is not None:
     html_context = {**REPO_INFO.groupdict(), "doc_path": "docs"}

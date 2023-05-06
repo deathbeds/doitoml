@@ -3,7 +3,7 @@ verbosity = 2
 backend = "json"
 
 [tool.doitoml]
-prefix = "demo"
+prefix = ""
 
 [tool.doitoml.paths]
 ppt = ["pyproject.toml"]
@@ -16,11 +16,11 @@ doc = "greet the reader"
 actions = [{py = {"dodo:greet" = {kwargs = {whom = "world"}}}}]
 
 [tool.doitoml.tasks.show]
-doc = "dump the doit config"
-task_dep = ["demo:greet"]
+doc = "dump the doit config as YAML"
+task_dep = ["greet"]
 actions = [{py = {"dodo:dump" = {}}}]
 
 [tool.doitoml.tasks.mermaid]
-doc = "dump the doit config"
-task_dep = ["demo:greet", "demo:show"]
+doc = "show this project as a MermaidJS graph"
+task_dep = ["greet", "show"]
 actions = [{py = {"dodo:mermaid" = {}}}]

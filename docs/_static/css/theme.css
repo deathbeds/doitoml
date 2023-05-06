@@ -52,3 +52,12 @@ table.jsonschema td:first-child ul {
 table.jsonschema h2 {
   font-family: var(--pst-font-family-monospace);
 }
+
+.bd-navbar-elements.navbar-nav > li:first-child {
+  background-color: var(--pst-color-primary);
+  border-radius: 0.25em;
+}
+.bd-navbar-elements.navbar-nav > li:first-child a {
+  font-weight: bold !important;
+  color: #fff !important;
+}
