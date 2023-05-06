@@ -1,0 +1,26 @@
+[tool.doit]
+verbosity = 2
+backend = "json"
+
+[tool.doitoml]
+prefix = "demo"
+
+[tool.doitoml.paths]
+ppt = ["pyproject.toml"]
+
+[tool.doitoml.tokens]
+lite = ["jupyter", "lite"]
+
+[tool.doitoml.tasks.greet]
+doc = "greet the reader"
+actions = [{py = {"dodo:greet" = {kwargs = {whom = "world"}}}}]
+
+[tool.doitoml.tasks.show]
+doc = "dump the doit config"
+task_dep = ["demo:greet"]
+actions = [{py = {"dodo:dump" = {}}}]
+
+[tool.doitoml.tasks.mermaid]
+doc = "dump the doit config"
+task_dep = ["demo:greet", "demo:show"]
+actions = [{py = {"dodo:mermaid" = {}}}]

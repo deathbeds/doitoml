@@ -213,10 +213,11 @@ select = [
 "entry_points.py" = ["BLE001"]
 "jinja2.py" = ["ARG002"]
 "test/**/*.py" = ["S101", "T201", "T203"]
+"lite/*.py" = ["D205", "INP001", "E402", "ANN201", "D103", "T201", "ANN001", "D100"]
 
 [tool.doitoml]
 prefix = ""
-config_paths = ["js/package.json"]
+config_paths = ["js/package.json", ":get::json::lite/jupyter_lite_config.json::doitoml"]
 validate = true
 
 [tool.doitoml.env]
@@ -259,14 +260,15 @@ dist_hash = ["dist/SHA256SUMS"]
 docs_py = ["docs/conf.py"]
 docs_etc = [":rglob::docs/_static::*.*", ":rglob::docs/_templates::*.*"]
 all_misc_py = ["dodo.py", "_actions.py", "::all_py_test", "::docs_py"]
+demo_py = [":glob::lite::*.py"]
 all_py = ["::all_py_src", "::all_misc_py"]
-all_ssort = ["::py_src", "::all_misc_py"]
+all_ssort = ["::py_src", "::all_misc_py", "::demo_py"]
 py_src = [":rglob::src::*.py::!/_v0*"]
 all_py_src = [":rglob::src::*.py"]
 all_ipynb = [":rglob::docs::*.ipynb::!ipynb_checkpoints"]
 all_py_test = [":rglob::test::*.py"]
 ppt = ["pyproject.toml"]
-all_ppt = ["::ppt", ":glob::examples::*/pyproject.toml"]
+all_ppt = ["::ppt", ":glob::examples::*/pyproject.toml", "lite/pyproject.toml"]
 all_schema_toml = [":rglob::src/doitoml::*.toml"]
 all_toml = ["::all_ppt", "::all_schema_toml"]
 all_py_dist = ["::ppt", "::py_src", "README.md", "LICENSE.txt"]
@@ -417,6 +419,7 @@ file_dep = [
   "::docs_py",
   "::docs_etc",
   "::dist_hash",
+  "::lite::build_targets",
 ]
 actions = [["sphinx-build", "-W", "--color", "::sphinx_opts"]]
 targets = ["::docs_buildinfo"]

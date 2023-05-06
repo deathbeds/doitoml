@@ -1,0 +1,28 @@
+{
+  "LiteBuildConfig": {
+    "contents": ["."],
+    "output_dir": "../build/lite",
+    "cache_dir": "../build/.cache/lite",
+    "extra_ignore_contents": ["\\.doit\\.db.*"]
+  },
+  "PipliteAddon": {
+    "piplite_urls": ["../dist"]
+  },
+  "doitoml": {
+    "prefix": "lite",
+    "paths": {
+      "build_deps": [":glob::.::*.json::*.ipynb::*.py::*.txt::*.toml", "::::whl"],
+      "build_targets": ["../build/lite/SHA256SUMS"]
+    },
+    "tasks": {
+      "build": {
+        "actions": [
+          ["jupyter", "lite", "build"],
+          ["jupyter", "lite", "archive"]
+        ],
+        "file_dep": ["::build_deps"],
+        "targets": ["::build_targets"]
+      }
+    }
+  }
+}

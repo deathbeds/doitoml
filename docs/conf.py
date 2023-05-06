@@ -99,8 +99,9 @@ suppress_warnings = ["autosectionlabel.*"]
 # theme
 templates_path = ["_templates"]
 html_static_path = [
-    "_static",
+    "../build/lite",
     "../dist",
+    "_static",
 ]
 html_theme = "pydata_sphinx_theme"
 html_logo = "_static/img/logo.svg"
