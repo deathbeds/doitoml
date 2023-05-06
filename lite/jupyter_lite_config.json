@@ -3,7 +3,7 @@
     "contents": ["."],
     "output_dir": "../build/lite",
     "cache_dir": "../build/.cache/lite",
-    "extra_ignore_contents": ["\\.doit\\.db.*"]
+    "extra_ignore_contents": ["\\.doit\\.db.*", "build"]
   },
   "PipliteAddon": {
     "piplite_urls": ["../dist"]

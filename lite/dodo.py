@@ -9,10 +9,12 @@ globals().update(doitoml.tasks())
 
 # then regular business
 from IPython.display import JSON, Markdown, display
-
+from pathlib import Path
+from datetime import datetime
 
 def greet(whom):
-    print(f"Hello {whom}")
+    print(f"# Hello {whom}")
+    print(f"> Generated at {datetime.now().isoformat()}")
     return True
 
 
@@ -22,10 +24,10 @@ def dump():
     display(JSON(dumped))
 
 def mm_task(n):
-    return f"{n}[/{n}/]"
+    return f"""{n}[/"▶️ {n}"/]"""
         
 def mm_files(t, fld):
-    return [f"{f}({f})" for f in t.get(fld, [])]
+    return [f"""{f}("📄 {f.split("/")[-1]}")""" for f in t.get(fld, [])]
 
 def mm_task_line(n, t):
     n = n[1:] if n.startswith(":") else n
@@ -34,7 +36,6 @@ def mm_task_line(n, t):
     tgt = " & ".join(mm_files(t, "targets"))
     arr = " --> "
     return f"""{dep + arr if dep else ""}{tsk}{arr + tgt if tgt else ""}"""
-
 
 def mermaid():
     dt = doitoml.config.to_dict()
@@ -64,3 +65,7 @@ def doit(line):
     from doit.doit_cmd import DoitMain
     DoitMain.BIN_NAME = "doit"
     DoitMain().run(shlex.split(line))
+
+@IPython.core.magic.register_line_magic
+def md(line):
+    display(Markdown(Path(line.strip()).read_text(encoding="utf-8")))

@@ -7,20 +7,21 @@ prefix = ""
 
 [tool.doitoml.paths]
 ppt = ["pyproject.toml"]
-
-[tool.doitoml.tokens]
-lite = ["jupyter", "lite"]
+greeting = ["build/hello.md"]
 
 [tool.doitoml.tasks.greet]
 doc = "greet the reader"
-actions = [{py = {"dodo:greet" = {kwargs = {whom = "world"}}}}]
+meta = {doitoml = {log = "::greeting"}}
+targets = ["::greeting"]
+actions = [{py = {"dodo:greet" = {args = ["world"]}}}]
 
 [tool.doitoml.tasks.show]
 doc = "dump the doit config as YAML"
-task_dep = ["greet"]
+file_dep = ["::greeting"]
 actions = [{py = {"dodo:dump" = {}}}]
 
 [tool.doitoml.tasks.mermaid]
 doc = "show this project as a MermaidJS graph"
-task_dep = ["greet", "show"]
+file_dep = ["::greeting"]
+task_dep = ["show"]
 actions = [{py = {"dodo:mermaid" = {}}}]
