@@ -17,7 +17,7 @@
         display: flex;
         flex-direction: column;
     }
-    .bd-header-article, .bd-sidebar-secondary, .bd-footer-article, .bd-footer {
+    .bd-header-article, .bd-sidebar-secondary, .bd-footer-article, .bd-footer, .admonition {
         display: none;
     }
 </style>
