@@ -64,7 +64,7 @@ class PathRef(DSL):
         """Expand a path name (with optional prefix) to a previously-found value."""
         groups = match.groupdict()
         ref: str = groups["ref"]
-        prefix: str = groups["prefix"] or source.prefix
+        prefix = source.prefix if groups["prefix"] is None else groups["prefix"]
         tokens = self.doitoml.config.tokens.get((prefix, ref))
         if tokens:
             return tokens

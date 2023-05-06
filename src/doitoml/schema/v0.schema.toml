@@ -59,7 +59,12 @@ required = ["cwd", "log", "source"]
 cwd = {type = "string"}
 env = {"$ref" = "#/definitions/env"}
 log = {type = "array", items = {oneOf = [{type = "string"}, {type = "null"}]}}
-skip = {type = "string"}
+skip = {oneOf = [
+  {type = "string"},
+  {type = "number"},
+  {type = "null"},
+  {type = "object"},
+]}
 source = {type = "string"}
 
 [definitions.actions]

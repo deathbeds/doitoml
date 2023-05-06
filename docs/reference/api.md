@@ -150,6 +150,27 @@
 .. automodule:: doitoml.updaters.doit_tools
 ```
 
+## Skippers
+
+```{eval-rst}
+.. currentmodule:: doitoml
+.. automodule:: doitoml.skippers._skipper
+```
+
+### Boolean Skippers
+
+```{eval-rst}
+.. currentmodule:: doitoml
+.. automodule:: doitoml.skippers.bools
+```
+
+### Path Skippers
+
+```{eval-rst}
+.. currentmodule:: doitoml
+.. automodule:: doitoml.skippers.path
+```
+
 ## Templates
 
 ```{eval-rst}

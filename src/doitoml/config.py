@@ -1,4 +1,5 @@
 """Handles discovering, loading, and normalizing configuration."""
+import json
 import os
 import warnings
 from copy import deepcopy
@@ -20,7 +21,6 @@ from .constants import (
     DEFAULTS,
     DOIT_TASK,
     DOITOML_META,
-    FALSEY,
     NAME,
 )
 from .errors import (
@@ -32,6 +32,7 @@ from .errors import (
     NoConfigError,
     NoTemplaterError,
     PrefixError,
+    SkipError,
     TemplaterError,
     UnresolvedError,
     UnsafePathError,
@@ -134,10 +135,6 @@ class Config:
         # first find the env
         self.sources = self.find_config_sources()
 
-        self.safe_paths = sorted(
-            {s.path.parent.as_posix() for s in self.sources.values()},
-        )
-
         top_config = [*self.sources.values()][0]
 
         unresolved_env = self.init_env({}, RETRIES)
@@ -206,9 +203,14 @@ class Config:
             if path.exists():
                 unchecked_paths += [path]
 
+        if unchecked_paths and not self.safe_paths:
+            self.safe_paths = [str(unchecked_paths[0].parent)]
+
         while unchecked_paths:
             config_path = unchecked_paths.pop(0)
-            config_source = self.load_config_source(Path(config_path))
+            config_source = self.load_config_source(
+                Path(self.check_safe_path(str(config_path))),
+            )
             self.find_one_config_source(config_source, config_sources)
 
         if not config_sources:
@@ -509,7 +511,7 @@ class Config:
             dt_meta = meta[NAME]
             if isinstance(dt_meta, dict) and DOITOML_META.SKIP in dt_meta:
                 skip = dt_meta.get(DOITOML_META.SKIP, "0")
-                if self.maybe_skip_task(source, skip):
+                if self.resolve_one_skip(source, skip):
                     return
 
         if maybe_old_actions:
@@ -526,12 +528,25 @@ class Config:
             ):
                 yield subtask_prefixes, subtask
 
-    def maybe_skip_task(self, source: ConfigSource, skip: Any) -> bool:
+    def resolve_one_skip(self, source: ConfigSource, skip: Any) -> bool:
         """Maybe skip discovery of task (and all its children)."""
-        found = self.resolve_one_path_spec(source, skip, source_relative=False)
-        if found and str(found[0]).strip().lower() not in FALSEY:
-            return True
-        return False
+        if skip is None:
+            return False
+        if isinstance(skip, (int, bool, float)):
+            return bool(skip)
+        if isinstance(skip, str):
+            found = self.resolve_one_path_spec(source, skip, source_relative=False)
+            if not found:  # pragma: no cover
+                return False
+            json_val = json.loads(str(found[0]).lower().strip())
+            return bool(json_val)
+        if isinstance(skip, dict):
+            for key, skipper in self.doitoml.entry_points.skippers.items():
+                if key in skip:
+                    return skipper.should_skip(source, skip[key])
+
+        message = f"Skip in {source} is ambiguous: {skip}"
+        raise SkipError(message)
 
     def resolve_one_task(
         self,

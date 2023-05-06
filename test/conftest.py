@@ -1,4 +1,5 @@
 """Test configuration and fixtures for ``doitoml``."""
+import json
 import logging
 import os
 import shutil
@@ -135,3 +136,21 @@ def a_pyproject_with(tmp_path: Path) -> Generator[TPyprojectMaker, None, None]:
     os.chdir(str(tmp_path))
     yield make_pyproject_toml
     os.chdir(str(old_cwd))
+
+
+@pytest.fixture()
+def a_package_json_with(
+    a_pyproject_with: TPyprojectMaker,
+) -> Callable[[Dict[str, Any]], Path]:
+    """Build a package.json (and py_project.toml that refers to it)."""
+
+    def with_pj(doitoml: Dict[str, Any]) -> Path:
+        ppt = a_pyproject_with({"config_paths": ["package.json"]})
+        pj = ppt.parent / "package.json"
+        pj.write_text(
+            json.dumps({"doitoml": {**doitoml, "prefix": "pj"}}),
+            encoding="utf-8",
+        )
+        return pj
+
+    return with_pj

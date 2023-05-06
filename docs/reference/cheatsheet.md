@@ -42,7 +42,7 @@
 
 ### `actions`
 
-| action kind | example                                             | description                                        |
+| action kind | TOML example                                        | description                                        |
 | ----------- | --------------------------------------------------- | -------------------------------------------------- |
 | _string_    | `echo 1`                                            | passed directly to `doit` without any manipulation |
 | _token_     | `["echo", "1"]`                                     | each token expanded by the [DSL]                   |
@@ -56,16 +56,31 @@
 | ----------- | -------------------------- | ------------------------------------------------------------------------------------------------- |
 | **`cwd`**   | string or `Path`           | the current working directory for _shell_, _token_, and _actor_ tasks                             |
 | **`env`**   | dictionary of strings      | environment variables to overload for a specific task                                             |
-| **`skip`**  | string or `bool`           | if _falsey_, this task will not appear in `doit list` or be included in `doit run`                |
+| **`skip`**  | string or `bool` or dict   | if _falsey_, this task will not appear in `doit list` or be included in `doit run`                |
 | **`log`**   | (list of) string or `Path` | file(s) to capture output of actions, e.g. `task.log` or `["task.stdout.log", "task.stderr.log"]` |
+
+#### `skip` values
+
+`skip` uses simple, normalized JSON `bool`-like values directly.
+
+More complex behaviors can be built from dictionary-based values.
+
+| skip kind      | true TOML example                   | will skip if...                    |
+| -------------- | ----------------------------------- | ---------------------------------- |
+| **`any`**      | `{any=[0, "TRUE"]}`                 | _any_ value is truthy              |
+| **`all`**      | `{all=[1, "${A_TRUE_ENV_VAR}"]}`    | _all_ values is truthy             |
+| **`not`**      | `{not=0}`                           | the value is falsey                |
+| **`exists`**   | `{exists=["::pyproject_toml"]}`     | all paths exist                    |
+| **`platform`** | `{platform={system=".*Windows.*"}}` | `platform` value (as JSON) matches |
 
 ## `doitoml` configuration
 
-| key                | default | field data type | field description                                                                                      |
-| ------------------ | ------- | --------------- | ------------------------------------------------------------------------------------------------------ |
-| **`config_paths`** | `[]`    | list of strings | relative paths to find more `doitoml` config sources: can use the `:get` [DSL] to extract partial data |
-| **`fail_quietly`** | `true`  | `bool`          | try to emit short, helpful errors with context                                                         |
-| **`update_env`**   | `true`  | `bool`          | use the `env` key to update the outer running environment variables                                    |
-| **`validate`**     | `true`  | `bool`          | use `jsonschema` to preflight tasks before `doit`                                                      |
+| key                | default                | field data type | field description                                                                                      |
+| ------------------ | ---------------------- | --------------- | ------------------------------------------------------------------------------------------------------ |
+| **`config_paths`** | `[]`                   | list of strings | relative paths to find more `doitoml` config sources: can use the `:get` [DSL] to extract partial data |
+| **`fail_quietly`** | `true`                 | `bool`          | try to emit short, helpful errors with context                                                         |
+| **`update_env`**   | `true`                 | `bool`          | use the `env` key to update the outer running environment variables                                    |
+| **`validate`**     | `true`                 | `bool`          | use `jsonschema` to preflight tasks before `doit`                                                      |
+| **`safe_paths`**   | parent of first config | list of strings | paths that are considered "safe" for doitoml to work with.                                             |
 
 [dsl]: ../how-to/dsl.md

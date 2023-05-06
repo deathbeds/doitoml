@@ -44,6 +44,8 @@ class ENTRY_POINTS:
     TEMPLATER: Literal["doitoml.templater.v0"] = "doitoml.templater.v0"
     #: extend the ``doitoml`` uptodate vocabulary
     UPDATER: Literal["doitoml.updater.v0"] = "doitoml.updater.v0"
+    #: extend the ``doitoml`` skip vocabulary
+    SKIPPER: Literal["doitoml.skipper.v0"] = "doitoml.skipper.v0"
 
 
 class DOIT_TASK:

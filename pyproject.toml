@@ -59,6 +59,12 @@ jinja2 = "doitoml.templaters.jinja2:Jinja2"
 config_changed = "doitoml.updaters.doit_tools:ConfigChanged"
 run_once = "doitoml.updaters.doit_tools:RunOnce"
 py = "doitoml.updaters.py:PyUpdater"
+[project.entry-points."doitoml.skipper.v0"]
+any = "doitoml.skippers.bools:Any_"
+all = "doitoml.skippers.bools:All"
+not = "doitoml.skippers.bools:Not"
+exists = "doitoml.skippers.path:Exists"
+platform = "doitoml.skippers.py:Platform"
 
 [tool.pytest.ini_options]
 cache_dir = "build/.cache/pytest"
