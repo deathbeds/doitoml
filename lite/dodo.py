@@ -19,18 +19,26 @@ def greet(whom):
 def dump():
     display(JSON(doitoml.config.to_dict()))
 
+def mm_task(n):
+    return f"{n}[/{n}/]"
+        
+def mm_files(t, fld):
+    return [f"{f}({f})" for f in t.get(fld, [])]
+
+def mm_task_line(n, t):
+    n = n[1:] if n.startswith(":") else n
+    tsk = mm_task(n)
+    dep = " & ".join([*map(mm_task, t.get("task_dep", [])), *mm_files(t, "file_dep")])
+    tgt = " & ".join(mm_files(t, "targets"))
+    arr = " --> "
+    return f"""{dep + arr if dep else ""}{tsk}{arr + tgt if tgt else ""}"""
+
 
 def mermaid():
     dt = doitoml.config.to_dict()
-    mermaid = ["flowchart LR"]
-    for name, t in dt["tasks"].items():
-        line = name[1:] if name.startswith(":") else name
-        dep = " & ".join([*t.get("task_dep", []), *t.get("file_dep", [])])
-        " & ".join([*t.get("targets", [])])
-        line = line if not dep else f"{dep} --> {line}"
-        mermaid += [line]
-    display(Markdown("\n".join(["```mermaid", *mermaid, "```"])))
-
+    lines = [mm_task_line(n, t) for n, t in dt["tasks"].items()]
+    display(Markdown("\n".join(["```mermaid", "flowchart LR", *lines, "```"])))
+            
 # the magic
 import shlex
 import sys
@@ -52,5 +60,5 @@ if LITE:
 @IPython.core.magic.register_line_magic
 def doit(line):
     from doit.doit_cmd import DoitMain
-
+    DoitMain.BIN_NAME = "doit"
     DoitMain().run(shlex.split(line))

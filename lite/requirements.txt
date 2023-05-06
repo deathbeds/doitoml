@@ -4,3 +4,5 @@ json-e
 jsonschema
 tomli-w
 pyyaml
+ipywidgets
+importnb
