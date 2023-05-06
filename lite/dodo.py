@@ -17,7 +17,9 @@ def greet(whom):
 
 
 def dump():
-    display(JSON(doitoml.config.to_dict()))
+    dumped = doitoml.config.to_dict()
+    dumped["env"] = doitoml.config.env
+    display(JSON(dumped))
 
 def mm_task(n):
     return f"{n}[/{n}/]"
