@@ -204,12 +204,12 @@ class Config:
                 unchecked_paths += [path]
 
         if unchecked_paths and not self.safe_paths:
-            self.safe_paths = [str(unchecked_paths[0].parent)]
+            self.safe_paths = [str(unchecked_paths[0].parent.as_posix())]
 
         while unchecked_paths:
             config_path = unchecked_paths.pop(0)
             config_source = self.load_config_source(
-                Path(self.check_safe_path(str(config_path))),
+                Path(self.check_safe_path(str(config_path.as_posix()))),
             )
             self.find_one_config_source(config_source, config_sources)
 
