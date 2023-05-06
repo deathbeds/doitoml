@@ -171,6 +171,13 @@
 .. automodule:: doitoml.skippers.path
 ```
 
+### Python Skippers
+
+```{eval-rst}
+.. currentmodule:: doitoml
+.. automodule:: doitoml.skippers.py
+```
+
 ## Templates
 
 ```{eval-rst}

@@ -27,6 +27,7 @@ from .conftest import TPyprojectMaker
         (1, {"exists": ["::nope", "pyproject.toml"]}),
         (0, {"exists": "pyproject.toml"}),
         (1, {"platform": {"python_implementation": "Jython"}}),
+        (0, {"py": {"platform:python_implementation": {}}}),
     ],
 )
 def test_good_skip(

@@ -65,6 +65,7 @@ all = "doitoml.skippers.bools:All"
 not = "doitoml.skippers.bools:Not"
 exists = "doitoml.skippers.path:Exists"
 platform = "doitoml.skippers.py:Platform"
+py = "doitoml.skippers.py:Py"
 
 [tool.pytest.ini_options]
 cache_dir = "build/.cache/pytest"
