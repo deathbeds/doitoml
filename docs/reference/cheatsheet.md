@@ -40,7 +40,7 @@
 
 </details>
 
-### `actions`
+## `actions`
 
 | action kind | TOML example                                        | description                                        |
 | ----------- | --------------------------------------------------- | -------------------------------------------------- |
@@ -48,7 +48,7 @@
 | _token_     | `["echo", "1"]`                                     | each token expanded by the [DSL]                   |
 | _actor_     | `{py={"shutil.copy2"={args=["a"], kwargs={b="c"}}}` | each token in `(kw)args` expanded by the [DSL]     |
 
-### `doitoml` task metadata
+## `doitoml` task metadata
 
 > Put these in your `task.{task name}.meta.doitoml` to fune-tune the behavior of tasks.
 
@@ -59,7 +59,7 @@
 | **`skip`**  | string or `bool` or dict   | if _falsey_, this task will not appear in `doit list` or be included in `doit run`                |
 | **`log`**   | (list of) string or `Path` | file(s) to capture output of actions, e.g. `task.log` or `["task.stdout.log", "task.stderr.log"]` |
 
-#### `skip` values
+## `skip` values
 
 `skip` uses simple, normalized JSON `bool`-like values directly.
 
@@ -84,3 +84,26 @@ More complex behaviors can be built from dictionary-based values.
 | **`safe_paths`**   | parent of first config | list of strings | paths that are considered "safe" for doitoml to work with.                                             |
 
 [dsl]: ../how-to/dsl.md
+
+<style>
+    .bd-container, .bd-container__inner, .bd-content, .bd-article-container, .bd-article, #demo {
+        width: 100% !important;
+        max-width: unset !important;
+        justify-content: stretch;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+    .bd-header-article, .bd-sidebar-secondary, .bd-footer-article, .bd-footer, .bd-sidebar-primary, h1 {
+        display: none;
+    }
+    article > section  {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+    article > section > section {
+        max-width: 45em;
+        padding-right: 1em;
+    }
+</style>

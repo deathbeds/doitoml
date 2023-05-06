@@ -230,6 +230,7 @@ RUST_LOG = "error"
 SOURCE_DATE_EPOCH = ":get|0::json::build/source_date_epoch.json::SOURCE_DATE_EPOCH"
 DOITOML_SKIP_CODEGEN = "0"
 COV_FAIL_UNDER = "100"
+JUPYTER_PLATFORM_DIRS = "1"
 
 [tool.doitoml.tokens]
 sphinx_opts = ["-b", "html", "docs", "build/docs"]
@@ -241,7 +242,7 @@ taplo_opts = [
 check_links_opts = [
   "--check-links-ignore=https://",
   "--check-links-ignore=builtins",
-  "--check-links-ignore=static/.*html",
+  "--check-links-ignore=genindex",
   "--no-cov",
   "--check-anchors",
   "--html=build/reports/pytest-check-links.html",
@@ -399,7 +400,7 @@ actions = [
 
 [tool.doitoml.tasks.test.unit]
 doc = "Run unit tests with pytest"
-file_dep = ["::ppt", "::all_py", "::all_py_test", "::all_examples"]
+file_dep = ["::ppt", "::all_py", "::all_py_test", "::all_examples", "::lite::config"]
 task_dep = ["test:preflight"]
 actions = [["pytest"]]
 

@@ -11,6 +11,7 @@
   "doitoml": {
     "prefix": "lite",
     "paths": {
+      "config": ["jupyter_lite_config.json"],
       "build_deps": [":glob::.::*.json::*.ipynb::*.py::*.txt::*.toml", "::::whl"],
       "build_targets": ["../build/lite/SHA256SUMS"]
     },
