@@ -19,7 +19,7 @@ env:
   CI: "1"
 
   # our stuff
-  CACHE_EPOCH: "5"
+  CACHE_EPOCH: "6"
 
 jobs:
   build:
