@@ -46,9 +46,10 @@ dependencies:
   - python-build
   # test deps
   # demo deps
+  - ipylab
   - ipywidgets >=8
-  - jupyterlab-markup
   - jupyterlab >=3.6.3,<4
+  - jupyterlab-markup
   # demo deps
   # docs deps
   - docutils >=0.19
