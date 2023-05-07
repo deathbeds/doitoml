@@ -1,0 +1,36 @@
+[tool.doit]
+loader = "doitoml"
+verbosity = 2
+
+[tool.doitoml]
+fail_quietly = false
+config_paths = [
+  # this is a good "source of truth"
+  "a/pyproject.toml",
+  "b/package.json",
+]
+
+[tool.doitoml.paths]
+dist = ["::pkg_*::dist"]
+
+[tool.doitoml.tasks.build]
+file_dep = ["::dist"]
+actions = [["echo", "OK"]]
+
+[tool.__doitoml_tests__.steps.00_list]
+after = {files = {"*" = 3}}
+before = {files = {"*" = 3, "**/*" = 9}}
+rc = 0
+run = ["doit", "list"]
+tasks = 6
+skip_os = ["nt"]
+
+[tool.__doitoml_tests__.steps.01_run]
+rc = 0
+run = ["doit", "build"]
+
+[tool.__doitoml_tests__.steps.01_run.after.files]
+"*" = 3
+"a/dist/*.tar.gz" = 1
+"a/dist/*.whl" = 1
+"b/*.tgz" = 1

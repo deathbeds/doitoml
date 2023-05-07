@@ -82,3 +82,6 @@ class DOITOML_META:
 
 #: all the false things
 FALSEY = ["", "false", "0", "0.0", "{}", "[]", "null", "none"]
+
+#: fnmatch triggers
+FNMATCH_WILDCARDS = "*?["

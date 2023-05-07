@@ -132,37 +132,52 @@ class Config:
 
     def initialize(self) -> None:
         """Perform a few passes to configure everything."""
-        # first find the env
         self.sources = self.find_config_sources()
-
+        # load top-level config values from the first config
         top_config = [*self.sources.values()][0]
-
-        unresolved_env = self.init_env({}, RETRIES)
-        if unresolved_env:
-            message = (
-                f"Failed to resolve environment variables: {pformat(unresolved_env)}"
-            )
-            raise UnresolvedError(message)
-
-        # load other top-level config values from the first config
         for key in DEFAULTS.ALL_FROM_FIRST_CONFIG:
             if getattr(self, key, None) is None:
                 setattr(self, key, top_config.raw_config.get(key, True))
 
-        # ...then find the paths
-        unresolved_paths = self.init_paths({}, RETRIES)
-        if unresolved_paths:
-            message = f"Failed to resolve paths: {pformat(unresolved_paths)}"
-            raise UnresolvedError(message)
+        unresolved_env: EnvDict = {}
+        unresolved_paths: PrefixedStrings = {}
+        unresolved_tokens: PrefixedStrings = {}
+        retry = RETRIES
 
-        # ...then find the commands
-        unresolved_commands = self.init_commands({}, RETRIES)
-        if unresolved_commands:
-            message = f"Failed to resolve commands: {pformat(unresolved_commands)}"
-            raise UnresolvedError(message)
+        # .. allow some retries for cross (but not circular) references
+        while retry:
+            retry -= 1
+            try:
+                unresolved_env = self.init_env(unresolved_env, RETRIES)
+                unresolved_paths = self.init_paths(unresolved_paths, RETRIES)
+                unresolved_tokens = self.init_tokens(unresolved_tokens, RETRIES)
+            except UnresolvedError:  # pragma: no cover
+                pass
+            if not any([unresolved_env, unresolved_paths, unresolved_tokens]):
+                break
+
+        if not retry:
+            message = [f"Gave up after {RETRIES} retries!"]
+            if unresolved_env:
+                message += [
+                    f"Failed to resolve environment variables: "
+                    f"{pformat(unresolved_env)}",
+                ]
+
+            if unresolved_paths:
+                message += [f"Failed to resolve paths: {pformat(unresolved_paths)}"]
+
+            if unresolved_tokens:
+                message += [
+                    f"Failed to resolve tokens: {pformat(unresolved_tokens)}",
+                ]
+
+            raise UnresolvedError("\n".join(message))
+
+        # ... then templates
         self.init_templates()
 
-        # .. then find the tasks
+        # ... then find the tasks
         self.init_tasks()
 
         self.maybe_validate()
@@ -288,6 +303,13 @@ class Config:
         raw_config = source.raw_config
         for env_key, env_value in raw_config.get("env", {}).items():
             if env_key in env:
+                self.doitoml.log.info(
+                    "$%s already set to `%s`: not setting with `%s` from %s",
+                    env_key,
+                    env[env_key],
+                    env_value,
+                    source,
+                )
                 continue
 
             new_key_value = self.resolve_one_env(source, env_value)
@@ -305,8 +327,14 @@ class Config:
             match = dsl.pattern.search(new_value)
             if match is not None:
                 try:
-                    new_value = str(dsl.transform_token(source, match, env_value)[0])
-                    break
+                    resolved = dsl.transform_token(
+                        source,
+                        match,
+                        new_value or env_value,
+                    )
+                    if resolved is None:  # pragma: no cover
+                        return None
+                    return str(resolved[0])
                 except DoitomlError:
                     return None
         return new_value
@@ -342,23 +370,23 @@ class Config:
         )
         raise UnsafePathError(message)
 
-    def init_commands(
+    def init_tokens(
         self,
-        unresolved_commands: PrefixedStrings,
+        unresolved_tokens: PrefixedStrings,
         retries: int,
     ) -> PrefixedStrings:
         """Find all commands in all sources."""
         for source in self.sources.values():
-            self.init_source_commands(source, unresolved_commands)
+            self.init_source_tokens(source, unresolved_tokens)
 
-        while unresolved_commands and retries:
+        while unresolved_tokens and retries:
             retries -= 1
-            unresolved_commands = self.init_commands(
-                unresolved_commands,
+            unresolved_tokens = self.init_tokens(
+                unresolved_tokens,
                 0,
             )
 
-        return unresolved_commands
+        return unresolved_tokens
 
     def init_source_paths(
         self,
@@ -383,10 +411,10 @@ class Config:
             )
             unresolved_paths.pop((source.prefix, path_key), None)
 
-    def init_source_commands(
+    def init_source_tokens(
         self,
         source: ConfigSource,
-        unresolved_commands: PrefixedStrings,
+        unresolved_tokens: PrefixedStrings,
     ) -> None:
         """Find the prefixed paths declared in a single source."""
         raw_config = source.raw_config
@@ -399,10 +427,10 @@ class Config:
             )
 
             if unresolved_specs:
-                unresolved_commands[source.prefix, path_key] = unresolved_specs
+                unresolved_tokens[source.prefix, path_key] = unresolved_specs
                 continue
             self.tokens[source.prefix, path_key] = found_tokens
-            unresolved_commands.pop((source.prefix, path_key), None)
+            unresolved_tokens.pop((source.prefix, path_key), None)
 
     def resolve_one_path_spec(
         self,

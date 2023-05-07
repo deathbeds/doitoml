@@ -1,0 +1,26 @@
+{
+    "name": "b",
+    "version": "0.0.0",
+    "scripts": {
+        "dist": "npm pack ."
+    },
+    "doitoml": {
+        "prefix": "pkg_b",
+        "env": {
+            "B_VERSION": ":get::json::package.json::version"
+        },
+        "paths": {
+            "dist": ["b-${B_VERSION}.tgz"],
+            "src": ["index.js"],
+            "conf": ["package.json"],
+            "readme": ["README.md"]
+        },
+        "tasks": {
+            "build": {
+                "file_dep": ["::src", "::conf", "::readme"],
+                "targets": ["::dist"],
+                "actions": [["npm", "pack", "."]]
+            }
+        }
+    }
+}

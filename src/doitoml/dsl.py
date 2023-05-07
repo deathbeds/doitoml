@@ -1,11 +1,14 @@
 """Domain-specific language for declarative ``doit`` task generation."""
 
 import abc
+import fnmatch
 import json
 import os
 import re
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, List, Tuple, cast
+from typing import TYPE_CHECKING, Any, Dict, List, Tuple, cast
+
+from doitoml.constants import FNMATCH_WILDCARDS
 
 from .errors import DslError
 from .types import Strings
@@ -65,10 +68,26 @@ class PathRef(DSL):
         groups = match.groupdict()
         ref: str = groups["ref"]
         prefix = source.prefix if groups["prefix"] is None else groups["prefix"]
-        tokens = self.doitoml.config.tokens.get((prefix, ref))
-        if tokens:
-            return tokens
-        return self.doitoml.config.paths.get((prefix, ref))  # type: ignore
+
+        config = self.doitoml.config
+
+        if any(c in prefix for c in FNMATCH_WILDCARDS):
+            prefixes = fnmatch.filter(sorted(config.sources), prefix)
+        else:
+            prefixes = [prefix]
+
+        prefix_tokens: Dict[str, List[str]] = {}
+
+        for prefix in prefixes:
+            for named in [config.paths, config.tokens]:
+                from_named = named.get((prefix, ref))
+                if from_named is not None:
+                    prefix_tokens[prefix] = from_named
+
+        if prefix_tokens:
+            return sum(prefix_tokens.values(), [])
+
+        return None  # type: ignore
 
 
 class EnvReplacer(DSL):

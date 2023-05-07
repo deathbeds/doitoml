@@ -6,6 +6,7 @@ usually require more complex Python or shell.
 ## `${}` Get Environment Variables
 
 > Get the value of an environment variable. Usually executed before any other parsers.
+> All config sources share the _same_ namespace.
 
 <div class="jp-Mermaid">
 
@@ -106,27 +107,28 @@ Get a version number.
 ## `::` Reference a path or token
 
 > Get the value of any `paths` or `tokens`, either in the same `doitoml` configuration
-> file, or with a named prefix.
+> file, or with a named prefix (including {mod}`fnmatch` wildcards).
 
 <div class="jp-Mermaid">
 
 ```{mermaid}
 flowchart LR
 
-colon-colon --> namespaces --> token_or_path
+colon-colon --> prefixes --> token_or_path
 token_or_path -.-> path & tokens
 
-namespace -.-> prefix
+prefix & prefix-wildcard -.-> source-prefix
 
 colon-colon([<code>::</code>])
 token_or_path([<code>::</code><i>token or path</i>])
 
-subgraph namespaces [0 or 1 namespace]
-  namespace([<code>::</code><i>namespace</i>])
+subgraph prefixes [0 or 1 prefix]
+  prefix([<code>::</code><i>prefix</i>])
+  prefix-wildcard(["<code>::</code>[<i>fragment, <code>?</code>, or <code>*</code>] ...</i>"])
 end
 
 subgraph doitoml ["<code>doitoml</code> configuration"]
-  prefix("<code>prefix = ...</code>")
+  source-prefix("<code>prefix = ...</code>")
   subgraph paths ["<code>.paths</code>"]
     path("<code>some_path = [...]</code>")
   end
