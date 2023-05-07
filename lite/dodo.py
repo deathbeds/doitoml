@@ -37,10 +37,12 @@ def mm_task_line(n, t):
     arr = " --> "
     return f"""{dep + arr if dep else ""}{tsk}{arr + tgt if tgt else ""}"""
 
+def dt2mermaid(dt_dict, direction="LR"):
+    lines = [mm_task_line(n, t) for n, t in dt_dict["tasks"].items()]
+    return "\n".join(["```mermaid", f"flowchart {direction}", *lines, "```"])
+
 def mermaid():
-    dt = doitoml.config.to_dict()
-    lines = [mm_task_line(n, t) for n, t in dt["tasks"].items()]
-    display(Markdown("\n".join(["```mermaid", "flowchart LR", *lines, "```"])))
+    display(Markdown(dt2mermaid(doitoml.config.to_dict())))
             
 # the magic
 import shlex

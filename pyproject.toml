@@ -265,6 +265,7 @@ all_py = ["::all_py_src", "::all_misc_py"]
 all_ssort = ["::py_src", "::all_misc_py", "::demo_py"]
 py_src = [":rglob::src::*.py::!/_v0*"]
 all_py_src = [":rglob::src::*.py"]
+docs_logo = ["docs/_static/img/logo.svg"]
 all_ipynb = [
   ":rglob::docs::*.ipynb::!ipynb_checkpoints",
   ":glob::lite::*.ipynb::!ipynb_checkpoints",
@@ -273,7 +274,8 @@ all_py_test = [":rglob::test::*.py"]
 ppt = ["pyproject.toml"]
 all_ppt = ["::ppt", ":glob::examples::*/pyproject.toml", "lite/pyproject.toml"]
 all_schema_toml = [":rglob::src/doitoml::*.toml"]
-all_toml = ["::all_ppt", "::all_schema_toml"]
+all_demo_toml = [":rglob::lite::*.toml::!.ipynb_checkpoints"]
+all_toml = ["::all_ppt", "::all_schema_toml", "::all_demo_toml"]
 all_py_dist = ["::ppt", "::py_src", "README.md", "LICENSE.txt"]
 _actions = ["_actions.py"]
 _ex_actions = ["examples/py-js-web/my_custom/_actions.py"]

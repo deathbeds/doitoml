@@ -1,0 +1,10 @@
+[tool.doitoml]
+prefix = "py"
+
+[tool.doitoml.tasks.greet]
+actions = [["hello"]]
+targets = ["hello.txt"]
+
+[tool.doitoml.tasks.bye]
+actions = [["bye"]]
+file_dep = ["hello.txt"]

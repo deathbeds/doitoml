@@ -1,6 +1,6 @@
 # Demo
 
-<iframe src="./_static/lab/index.html?path=demo.ipynb"></iframe>
+<iframe src="./_static/lab/index.html?path=demo.ipynb&"></iframe>
 
 <style>
     h1 { display: none; }
