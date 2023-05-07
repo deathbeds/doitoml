@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.1.2 (unreleased)
+## 0.2.0 (unreleased)
 
 ### Data Model
 
@@ -23,7 +23,7 @@
 
 ### Bugs
 
-- fixes schema import
+- fixes `jsonschema` dependency
 
 ### Packaging
 

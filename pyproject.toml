@@ -4,7 +4,7 @@ requires = ["flit_core<4,>=3.7.1"]
 
 [project]
 name = "doitoml"
-version = "0.1.2"
+version = "0.2.0"
 description = "Load declarative tasks for doit from TOML, JSON, YAML, and other files."
 readme = "README.md"
 authors = [{name = "doitoml contributors", email = "deathbeds@googlegroups.com"}]
@@ -301,6 +301,12 @@ env_test = [".github/environment.yml"]
 meta = {doitoml = {log = "build/bootstrap.txt"}}
 targets = ["::bootstrap_txt"]
 actions = [
+  [
+    "::pip",
+    "uninstall",
+    "doitoml",
+    "-y",
+  ],
   [
     "::pip",
     "install",
