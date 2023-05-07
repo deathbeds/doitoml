@@ -1,0 +1,38 @@
+{
+  "LiteBuildConfig": {
+    "contents": ["."],
+    "output_dir": "../build/lite",
+    "cache_dir": "../build/.cache/lite",
+    "extra_ignore_contents": ["\\.doit\\.db.*", "build"]
+  },
+  "PipliteAddon": {
+    "piplite_urls": ["../dist"]
+  },
+  "doitoml": {
+    "prefix": "lite",
+    "paths": {
+      "config": ["jupyter_lite_config.json"],
+      "build_deps": [
+        ":rglob::.::*.json::*.ipynb::*.py::*.txt::*.toml::*.svg::*.md::!ipynb_checkpoints",
+        "::::whl"
+      ],
+      "build_targets": ["../build/lite/SHA256SUMS"]
+    },
+    "tokens": {
+      "scour_opts": ["--enable-id-stripping", "--enable-comment-stripping"]
+    },
+    "tasks": {
+      "static": {
+        "actions": [["scour", "::scour_opts", "::::docs_logo", "logo.svg"]]
+      },
+      "build": {
+        "actions": [
+          ["jupyter", "lite", "build"],
+          ["jupyter", "lite", "archive"]
+        ],
+        "file_dep": ["::build_deps"],
+        "targets": ["::build_targets"]
+      }
+    }
+  }
+}

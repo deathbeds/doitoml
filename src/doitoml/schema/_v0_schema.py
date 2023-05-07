@@ -33,7 +33,9 @@ class DoitomlMetadataa(TypedDict, total=False):
     log: Required[List["_DoitomlMetadataaLogItem"]]
     """ Required property """
 
-    skip: str
+    skip: Union[str, Union[int, float], None, Dict[str, Any]]
+    """ oneOf """
+
     source: Required[str]
     """ Required property """
 

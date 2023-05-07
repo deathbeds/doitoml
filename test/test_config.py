@@ -33,7 +33,7 @@ if __name__ == "__main__":
     [
         (UnresolvedError, "resolve environment", {"env": {"a": "${b}"}}),
         (UnresolvedError, "resolve paths", {"paths": {"a": ["::b"]}}),
-        (UnresolvedError, "resolve commands", {"tokens": {"a": ["::b"]}}),
+        (UnresolvedError, "resolve tokens", {"tokens": {"a": ["::b"]}}),
         (ConfigError, "not a dict", {"tasks": {"a": []}}),
         (UnresolvedError, "paths", {"tasks": {"a": {"actions": [["::b"]]}}}),
         (

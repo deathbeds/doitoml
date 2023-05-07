@@ -18,6 +18,7 @@
         ":glob::..::*.md::*.json::*.yml",
         ":glob::../.binder::*.yml",
         ":glob::../examples::*/*.json",
+        ":rglob::../lite::*.json::*.yml",
         ":rglob::../.github::*.yml::*.md",
         ":rglob::../docs::*.md::*.html::*.yml::*.css::*.mjs::!ipynb_checkpoints"
       ],

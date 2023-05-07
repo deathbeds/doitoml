@@ -1,0 +1,27 @@
+[tool.doit]
+verbosity = 2
+backend = "json"
+
+[tool.doitoml]
+prefix = ""
+
+[tool.doitoml.paths]
+ppt = ["pyproject.toml"]
+greeting = ["build/hello.md"]
+
+[tool.doitoml.tasks.greet]
+doc = "greet the reader"
+meta = {doitoml = {log = "::greeting"}}
+targets = ["::greeting"]
+actions = [{py = {"dodo:greet" = {args = ["world"]}}}]
+
+[tool.doitoml.tasks.show]
+doc = "dump the doit config as YAML"
+file_dep = ["::greeting"]
+actions = [{py = {"dodo:dump" = {}}}]
+
+[tool.doitoml.tasks.mermaid]
+doc = "show this project as a MermaidJS graph"
+file_dep = ["::greeting"]
+task_dep = ["show"]
+actions = [{py = {"dodo:mermaid" = {}}}]

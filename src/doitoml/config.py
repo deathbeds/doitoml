@@ -1,4 +1,5 @@
 """Handles discovering, loading, and normalizing configuration."""
+import json
 import os
 import warnings
 from copy import deepcopy
@@ -20,7 +21,6 @@ from .constants import (
     DEFAULTS,
     DOIT_TASK,
     DOITOML_META,
-    FALSEY,
     NAME,
 )
 from .errors import (
@@ -32,8 +32,10 @@ from .errors import (
     NoConfigError,
     NoTemplaterError,
     PrefixError,
+    SkipError,
     TemplaterError,
     UnresolvedError,
+    UnsafePathError,
 )
 from .schema._v0_schema import DoitomlSchema
 from .sources._config import ConfigParser, ConfigSource
@@ -83,6 +85,7 @@ class Config:
     fail_quietly: Optional[bool]
     discover_config_paths: Optional[bool]
     validate: Optional[bool]
+    safe_paths: List[str]
 
     def __init__(
         self,
@@ -93,6 +96,7 @@ class Config:
         fail_quietly: Optional[bool] = None,
         discover_config_paths: Optional[bool] = None,
         validate: Optional[bool] = None,
+        safe_paths: Optional[List[str]] = None,
     ) -> None:
         """Create empty configuration and discover sources."""
         self.validate = validate
@@ -107,6 +111,7 @@ class Config:
         self.update_env = update_env
         self.fail_quietly = fail_quietly
         self.discover_config_paths = discover_config_paths
+        self.safe_paths = safe_paths or []
 
     def to_dict(self) -> DoitomlSchema:
         """Return a normalized subset of config data."""
@@ -127,37 +132,52 @@ class Config:
 
     def initialize(self) -> None:
         """Perform a few passes to configure everything."""
-        # first find the env
         self.sources = self.find_config_sources()
-
+        # load top-level config values from the first config
         top_config = [*self.sources.values()][0]
-
-        unresolved_env = self.init_env({}, RETRIES)
-        if unresolved_env:
-            message = (
-                f"Failed to resolve environment variables: {pformat(unresolved_env)}"
-            )
-            raise UnresolvedError(message)
-
-        # load other top-level config values from the first config
         for key in DEFAULTS.ALL_FROM_FIRST_CONFIG:
             if getattr(self, key, None) is None:
                 setattr(self, key, top_config.raw_config.get(key, True))
 
-        # ...then find the paths
-        unresolved_paths = self.init_paths({}, RETRIES)
-        if unresolved_paths:
-            message = f"Failed to resolve paths: {pformat(unresolved_paths)}"
-            raise UnresolvedError(message)
+        unresolved_env: EnvDict = {}
+        unresolved_paths: PrefixedStrings = {}
+        unresolved_tokens: PrefixedStrings = {}
+        retry = RETRIES
 
-        # ...then find the commands
-        unresolved_commands = self.init_commands({}, RETRIES)
-        if unresolved_commands:
-            message = f"Failed to resolve commands: {pformat(unresolved_commands)}"
-            raise UnresolvedError(message)
+        # .. allow some retries for cross (but not circular) references
+        while retry:
+            retry -= 1
+            try:
+                unresolved_env = self.init_env(unresolved_env, RETRIES)
+                unresolved_paths = self.init_paths(unresolved_paths, RETRIES)
+                unresolved_tokens = self.init_tokens(unresolved_tokens, RETRIES)
+            except UnresolvedError:  # pragma: no cover
+                pass
+            if not any([unresolved_env, unresolved_paths, unresolved_tokens]):
+                break
+
+        if not retry:
+            message = [f"Gave up after {RETRIES} retries!"]
+            if unresolved_env:
+                message += [
+                    f"Failed to resolve environment variables: "
+                    f"{pformat(unresolved_env)}",
+                ]
+
+            if unresolved_paths:
+                message += [f"Failed to resolve paths: {pformat(unresolved_paths)}"]
+
+            if unresolved_tokens:
+                message += [
+                    f"Failed to resolve tokens: {pformat(unresolved_tokens)}",
+                ]
+
+            raise UnresolvedError("\n".join(message))
+
+        # ... then templates
         self.init_templates()
 
-        # .. then find the tasks
+        # ... then find the tasks
         self.init_tasks()
 
         self.maybe_validate()
@@ -198,9 +218,14 @@ class Config:
             if path.exists():
                 unchecked_paths += [path]
 
+        if unchecked_paths and not self.safe_paths:
+            self.safe_paths = [str(unchecked_paths[0].parent.as_posix())]
+
         while unchecked_paths:
             config_path = unchecked_paths.pop(0)
-            config_source = self.load_config_source(Path(config_path))
+            config_source = self.load_config_source(
+                Path(self.check_safe_path(str(config_path.as_posix()))),
+            )
             self.find_one_config_source(config_source, config_sources)
 
         if not config_sources:
@@ -278,6 +303,13 @@ class Config:
         raw_config = source.raw_config
         for env_key, env_value in raw_config.get("env", {}).items():
             if env_key in env:
+                self.doitoml.log.info(
+                    "$%s already set to `%s`: not setting with `%s` from %s",
+                    env_key,
+                    env[env_key],
+                    env_value,
+                    source,
+                )
                 continue
 
             new_key_value = self.resolve_one_env(source, env_value)
@@ -295,8 +327,14 @@ class Config:
             match = dsl.pattern.search(new_value)
             if match is not None:
                 try:
-                    new_value = str(dsl.transform_token(source, match, env_value)[0])
-                    break
+                    resolved = dsl.transform_token(
+                        source,
+                        match,
+                        new_value or env_value,
+                    )
+                    if resolved is None:  # pragma: no cover
+                        return None
+                    return str(resolved[0])
                 except DoitomlError:
                     return None
         return new_value
@@ -319,23 +357,36 @@ class Config:
 
         return unresolved_paths
 
-    def init_commands(
+    def check_safe_path(self, path: str) -> str:
+        """Check if some paths are safe."""
+        if any(path.startswith(safe) for safe in self.safe_paths):
+            return path
+
+        nl = "\n  -"
+        message = (
+            f"The path is outside the known `safe_paths`: {path}"
+            "\n"
+            f"""{nl}{nl.join(self.safe_paths)}"""
+        )
+        raise UnsafePathError(message)
+
+    def init_tokens(
         self,
-        unresolved_commands: PrefixedStrings,
+        unresolved_tokens: PrefixedStrings,
         retries: int,
     ) -> PrefixedStrings:
         """Find all commands in all sources."""
         for source in self.sources.values():
-            self.init_source_commands(source, unresolved_commands)
+            self.init_source_tokens(source, unresolved_tokens)
 
-        while unresolved_commands and retries:
+        while unresolved_tokens and retries:
             retries -= 1
-            unresolved_commands = self.init_commands(
-                unresolved_commands,
+            unresolved_tokens = self.init_tokens(
+                unresolved_tokens,
                 0,
             )
 
-        return unresolved_commands
+        return unresolved_tokens
 
     def init_source_paths(
         self,
@@ -360,10 +411,10 @@ class Config:
             )
             unresolved_paths.pop((source.prefix, path_key), None)
 
-    def init_source_commands(
+    def init_source_tokens(
         self,
         source: ConfigSource,
-        unresolved_commands: PrefixedStrings,
+        unresolved_tokens: PrefixedStrings,
     ) -> None:
         """Find the prefixed paths declared in a single source."""
         raw_config = source.raw_config
@@ -376,10 +427,10 @@ class Config:
             )
 
             if unresolved_specs:
-                unresolved_commands[source.prefix, path_key] = unresolved_specs
+                unresolved_tokens[source.prefix, path_key] = unresolved_specs
                 continue
             self.tokens[source.prefix, path_key] = found_tokens
-            unresolved_commands.pop((source.prefix, path_key), None)
+            unresolved_tokens.pop((source.prefix, path_key), None)
 
     def resolve_one_path_spec(
         self,
@@ -405,11 +456,14 @@ class Config:
 
         if resolved:
             if source_relative:
-                return [(cwd / r).resolve().as_posix() for r in resolved]
+                return [
+                    self.check_safe_path((cwd / r).resolve().as_posix())
+                    for r in resolved
+                ]
             return resolved
 
         if source_relative:
-            return [(cwd / spec).resolve().as_posix()]
+            return [self.check_safe_path((cwd / spec).resolve().as_posix())]
 
         return [spec]
 
@@ -484,9 +538,8 @@ class Config:
         if isinstance(meta, dict) and NAME in meta:
             dt_meta = meta[NAME]
             if isinstance(dt_meta, dict) and DOITOML_META.SKIP in dt_meta:
-                skip = str(dt_meta.get(DOITOML_META.SKIP, "0"))
-                found = self.resolve_one_path_spec(source, skip, source_relative=False)
-                if found and str(found[0]).strip().lower() not in FALSEY:
+                skip = dt_meta.get(DOITOML_META.SKIP, "0")
+                if self.resolve_one_skip(source, skip):
                     return
 
         if maybe_old_actions:
@@ -502,6 +555,26 @@ class Config:
                 subtask_or_group,
             ):
                 yield subtask_prefixes, subtask
+
+    def resolve_one_skip(self, source: ConfigSource, skip: Any) -> bool:
+        """Maybe skip discovery of task (and all its children)."""
+        if skip is None:
+            return False
+        if isinstance(skip, (int, bool, float)):
+            return bool(skip)
+        if isinstance(skip, str):
+            found = self.resolve_one_path_spec(source, skip, source_relative=False)
+            if not found:  # pragma: no cover
+                return False
+            json_val = json.loads(str(found[0]).lower().strip())
+            return bool(json_val)
+        if isinstance(skip, dict):
+            for key, skipper in self.doitoml.entry_points.skippers.items():
+                if key in skip:
+                    return skipper.should_skip(source, skip[key])
+
+        message = f"Skip in {source} is ambiguous: {skip}"
+        raise SkipError(message)
 
     def resolve_one_task(
         self,
@@ -577,7 +650,14 @@ class Config:
         new_task = deepcopy(task)
         meta = cast(dict, cast(dict, new_task).setdefault(DOIT_TASK.META, {}))
         dt_meta = cast(dict, meta.setdefault(NAME, {}))
-        dt_cwd = Path(dt_meta.get(DOITOML_META.CWD, source.path.parent))
+        raw_cwd = self.resolve_one_path_spec(
+            source,
+            dt_meta.get(DOITOML_META.CWD, str(source.path.parent)),
+            source_relative=True,
+        )
+        dt_cwd = Path(
+            self.check_safe_path(raw_cwd[0] if raw_cwd else str(source.path.parent)),
+        )
         dt_log_paths = self.build_log_paths(
             source,
             dt_meta.get(DOITOML_META.LOG),
@@ -621,7 +701,7 @@ class Config:
                 message = f"Unresolved log path {stream}"
                 raise ConfigError(message)
 
-            maybe_paths[i] = Path(maybe_stream_path[0])
+            maybe_paths[i] = Path(self.check_safe_path(maybe_stream_path[0]))
 
         return self.check_log_paths(*maybe_paths)
 

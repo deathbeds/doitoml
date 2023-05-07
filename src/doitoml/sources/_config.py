@@ -1,5 +1,6 @@
 """Handles discovering, loading, and normalizing configuration."""
 import abc
+import os
 import re
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, Generator, List, Optional, Tuple, cast
@@ -58,7 +59,12 @@ class ConfigSource(Source):
 
     def __repr__(self) -> str:
         """Format the source for warnings and errors."""
-        return f"<{self.__class__.__name__} prefix='{self.prefix}' path='{self.path}'>"
+        return (
+            f"<{self.__class__.__name__}"
+            f" prefix='{self.prefix}' "
+            f" path='{os.path.relpath(str(self.path), str(Path.cwd()))}'"
+            f">"
+        )
 
 
 class WrapperConfigSource(ConfigSource):

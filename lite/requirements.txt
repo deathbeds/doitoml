@@ -1,0 +1,11 @@
+doitoml
+# extras (bracket notation doesn't work right in piplite)
+jinja2
+json-e
+jsonschema
+pyyaml
+# just for demos
+importnb
+ipylab
+ipywidgets >=8
+tomli-w

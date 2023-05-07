@@ -25,6 +25,8 @@ dependencies:
   # lint deps
   - black
   - mypy
+  - nbqa
+  - nbstripout
   - nodejs >=18,<19
   - ruff
   - ssort
@@ -45,12 +47,15 @@ dependencies:
   - python-build
   # test deps
   # demo deps
+  - ipylab
   - ipywidgets >=8
+  - jupyterlab >=3.6.3,<4
   - jupyterlab-markup
-  - jupyterlab >=3.6.1,<4
   # demo deps
   # docs deps
   - docutils >=0.19
+  - jupyterlite-pyodide-kernel
+  - jupyterlite-core-with-libarchive
   - myst-nb
   - pydata-sphinx-theme
   - sphinx-autobuild
@@ -59,6 +64,8 @@ dependencies:
   - sphinx-design
   - sphinx-jsonschema
   - sphinxcontrib-mermaid
+  - importnb
+  - scour
   # docs deps
   # check deps
   - pytest-check-links

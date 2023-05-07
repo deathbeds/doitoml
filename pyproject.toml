@@ -4,7 +4,7 @@ requires = ["flit_core<4,>=3.7.1"]
 
 [project]
 name = "doitoml"
-version = "0.1.1"
+version = "0.2.0"
 description = "Load declarative tasks for doit from TOML, JSON, YAML, and other files."
 readme = "README.md"
 authors = [{name = "doitoml contributors", email = "deathbeds@googlegroups.com"}]
@@ -21,6 +21,15 @@ json-e = ["json-e >=4"]
 jinja2 = ["jinja2 >=3"]
 jsonschema = ["jsonschema >=4"]
 yaml = ["pyyaml >=5"]
+test = [
+  "build",
+  "pytest-console-scripts",
+  "pytest-cov",
+  "pytest-html-report",
+  "pytest-json-report",
+  "pytest-xdist",
+  "tomli-w",
+]
 [project.urls]
 "Bug Tracker" = "https://github.com/deathbeds/doitoml/issues"
 "Changelog" = "https://github.com/deathbeds/doitoml/blob/main/CHANGELOG.md"
@@ -50,6 +59,13 @@ jinja2 = "doitoml.templaters.jinja2:Jinja2"
 config_changed = "doitoml.updaters.doit_tools:ConfigChanged"
 run_once = "doitoml.updaters.doit_tools:RunOnce"
 py = "doitoml.updaters.py:PyUpdater"
+[project.entry-points."doitoml.skipper.v0"]
+any = "doitoml.skippers.bools:Any_"
+all = "doitoml.skippers.bools:All"
+not = "doitoml.skippers.bools:Not"
+exists = "doitoml.skippers.path:Exists"
+platform = "doitoml.skippers.py:Platform"
+py = "doitoml.skippers.py:Py"
 
 [tool.pytest.ini_options]
 cache_dir = "build/.cache/pytest"
@@ -65,7 +81,6 @@ addopts = [
   "--json-report",
   "--json-report-file=build/reports/pytest.json",
   # xdist
-  "-n=auto",
   "--dist=worksteal",
   # cov
   "--cov=doitoml",
@@ -73,7 +88,6 @@ addopts = [
   "--cov-context=test",
   "--no-cov-on-fail",
   # misc
-  "-vv",
   "--ff",
   "--tb=long",
 ]
@@ -123,7 +137,6 @@ status = true
 subtasks = true
 
 [tool.ruff]
-# fix = true
 ignore = [
   "D211",
   "D213",
@@ -197,10 +210,11 @@ select = [
 "entry_points.py" = ["BLE001"]
 "jinja2.py" = ["ARG002"]
 "test/**/*.py" = ["S101", "T201", "T203"]
+"lite/*.py" = ["D205", "INP001", "E402", "ANN201", "D103", "T201", "ANN001", "D100"]
 
 [tool.doitoml]
 prefix = ""
-config_paths = ["js/package.json"]
+config_paths = ["js/package.json", ":get::json::lite/jupyter_lite_config.json::doitoml"]
 validate = true
 
 [tool.doitoml.env]
@@ -213,6 +227,7 @@ RUST_LOG = "error"
 SOURCE_DATE_EPOCH = ":get|0::json::build/source_date_epoch.json::SOURCE_DATE_EPOCH"
 DOITOML_SKIP_CODEGEN = "0"
 COV_FAIL_UNDER = "100"
+JUPYTER_PLATFORM_DIRS = "1"
 
 [tool.doitoml.tokens]
 sphinx_opts = ["-b", "html", "docs", "build/docs"]
@@ -222,8 +237,9 @@ taplo_opts = [
   "--option=column_width=88",
 ]
 check_links_opts = [
-  "--check-links-ignore=https://",
-  "--check-links-ignore=builtins",
+  "--check-links-ignore",
+  "(https://|builtins|genindex)",
+  "--links-ext=html",
   "--no-cov",
   "--check-anchors",
   "--html=build/reports/pytest-check-links.html",
@@ -231,6 +247,7 @@ check_links_opts = [
   "no:importnb",
   "--json-report-file=build/reports/pytest-check-links.json",
   "--tb=no",
+  "-n=10",
 ]
 pym = ["python3", "-m"]
 pip = ["::pym", "pip"]
@@ -243,16 +260,22 @@ dist_hash = ["dist/SHA256SUMS"]
 docs_py = ["docs/conf.py"]
 docs_etc = [":rglob::docs/_static::*.*", ":rglob::docs/_templates::*.*"]
 all_misc_py = ["dodo.py", "_actions.py", "::all_py_test", "::docs_py"]
+demo_py = [":glob::lite::*.py"]
 all_py = ["::all_py_src", "::all_misc_py"]
-all_ssort = ["::py_src", "::all_misc_py"]
+all_ssort = ["::py_src", "::all_misc_py", "::demo_py"]
 py_src = [":rglob::src::*.py::!/_v0*"]
 all_py_src = [":rglob::src::*.py"]
-all_ipynb = [":rglob::docs::*.ipynb::!ipynb_checkpoints"]
+docs_logo = ["docs/_static/img/logo.svg"]
+all_ipynb = [
+  ":rglob::docs::*.ipynb::!ipynb_checkpoints",
+  ":rglob::lite::*.ipynb::!ipynb_checkpoints",
+]
 all_py_test = [":rglob::test::*.py"]
 ppt = ["pyproject.toml"]
-all_ppt = ["::ppt", ":glob::examples::*/pyproject.toml"]
+all_ppt = ["::ppt", ":glob::examples::*/pyproject.toml", "lite/pyproject.toml"]
 all_schema_toml = [":rglob::src/doitoml::*.toml"]
-all_toml = ["::all_ppt", "::all_schema_toml"]
+all_demo_toml = [":rglob::lite::*.toml::!.ipynb_checkpoints"]
+all_toml = ["::all_ppt", "::all_schema_toml", "::all_demo_toml"]
 all_py_dist = ["::ppt", "::py_src", "README.md", "LICENSE.txt"]
 _actions = ["_actions.py"]
 _ex_actions = ["examples/py-js-web/my_custom/_actions.py"]
@@ -278,6 +301,12 @@ env_test = [".github/environment.yml"]
 meta = {doitoml = {log = "build/bootstrap.txt"}}
 targets = ["::bootstrap_txt"]
 actions = [
+  [
+    "::pip",
+    "uninstall",
+    "doitoml",
+    "-y",
+  ],
   [
     "::pip",
     "install",
@@ -343,6 +372,27 @@ doc = "Format TOML with taplo"
 file_dep = ["::all_toml"]
 actions = [["taplo", "fmt", "::taplo_opts", "::all_toml"]]
 
+[tool.doitoml.tasks.fix.ipynb]
+doc = "Format notebooks with nbqa"
+file_dep = ["::all_ipynb"]
+actions = [
+  [
+    "nbstripout",
+    "::all_ipynb",
+  ],
+  [
+    "nbqa",
+    "black",
+    "::all_ipynb",
+  ],
+  [
+    "nbqa",
+    "ruff",
+    "--fix-only",
+    "::all_ipynb",
+  ],
+]
+
 [tool.doitoml.tasks.lint.py.black]
 doc = "Check python formatting with `black`"
 file_dep = ["::ppt", "::all_py"]
@@ -380,15 +430,15 @@ actions = [
 
 [tool.doitoml.tasks.test.unit]
 doc = "Run unit tests with pytest"
-file_dep = ["::ppt", "::all_py", "::all_py_test", "::all_examples"]
+file_dep = ["::ppt", "::all_py", "::all_py_test", "::all_examples", "::lite::config"]
 task_dep = ["test:preflight"]
-actions = [["pytest"]]
+actions = [["pytest", "-n=auto", "-vv"]]
 
 [tool.doitoml.tasks.test.full]
 doc = "Run all tests with pytest"
 file_dep = ["::ppt", "::all_py", "::all_py_test", "::all_examples"]
 task_dep = ["test:unit"]
-actions = [["pytest", "--cov-fail-under=${COV_FAIL_UNDER}"]]
+actions = [["pytest", "-n=auto", "-vv", "--cov-fail-under=${COV_FAIL_UNDER}"]]
 meta = {doitoml = {env = {DOITOML_TEST_FULL_EXAMPLES = 1}}}
 
 [tool.doitoml.tasks.docs.sphinx]
@@ -401,6 +451,7 @@ file_dep = [
   "::docs_py",
   "::docs_etc",
   "::dist_hash",
+  "::lite::build_targets",
 ]
 actions = [["sphinx-build", "-W", "--color", "::sphinx_opts"]]
 targets = ["::docs_buildinfo"]
@@ -472,6 +523,11 @@ actions = [
     "::env_binder",
     "::env_docs",
     "# optional deps",
+  ]}}},
+  {py = {"_actions:replace_between" = {args = [
+    "::env_binder",
+    "::env_docs",
+    "# demo deps",
   ]}}},
 ]
 

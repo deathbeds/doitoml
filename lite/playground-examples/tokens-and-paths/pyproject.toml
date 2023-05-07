@@ -1,0 +1,17 @@
+[tool.doitoml.env]
+WHOM = "world"
+
+[tool.doitoml.paths]
+greetings = ["hello-${WHOM}.txt"]
+farewells = ["goodbye-${WHOM}.txt"]
+
+[tool.doitoml.tokens]
+say = ["echo"]
+
+[tool.doitoml.tasks.greet]
+targets = ["::greetings"]
+actions = [["::say", "hello"]]
+
+[tool.doitoml.tasks.leave]
+actions = [["::say", "goodbye"]]
+file_dep = ["::farewells"]

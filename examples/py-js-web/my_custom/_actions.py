@@ -98,12 +98,13 @@ def hash_files(
         print(output)
 
 
-def toml2json(src: Path, dest: Path) -> None:
+def toml2json(src_path: str, dest_path: str) -> None:
     try:
         import tomllib
     except ImportError:
         import tomli as tomllib
-
+    src = Path(src_path)
+    dest = Path(dest_path)
     dest.parent.mkdir(exist_ok=True, parents=True)
     dest.write_text(
         json.dumps(tomllib.loads(src.read_text(**UTF8)), indent=2, sort_keys=True),

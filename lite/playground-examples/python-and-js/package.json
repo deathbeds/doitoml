@@ -1,0 +1,15 @@
+{
+  "doitoml": {
+    "prefix": "js",
+    "tasks": {
+      "hello": {
+        "task_dep": [
+          "py:greet"
+        ],
+        "actions": [
+          "hi"
+        ]
+      }
+    }
+  }
+}

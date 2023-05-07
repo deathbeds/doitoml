@@ -72,7 +72,12 @@
           "description": "named command tokens"
         }
       },
-      "required": ["tasks", "tokens", "env", "paths"],
+      "required": [
+        "tasks",
+        "tokens",
+        "env",
+        "paths"
+      ],
       "title": "doitoml Schema",
       "type": "object"
     },
@@ -115,13 +120,30 @@
           "type": "array"
         },
         "skip": {
-          "type": "string"
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            },
+            {
+              "type": "object"
+            }
+          ]
         },
         "source": {
           "type": "string"
         }
       },
-      "required": ["cwd", "log", "source"],
+      "required": [
+        "cwd",
+        "log",
+        "source"
+      ],
       "title": "doitoml Metadataa",
       "type": "object"
     },
@@ -162,7 +184,11 @@
           "$ref": "#/definitions/uptodates"
         },
         "verbosity": {
-          "enum": [1, 2, 3],
+          "enum": [
+            1,
+            2,
+            3
+          ],
           "type": "number"
         },
         "watch": {

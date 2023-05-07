@@ -3,7 +3,7 @@ import datetime
 import os
 import re
 from pathlib import Path
-from typing import Any, Tuple
+from typing import Any, Dict, Tuple
 
 import tomli
 
@@ -99,8 +99,9 @@ suppress_warnings = ["autosectionlabel.*"]
 # theme
 templates_path = ["_templates"]
 html_static_path = [
-    "_static",
+    "../build/lite",
     "../dist",
+    "_static",
 ]
 html_theme = "pydata_sphinx_theme"
 html_logo = "_static/img/logo.svg"
@@ -119,13 +120,15 @@ html_theme_options = {
         },
         {
             "name": "conda-forge",
-            "url": "https://github.com/conda-forge/doitoml-feedstock#about-doitoml",
+            "url": "https://github.com/conda-forge/doitoml-split-feedstock",
             "icon": "_static/img/anvil.svg",
             "type": "local",
         },
     ],
     "footer_end": ["mermaid10"],
 }
+
+html_sidebars: Dict[str, Any] = {"demo": []}
 
 if REPO_INFO is not None:
     html_context = {**REPO_INFO.groupdict(), "doc_path": "docs"}

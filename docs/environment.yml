@@ -19,8 +19,16 @@ dependencies:
   - flit >=3.8
   - jsonschema-gentypes
   # build deps
+  # demo deps
+  - ipylab
+  - ipywidgets >=8
+  - jupyterlab >=3.6.3,<4
+  - jupyterlab-markup
+  # demo deps
   # docs deps
   - docutils >=0.19
+  - jupyterlite-pyodide-kernel
+  - jupyterlite-core-with-libarchive
   - myst-nb
   - pydata-sphinx-theme
   - sphinx-autobuild
@@ -29,6 +37,8 @@ dependencies:
   - sphinx-design
   - sphinx-jsonschema
   - sphinxcontrib-mermaid
+  - importnb
+  - scour
   # docs deps
 
 name: doitoml-docs

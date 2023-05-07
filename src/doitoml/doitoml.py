@@ -49,6 +49,7 @@ class DoiTOML:
         log_level: MaybeLogLevel = None,
         discover_config_paths: Optional[bool] = None,
         validate: Optional[bool] = None,
+        safe_paths: Optional[List[str]] = None,
     ) -> None:
         """Initialize a ``doitoml`` task generator."""
         self.cwd = Path(cwd) if cwd else Path.cwd()
@@ -61,6 +62,7 @@ class DoiTOML:
                 fail_quietly=fail_quietly,
                 discover_config_paths=discover_config_paths,
                 validate=validate,
+                safe_paths=safe_paths,
             )
             # initialize late for ``entry_points`` that reference ``self.entry_points``
             self.entry_points.initialize()
@@ -96,6 +98,7 @@ class DoiTOML:
         fail_quietly: Optional[bool] = None,
         discover_config_paths: Optional[bool] = None,
         validate: Optional[bool] = None,
+        safe_paths: Optional[List[str]] = None,
     ) -> Config:
         """Initialize configuration."""
         return Config(
@@ -105,6 +108,7 @@ class DoiTOML:
             fail_quietly=fail_quietly,
             discover_config_paths=discover_config_paths,
             validate=validate,
+            safe_paths=safe_paths,
         )
 
     def tasks(self) -> Dict[str, TaskFunction]:

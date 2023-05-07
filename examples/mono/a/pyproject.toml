@@ -1,0 +1,32 @@
+[build-system]
+requires = ["flit_core >=3.2,<4"]
+build-backend = "flit_core.buildapi"
+
+[project]
+name = "a"
+description = "a"
+version = "0.0.0"
+authors = [
+    {name = "doitoml", email = "doitoml@example.com"},
+]
+readme = "README.md"
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+]
+
+[tool.doitoml]
+prefix = "pkg_a"
+
+[tool.doitoml.env]
+A_VERSION = ":get::toml::pyproject.toml::project::version"
+
+[tool.doitoml.paths]
+dist = ["dist/a-${A_VERSION}-py2.py3-none-any.whl"]
+src = ["a.py"]
+conf = ["pyproject.toml"]
+readme = ["README.md"]
+
+[tool.doitoml.tasks.build]
+file_dep = ["::src", "::conf", "::readme"]
+actions = [["flit", "build"]]
+targets = ["::dist"]

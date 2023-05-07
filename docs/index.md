@@ -1,9 +1,12 @@
 ```{hint}
-Try the [getting started] tutorial or the [cheatsheet]
-```
+Start with the [getting started] tutorial, the [cheatsheet], or...
 
-[getting started]: ./tutorials/getting-started.ipynb
-[cheatsheet]: ./reference/cheatsheet.md
+~~~{button-link} ./demo.html
+:color: primary
+:expand:
+Try **doitoml** Now
+~~~
+```
 
 ```{grid} 2
 
@@ -37,8 +40,12 @@ Try the [getting started] tutorial or the [cheatsheet]
 ```{toctree}
 :maxdepth: 2
 
+demo
 tutorials/index
 how-to/index
 understanding/index
 reference/index
 ```
+
+[getting started]: ./tutorials/getting-started.ipynb
+[cheatsheet]: ./reference/cheatsheet.md
