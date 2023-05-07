@@ -377,6 +377,10 @@ doc = "Format notebooks with nbqa"
 file_dep = ["::all_ipynb"]
 actions = [
   [
+    "nbstripout",
+    "::all_ipynb",
+  ],
+  [
     "nbqa",
     "black",
     "::all_ipynb",
