@@ -268,7 +268,7 @@ all_py_src = [":rglob::src::*.py"]
 docs_logo = ["docs/_static/img/logo.svg"]
 all_ipynb = [
   ":rglob::docs::*.ipynb::!ipynb_checkpoints",
-  ":glob::lite::*.ipynb::!ipynb_checkpoints",
+  ":rglob::lite::*.ipynb::!ipynb_checkpoints",
 ]
 all_py_test = [":rglob::test::*.py"]
 ppt = ["pyproject.toml"]
