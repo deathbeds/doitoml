@@ -1,11 +1,15 @@
 """Constants for ``doitoml``."""
 #: default encoding
+import platform
 from typing import Literal
 
 UTF8 = "utf-8"
 
 #: package/config name
 NAME = "doitoml"
+
+PLATFORM = platform.system()
+WIN = PLATFORM == "Windows"
 
 
 class DEFAULTS:

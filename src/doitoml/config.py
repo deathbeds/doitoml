@@ -22,6 +22,7 @@ from .constants import (
     DOIT_TASK,
     DOITOML_META,
     NAME,
+    WIN,
 )
 from .errors import (
     ActionError,
@@ -43,6 +44,7 @@ from .sources._source import Source
 from .types import (
     Action,
     LogPaths,
+    PathOrString,
     PathOrStrings,
     Paths,
     PrefixedStrings,
@@ -357,16 +359,26 @@ class Config:
 
         return unresolved_paths
 
+    def normalize_path(self, path: PathOrString) -> str:
+        """Apply some best-effort, platform-aware path normalization."""
+        norm = str(Path(path).resolve())
+        if WIN:
+            norm = f"{norm[0].lower()}{norm[1:]}"
+        return norm
+
     def check_safe_path(self, path: str) -> str:
         """Check if some paths are safe."""
-        if any(path.startswith(safe) for safe in self.safe_paths):
+        norm_safe = [self.normalize_path(p) for p in self.safe_paths]
+        norm_path = self.normalize_path(path)
+
+        if any(norm_path.startswith(safe) for safe in norm_safe):
             return path
 
-        nl = "\n  -"
+        nl = "\n  - "
         message = (
-            f"The path is outside the known `safe_paths`: {path}"
+            f"The path is outside the known `safe_paths`: {norm_path}"
             "\n"
-            f"""{nl}{nl.join(self.safe_paths)}"""
+            f"""{nl}{nl.join(norm_safe)}"""
         )
         raise UnsafePathError(message)
 
