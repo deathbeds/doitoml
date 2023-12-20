@@ -18,9 +18,8 @@ def ensure_parents(*paths: Optional[Path]) -> Tuple[Optional[Path], ...]:
 def normalize_path(path: PathOrString) -> str:
     """Apply some best-effort, platform-aware path normalization."""
     as_path = Path(path).resolve()
-    norm = as_path.as_uri()
-    norm = str(as_path.as_uri()).replace("file://", "")
+    norm = str(as_path)
     if as_path.drive:  # pragma: no cover
-        norm_bits = norm.split(":", 1)
-        norm = ":".join([*norm_bits[0].lower(), *norm_bits[1:]])
+        norm_bits = norm.split(":")
+        norm = ":".join([norm_bits[0].lower(), *norm_bits[1:]])
     return norm
