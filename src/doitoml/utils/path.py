@@ -18,8 +18,8 @@ def ensure_parents(*paths: Optional[Path]) -> Tuple[Optional[Path], ...]:
 def normalize_path(path: PathOrString) -> str:
     """Apply some best-effort, platform-aware path normalization."""
     as_path = Path(path).resolve()
-    norm = str(as_path)
+    norm = as_path.as_posix()
     if as_path.drive:  # pragma: no cover
-        norm_bits = norm.split(":")
+        norm_bits = str(path).split(":")
         norm = ":".join([norm_bits[0].lower(), *norm_bits[1:]])
     return norm
