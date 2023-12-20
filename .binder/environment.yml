@@ -27,7 +27,7 @@ dependencies:
   - mypy
   - nbqa
   - nbstripout
-  - nodejs >=18,<19
+  - nodejs >=20,<21
   - ruff
   - ssort
   - taplo
@@ -49,8 +49,7 @@ dependencies:
   # demo deps
   - ipylab
   - ipywidgets >=8
-  - jupyterlab >=3.6.3,<4
-  - jupyterlab-markup
+  - jupyterlab >=4,<5
   # demo deps
   # docs deps
   - docutils >=0.19

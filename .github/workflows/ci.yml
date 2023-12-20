@@ -207,7 +207,7 @@ jobs:
         python-version: ["3.11"]
     steps:
       - name: download (dist)
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: doitoml-dist-${{ github.run_number }}
           path: ./dist

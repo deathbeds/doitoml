@@ -3,7 +3,7 @@ channels:
 dependencies:
   # runtimes
   - python >=3.11,<3.12
-  - nodejs >=18,<19
+  - nodejs >=20,<21
   # run
   - fastapi
   - uvicorn-standard
