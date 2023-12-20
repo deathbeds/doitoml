@@ -22,5 +22,5 @@ def normalize_path(path: PathOrString) -> str:
     if as_path.drive:  # pragma: no cover
         norm_bits = str(path).split(":")
         norm = ":".join([norm_bits[0].lower(), *norm_bits[1:]])
-        norm.replace("\\", "/")
+        norm = norm.replace("\\", "/")
     return norm
