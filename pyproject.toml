@@ -147,6 +147,11 @@ ignore = [
   # keep 3.8 compat
   "UP006",
   "UP007",
+  # harder to read
+  "RUF015",
+  # conflict with format
+  "COM812",
+  "ISC001",
 ]
 cache-dir = "build/.cache/ruff"
 select = [
@@ -211,6 +216,7 @@ select = [
 "jinja2.py" = ["ARG002"]
 "test/**/*.py" = ["S101", "T201", "T203"]
 "lite/*.py" = ["D205", "INP001", "E402", "ANN201", "D103", "T201", "ANN001", "D100"]
+"_v*.py" = ["PYI030"]
 
 [tool.doitoml]
 prefix = ""
@@ -218,7 +224,6 @@ config_paths = ["js/package.json", ":get::json::lite/jupyter_lite_config.json::d
 validate = true
 
 [tool.doitoml.env]
-BLACK_CACHE_DIR = "./build/.cache/black"
 DOITOML_SDIST = "doitoml-${DOITOML_VERSION}.tar.gz"
 DOITOML_VERSION = ":get::toml::pyproject.toml::project::version"
 DOITOML_WHEEL = "doitoml-${DOITOML_VERSION}-py3-none-any.whl"
@@ -355,17 +360,11 @@ file_dep = ["::ppt", "::all_ssort"]
 task_dep = ["js:fix:prettier"]
 actions = [["ssort", "::all_ssort"]]
 
-[tool.doitoml.tasks.fix.black]
-doc = "Format python source with `black`"
-file_dep = ["::ppt", "::all_py"]
-task_dep = ["fix:ssort"]
-actions = [["black", "--quiet", "::all_py"]]
-
 [tool.doitoml.tasks.fix.ruff]
 doc = "Format python source with `ruff`"
 file_dep = ["::ppt", "::all_py"]
-task_dep = ["fix:black"]
-actions = [["ruff", "--fix", "::all_py"]]
+task_dep = ["fix:ssort"]
+actions = [["ruff", "--fix-only", "::all_py"], ["ruff", "format", "::all_py"]]
 
 [tool.doitoml.tasks.fix.toml]
 doc = "Format TOML with taplo"
@@ -381,22 +380,16 @@ actions = [
     "::all_ipynb",
   ],
   [
-    "nbqa",
-    "black",
-    "::all_ipynb",
-  ],
-  [
-    "nbqa",
     "ruff",
     "--fix-only",
     "::all_ipynb",
   ],
+  [
+    "ruff",
+    "format",
+    "::all_ipynb",
+  ],
 ]
-
-[tool.doitoml.tasks.lint.py.black]
-doc = "Check python formatting with `black`"
-file_dep = ["::ppt", "::all_py"]
-actions = [["black", "--quiet", "--check", "::all_py"]]
 
 [tool.doitoml.tasks.lint.py.ruff]
 doc = "Check python syntax with `ruff`"
@@ -495,7 +488,8 @@ actions = [
     "::schema_py",
   ],
   [
-    "black",
+    "ruff",
+    "format",
     "::schema_py",
   ],
 ]

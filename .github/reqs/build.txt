@@ -11,4 +11,3 @@ jsonschema-gentypes
 ssort
 ruff
 mypy
-black

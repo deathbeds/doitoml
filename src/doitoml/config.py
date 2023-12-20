@@ -89,7 +89,7 @@ class Config:
     validate: Optional[bool]
     safe_paths: List[str]
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         doitoml: "DoiTOML",
         config_paths: Paths,
@@ -550,12 +550,11 @@ class Config:
 
         group = cast(Dict[str, Task], task_or_group)
         for subtask_prefix, subtask_or_group in group.items():
-            for subtask_prefixes, subtask in self.resolve_one_task_or_group(
+            yield from self.resolve_one_task_or_group(
                 source,
                 (*prefixes, subtask_prefix),
                 subtask_or_group,
-            ):
-                yield subtask_prefixes, subtask
+            )
 
     def resolve_one_skip(self, source: ConfigSource, skip: Any) -> bool:
         """Maybe skip discovery of task (and all its children)."""

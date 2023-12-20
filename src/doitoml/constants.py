@@ -29,7 +29,7 @@ class DEFAULTS:
     #: the key for controlling validation
     VALIDATE: Literal["validate"] = "validate"
     #: the values that will be read from the first config file
-    ALL_FROM_FIRST_CONFIG = [UPDATE_ENV, FAIL_QUIETLY, VALIDATE, CONFIG_PATH]
+    ALL_FROM_FIRST_CONFIG = (UPDATE_ENV, FAIL_QUIETLY, VALIDATE, CONFIG_PATH)
 
 
 class ENTRY_POINTS:
@@ -63,9 +63,9 @@ class DOIT_TASK:
     #: field for task up-to-date checks (might overload `file_dep` and `task_dep`)
     UPTODATE: Literal["uptodate"] = "uptodate"
     #: ``doit`` task items known to be lists
-    LIST_KEYS = ["file_dep", "task_dep", "targets", "actions", "clean"]
+    LIST_KEYS = ("file_dep", "task_dep", "targets", "actions", "clean")
     #: ``doit`` keys that are always paths
-    RELATIVE_LISTS = ["file_dep", "targets", "clean"]
+    RELATIVE_LISTS = ("file_dep", "targets", "clean")
 
 
 class DOITOML_META:

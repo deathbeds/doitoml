@@ -38,8 +38,8 @@ formatters, with as aggressive-as-possible options. A `doit format` task that au
 as much as possible will not only improve the _stability_ and _responsiveness_ of a
 `doit` task tree, but also lead to cleaner revision control history.
 
-For example, on `doitoml`'s own Python code, `ssort`, `black`, and `ruff` are all used
-to take as much guesswork as possible out of line- and token-level syntax choices.
+For example, on `doitoml`'s own Python code, `ssort` and `ruff` are used to take as much
+guesswork as possible out of line- and token-level syntax choices.
 
 ## Single sources of truth
 

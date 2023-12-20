@@ -61,7 +61,7 @@ jobs:
         run: doit bootstrap
 
       - name: lint
-        run: doit -n8 lint:py:ruff lint:py:black
+        run: doit -n8 lint:py:ruff
 
       - name: list
         run: doit list --all --status

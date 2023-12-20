@@ -19,7 +19,7 @@ A common use case is to create a number of tasks, changing only certain key valu
 ```toml
 # pyproject.toml
 [tool.doitoml.templates.json-e.tasks.echo]
-"$map": ["a", "b"]
+"$map" = ["a", "b"]
 
 [tool.doitoml.templates.json-e.tasks.echo."each(x)"]
 name = "${x}"
