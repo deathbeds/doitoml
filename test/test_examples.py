@@ -53,11 +53,7 @@ def _count_tasks(
     prefix = "TASK: "
 
     list_all = script_runner.run(
-        "doit",
-        "list",
-        "--all",
-        "--template",
-        (prefix + "{name}"),
+        ["doit", "list", "--all", "--template", (prefix + "{name}")],
         env=env or os.environ,
     )
     assert list_all.success
@@ -127,7 +123,7 @@ def test_example(
         _count_files(f"{name} files before {step_name}", path, before.get("files"))
         env = dict(**os.environ)
         env.update(step.get("env", {}))
-        res = script_runner.run(*step["run"], env=env)
+        res = script_runner.run(step["run"], env=env)
         assert res.returncode == step["rc"]
         _count_files(f"{name} files after {step_name}", path, after.get("files"))
         _count_tasks(

@@ -6,7 +6,7 @@ Action = Union["ShellAction", "TokenAction", "ActorAction"]
 """
 action.
 
-oneOf
+Aggregation type: oneOf
 """
 
 
@@ -30,11 +30,13 @@ class DoitomlMetadataa(TypedDict, total=False):
     """ Required property """
 
     env: "EnvironmentVariables"
+    """ environment variables. """
+
     log: Required[List["_DoitomlMetadataaLogItem"]]
     """ Required property """
 
     skip: Union[str, Union[int, float], None, Dict[str, Any]]
-    """ oneOf """
+    """ Aggregation type: oneOf """
 
     source: Required[str]
     """ Required property """
@@ -48,20 +50,28 @@ class DoitomlSchema(TypedDict, total=False):
     """
 
     env: Required["EnvironmentVariables"]
-    """ Required property """
-
-    paths: Required["PathTokens"]
-    """ Required property """
-
-    tasks: Required[Dict[str, "Task"]]
     """
-    named tasks
+    environment variables.
 
     Required property
     """
 
-    tokens: Required["CommandTokens"]
+    paths: Required["PathTokens"]
+    """
+    path tokens.
+
+    Required property
+    """
+
+    tasks: Required[Dict[str, "Task"]]
     """ Required property """
+
+    tokens: Required["CommandTokens"]
+    """
+    command tokens.
+
+    Required property
+    """
 
 
 EnvironmentVariables = Dict[str, str]
@@ -73,6 +83,7 @@ class Metadata(TypedDict, total=False):
     """Metadata."""
 
     doitoml: "DoitomlMetadataa"
+    """ doitoml Metadataa. """
 
 
 PathTokens = Dict[str, List["_ArrayOfPathsItem"]]
@@ -92,6 +103,8 @@ class Task(TypedDict, total=False):
     doc: str
     file_dep: List["_ArrayOfPathsItem"]
     meta: "Metadata"
+    """ Metadata. """
+
     name: str
     targets: List["_ArrayOfPathsItem"]
     title: str
@@ -108,7 +121,7 @@ Uptodate = Union[bool, str, Dict[str, Any], None]
 """
 uptodate.
 
-oneOf
+Aggregation type: oneOf
 """
 
 
@@ -117,7 +130,7 @@ _ArrayOfPathsItem = str
 
 
 _DoitomlMetadataaLogItem = Union[str, None]
-""" oneOf """
+""" Aggregation type: oneOf """
 
 
 _TaskVerbosity = Union[Literal[1], Literal[2], Literal[3]]

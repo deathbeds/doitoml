@@ -12,3 +12,4 @@ dist/
 untitled*
 Untitled*
 .jupyterlite*
+node_modules/

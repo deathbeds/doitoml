@@ -4,8 +4,10 @@ from pathlib import Path
 from pprint import pprint
 
 import pytest
+from doitoml.constants import WIN
 from doitoml.doitoml import DoiTOML
 from doitoml.errors import UnsafePathError
+from doitoml.utils.path import normalize_path
 
 from .conftest import TPyprojectMaker
 
@@ -38,3 +40,10 @@ def test_safe_paths(
     a_pyproject_with(loaded)
     with pytest.raises(UnsafePathError, match="safe_paths"):
         pprint(DoiTOML(fail_quietly=False).config.tasks)
+
+
+@pytest.mark.skipif(not WIN, reason="not interesting on POSIX")
+@pytest.mark.parametrize(("raw_path", "expected"), [("C:\\git", "c:/git")])
+def test_norm_win_path(raw_path: str, expected: str) -> None:
+    """Verify windows path drive letters and slashes are normalized."""
+    assert normalize_path(raw_path) == expected

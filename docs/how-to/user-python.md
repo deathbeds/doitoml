@@ -22,7 +22,7 @@ the box.
   ```toml
   [tool.doitoml.tasks.copy]
   actions = [
-      {py = {"shutil:copytree" = {kwargs = {src = "from/path/", dst = "to/path"} } }
+      {py = {"shutil:copytree" = {kwargs = {src = "from/path/", dst = "to/path"} } } }
   ]
   ```
   ~~~
@@ -113,7 +113,7 @@ Can be referenced as:
 # pyproject.toml
 [tool.doitoml.tasks.greet]
 actions = [
-    {py = {"my_actions:greet" = {args = ["hello", "world"] } }
+    {py = {"my_actions:greet" = {args = ["hello", "world"] } } }
 ]
 ```
 
@@ -141,7 +141,7 @@ The `pyproject.toml` in the `child` directory can extend `sys.path` to find the
 # child/pyproject.toml
 [tool.doitoml.tasks.greet]
 actions = [
-    {py = {"../my_actions:greetings:greet" = {args = ["hello", "world"] } }
+    {py = {"../my_actions:greetings:greet" = {args = ["hello", "world"] } } }
 ]
 ```
 
@@ -153,10 +153,12 @@ imported...
 ```toml
 # pyproject.toml
 [tool.doitoml.tasks.greet]
-actions=[{ py = {"dodo:greet": { kwargs = { whom = "world" } } } }]
+actions = [
+  { py = {"dodo:greet" = { kwargs = { whom = "world" } } } }
+]
 
 [tool.doitoml.tasks.greet]
-actions=[{ py = {"dodo:dump": { } } }]
+actions = [{ py = {"dodo:dump" = { } } }]
 ```
 
 ... and even explore a `DoiTOML` instance.

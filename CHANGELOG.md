@@ -2,6 +2,10 @@
 
 ## 0.2.1 (unreleased)
 
+- [#15] normalizes path drive letters on windows
+
+[#15]: https://github.com/deathbeds/doitoml/issues/15
+
 ## 0.2.0
 
 ### Data Model

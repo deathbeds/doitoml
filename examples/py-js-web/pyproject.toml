@@ -45,7 +45,7 @@ license = ["./LICENSE"]
 ppt = ["./pyproject.toml"]
 py_src = [":rglob::src::*.py"]
 readme = ["./README.md"]
-sdist = ["dist/example-web-${EXAMPLE_PY_VERSION}.tar.gz"]
+sdist = ["dist/example_web-${EXAMPLE_PY_VERSION}.tar.gz"]
 venv = ["./.venv"]
 venv_history = ["./.venv/conda-meta/history"]
 whl = ["dist/example_web-${EXAMPLE_PY_VERSION}-py3-none-any.whl"]
@@ -104,8 +104,8 @@ file_dep = ["::all_dist"]
 targets = ["::dist_hash"]
 
 [tool.__doitoml_tests__.steps.00_list]
-after = {files = {"*" = 9}}
-before = {files = {"**/*" = 16, "*" = 9}}
+after = {files = {"*" = 10}}
+before = {files = {"*" = 10, "**/*" = 17}}
 rc = 0
 run = ["doit", "list"]
 tasks = 10
@@ -116,7 +116,7 @@ rc = 0
 run = ["doit"]
 
 [tool.__doitoml_tests__.steps.01_run.after.files]
-"*" = 12
+"*" = 11
 "yarn.lock" = 1
 "dist/*.tar.gz" = 1
 "dist/*.whl" = 1

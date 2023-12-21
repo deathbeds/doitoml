@@ -131,10 +131,10 @@ def test_task_env(a_pyproject_with: TPyprojectMaker, script_runner: Any) -> None
     )
     foo_py = ppt.parent / "foo.py"
     foo_py.write_text(FOO_PY)
-    res = script_runner.run("doit", "foo")
+    res = script_runner.run(["doit", "foo"])
     assert "FOO is baz" in res.stdout
 
-    res = script_runner.run("doit", "foo2")
+    res = script_runner.run(["doit", "foo2"])
     foo2 = (ppt.parent / "foo2.txt").read_text(encoding="utf-8")
     assert "FOO is boo" in foo2
     assert "oob" in foo2
@@ -180,7 +180,7 @@ def test_log(
     )
     foo_py = ppt.parent / "foo.py"
     foo_py.write_text(FOO_PY)
-    script_runner.run("doit")
+    script_runner.run(["doit"])
     out = ppt.parent / "out.txt"
     err = ppt.parent / "err.txt"
     out_txt = None
@@ -195,7 +195,7 @@ def test_log(
     if stderr not in [stdout, None, ""]:
         err_txt = err.read_text()
         assert "rab" in err_txt
-    script_runner.run("doit")
+    script_runner.run(["doit"])
 
 
 @pytest.mark.parametrize(

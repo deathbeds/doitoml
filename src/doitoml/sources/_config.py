@@ -26,7 +26,7 @@ class ConfigSource(Source):
     @property
     def prefix(self) -> str:
         """Get the prefix for this configuration source."""
-        return self.raw_config.get(PREFIX, "")
+        return str(self.raw_config.get(PREFIX, ""))
 
     def extra_config_sources(
         self,
@@ -54,7 +54,7 @@ class ConfigSource(Source):
     def raw_config(self) -> Dict[str, Any]:
         """Extract a raw ``doitoml`` configuration from this source."""
 
-    def __eq__(self, other: Any) -> bool:
+    def __eq__(self, other: object) -> bool:
         return isinstance(other, ConfigSource) and other.path == self.path
 
     def __repr__(self) -> str:

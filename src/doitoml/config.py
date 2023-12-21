@@ -43,6 +43,7 @@ from .sources._source import Source
 from .types import (
     Action,
     LogPaths,
+    PathOrString,
     PathOrStrings,
     Paths,
     PrefixedStrings,
@@ -53,6 +54,7 @@ from .types import (
     Task,
 )
 from .utils.json import to_json
+from .utils.path import normalize_path
 
 if TYPE_CHECKING:
     from .doitoml import DoiTOML
@@ -87,7 +89,7 @@ class Config:
     validate: Optional[bool]
     safe_paths: List[str]
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         doitoml: "DoiTOML",
         config_paths: Paths,
@@ -111,7 +113,7 @@ class Config:
         self.update_env = update_env
         self.fail_quietly = fail_quietly
         self.discover_config_paths = discover_config_paths
-        self.safe_paths = safe_paths or []
+        self.safe_paths = [normalize_path(p) for p in safe_paths or []]
 
     def to_dict(self) -> DoitomlSchema:
         """Return a normalized subset of config data."""
@@ -219,12 +221,12 @@ class Config:
                 unchecked_paths += [path]
 
         if unchecked_paths and not self.safe_paths:
-            self.safe_paths = [str(unchecked_paths[0].parent.as_posix())]
+            self.safe_paths = [normalize_path(unchecked_paths[0].parent)]
 
         while unchecked_paths:
             config_path = unchecked_paths.pop(0)
             config_source = self.load_config_source(
-                Path(self.check_safe_path(str(config_path.as_posix()))),
+                Path(self.check_safe_path(config_path)),
             )
             self.find_one_config_source(config_source, config_sources)
 
@@ -357,14 +359,16 @@ class Config:
 
         return unresolved_paths
 
-    def check_safe_path(self, path: str) -> str:
+    def check_safe_path(self, path: PathOrString) -> str:
         """Check if some paths are safe."""
-        if any(path.startswith(safe) for safe in self.safe_paths):
-            return path
+        norm_path = normalize_path(path)
 
-        nl = "\n  -"
+        if any(norm_path.startswith(safe) for safe in self.safe_paths):
+            return str(path)
+
+        nl = "\n  - "
         message = (
-            f"The path is outside the known `safe_paths`: {path}"
+            f"The path is outside the known `safe_paths`: {norm_path}"
             "\n"
             f"""{nl}{nl.join(self.safe_paths)}"""
         )
@@ -407,7 +411,7 @@ class Config:
                 unresolved_paths[source.prefix, path_key] = unresolved_specs
                 continue
             self.paths[source.prefix, path_key] = sorted(
-                {Path(p).as_posix() for p in found_paths},
+                {normalize_path(p) for p in found_paths},
             )
             unresolved_paths.pop((source.prefix, path_key), None)
 
@@ -456,14 +460,11 @@ class Config:
 
         if resolved:
             if source_relative:
-                return [
-                    self.check_safe_path((cwd / r).resolve().as_posix())
-                    for r in resolved
-                ]
+                return [self.check_safe_path((cwd / r).resolve()) for r in resolved]
             return resolved
 
         if source_relative:
-            return [self.check_safe_path((cwd / spec).resolve().as_posix())]
+            return [self.check_safe_path((cwd / spec).resolve())]
 
         return [spec]
 
@@ -549,12 +550,11 @@ class Config:
 
         group = cast(Dict[str, Task], task_or_group)
         for subtask_prefix, subtask_or_group in group.items():
-            for subtask_prefixes, subtask in self.resolve_one_task_or_group(
+            yield from self.resolve_one_task_or_group(
                 source,
                 (*prefixes, subtask_prefix),
                 subtask_or_group,
-            ):
-                yield subtask_prefixes, subtask
+            )
 
     def resolve_one_skip(self, source: ConfigSource, skip: Any) -> bool:
         """Maybe skip discovery of task (and all its children)."""

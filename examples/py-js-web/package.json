@@ -36,8 +36,11 @@
       "y_lock": [
         "yarn.lock"
       ],
+      "y_rc": [
+        ".yarnrc.yml"
+      ],
       "y_install_state": [
-        ".yarn/install-state.gz"
+        "build/.cache/yarn/install-state.gz"
       ],
       "w_cfg": [
         "webpack.config.js"
@@ -71,7 +74,8 @@
         ],
         "file_dep": [
           "::backend::venv_history",
-          "::pj"
+          "::pj",
+          "::y_rc"
         ],
         "targets": [
           "::y_install_state",
