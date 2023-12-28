@@ -204,7 +204,8 @@ class Config:
                 f"Validation was requested, but cannot validate: {jsonschema_error}"
             )
             warnings.warn(message, stacklevel=1)
-            return None
+
+        return None  # pragma: no cover
 
     def find_config_sources(self) -> ConfigSources:
         """Find all directly and referenced configuration sources."""

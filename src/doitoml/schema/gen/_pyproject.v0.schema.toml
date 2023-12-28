@@ -1,5 +1,5 @@
 "$id" = "https://doitoml.rtfd.io/en/latest/schema/v0.pyproject.schema.json#"
-"$schema" = "http://json-schema.org/draft-07/schema#"
+"$schema" = "https://json-schema.org/draft/2019-09/schema"
 
 "$ref" = "#/definitions/pyproject"
 description = "``doitoml`` and ``doit`` configuration for ``pyproject.toml``"

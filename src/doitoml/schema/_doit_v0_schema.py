@@ -34,7 +34,7 @@ class DoitomlMetadataa(TypedDict, total=False):
 
     env: "EnvironmentVariables"
 
-    log: Required[List["_DoitomlLogItem"]]
+    log: Required[List["_DefinitionsDoitomlLogItem"]]
 
     skip: Union[str, Union[int, float], None, Dict[str, Any]]
 
@@ -107,7 +107,7 @@ class Metadata(TypedDict, total=False):
     """ doitoml Metadataa. """
 
 
-PathTokens = Dict[str, List["_ArrayOfPathsItem"]]
+PathTokens = Dict[str, List["_DefinitionsArrayOfPathsItem"]]
 """
 path tokens.
 
@@ -124,17 +124,17 @@ class Task(TypedDict, total=False):
     """Task."""
 
     actions: List["Action"]
-    calc_dep: List["_ArrayOfPathsItem"]
+    calc_dep: List["_DefinitionsArrayOfPathsItem"]
     doc: str
-    file_dep: List["_ArrayOfPathsItem"]
+    file_dep: List["_DefinitionsArrayOfPathsItem"]
     meta: "Metadata"
 
     name: str
-    targets: List["_ArrayOfPathsItem"]
+    targets: List["_DefinitionsArrayOfPathsItem"]
     title: str
     uptodate: List["Uptodate"]
     verbosity: "_TaskVerbosity"
-    watch: List["_ArrayOfPathsItem"]
+    watch: List["_DefinitionsArrayOfPathsItem"]
     """ Metadata. """
 
 
@@ -150,11 +150,11 @@ Aggregation type: oneOf
 """
 
 
-_ArrayOfPathsItem = str
+_DefinitionsArrayOfPathsItem = str
 """ minLength: 1 """
 
 
-_DoitomlLogItem = Union[str, None]
+_DefinitionsDoitomlLogItem = Union[str, None]
 """ Aggregation type: oneOf """
 
 

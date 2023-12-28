@@ -170,9 +170,9 @@ def validate(instance: str, schema: str) -> bool:
     registry = _get_registry(Path(schema).parent)
     import jsonschema
 
-    validator = jsonschema.Draft7Validator(
+    validator = jsonschema.Draft201909Validator(
         schema_data,
-        format_checker=jsonschema.Draft7Validator.FORMAT_CHECKER,
+        format_checker=jsonschema.Draft201909Validator.FORMAT_CHECKER,
         registry=registry,
     )
     errors = [*validator.iter_errors(instance_data, schema_data)]

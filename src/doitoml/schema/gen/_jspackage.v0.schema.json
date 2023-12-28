@@ -1,7 +1,7 @@
 {
   "$id": "https://doitoml.rtfd.io/en/latest/schema/v0.jspackage.schema.json#",
   "$ref": "#/definitions/jspackage",
-  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
   "definitions": {
     "action": {
       "oneOf": [
