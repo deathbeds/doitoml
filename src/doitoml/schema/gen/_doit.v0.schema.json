@@ -1,0 +1,250 @@
+{
+  "$id": "https://doitoml.rtfd.io/en/latest/schema/v0.doit.schema.json#",
+  "$ref": "#/definitions/config",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "action": {
+      "oneOf": [
+        {
+          "$ref": "#/definitions/action-shell"
+        },
+        {
+          "$ref": "#/definitions/action-token"
+        },
+        {
+          "$ref": "#/definitions/action-actor"
+        }
+      ],
+      "title": "action"
+    },
+    "action-actor": {
+      "description": "a custom action",
+      "title": "actor action",
+      "type": "object"
+    },
+    "action-shell": {
+      "title": "shell action",
+      "type": "string"
+    },
+    "action-token": {
+      "items": {
+        "type": "string"
+      },
+      "title": "token action",
+      "type": "array"
+    },
+    "actions": {
+      "items": {
+        "$ref": "#/definitions/action"
+      },
+      "type": "array"
+    },
+    "array-of-paths": {
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "array-of-strings": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "config": {
+      "additionalProperties": false,
+      "description": "schema for ``doitoml`` configuration",
+      "properties": {
+        "env": {
+          "$ref": "#/definitions/env",
+          "description": "environment variables"
+        },
+        "paths": {
+          "$ref": "#/definitions/paths",
+          "description": "named paths"
+        },
+        "tasks": {
+          "$ref": "#/definitions/tasks",
+          "description": "named tasks"
+        },
+        "templates": {
+          "description": "extensible task generators",
+          "type": "object"
+        },
+        "tokens": {
+          "$ref": "#/definitions/tokens",
+          "description": "named command tokens"
+        }
+      },
+      "required": [
+        "tasks",
+        "tokens",
+        "env",
+        "paths"
+      ],
+      "title": "doitoml schema",
+      "type": "object"
+    },
+    "doitoml-log": {
+      "items": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "type": "array"
+    },
+    "env": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "description": "environment variables shared among all tasks",
+      "title": "environment variables",
+      "type": "object"
+    },
+    "meta": {
+      "properties": {
+        "doitoml": {
+          "$ref": "#/definitions/meta-doitoml"
+        }
+      },
+      "title": "Metadata",
+      "type": "object"
+    },
+    "meta-doitoml": {
+      "additionalProperties": false,
+      "properties": {
+        "cwd": {
+          "type": "string"
+        },
+        "env": {
+          "$ref": "#/definitions/env"
+        },
+        "log": {
+          "$ref": "#/definitions/doitoml-log"
+        },
+        "skip": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            },
+            {
+              "type": "object"
+            }
+          ]
+        },
+        "source": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "cwd",
+        "log",
+        "source"
+      ],
+      "title": "doitoml Metadataa",
+      "type": "object"
+    },
+    "paths": {
+      "additionalProperties": {
+        "$ref": "#/definitions/array-of-paths"
+      },
+      "description": "paths to expand and normalize, relative to the current working directory",
+      "title": "path tokens",
+      "type": "object"
+    },
+    "task": {
+      "properties": {
+        "actions": {
+          "$ref": "#/definitions/actions"
+        },
+        "calc_dep": {
+          "$ref": "#/definitions/array-of-paths"
+        },
+        "doc": {
+          "type": "string"
+        },
+        "file_dep": {
+          "$ref": "#/definitions/array-of-paths"
+        },
+        "meta": {
+          "$ref": "#/definitions/meta"
+        },
+        "name": {
+          "type": "string"
+        },
+        "targets": {
+          "$ref": "#/definitions/array-of-paths"
+        },
+        "title": {
+          "type": "string"
+        },
+        "uptodate": {
+          "$ref": "#/definitions/uptodates"
+        },
+        "verbosity": {
+          "enum": [
+            1,
+            2,
+            3
+          ],
+          "type": "number"
+        },
+        "watch": {
+          "$ref": "#/definitions/array-of-paths"
+        }
+      },
+      "title": "Task",
+      "type": "object"
+    },
+    "tasks": {
+      "additionalProperties": {
+        "$ref": "#/definitions/task"
+      },
+      "type": "object"
+    },
+    "tokens": {
+      "additionalProperties": {
+        "$ref": "#/definitions/array-of-strings"
+      },
+      "description": "command tokens which may be expanded as paths",
+      "title": "command tokens",
+      "type": "object"
+    },
+    "uptodate": {
+      "oneOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "string"
+        },
+        {
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "uptodate"
+    },
+    "uptodates": {
+      "items": {
+        "$ref": "#/definitions/uptodate"
+      },
+      "type": "array"
+    }
+  },
+  "description": "``doitoml`` configuration after full expansion"
+}

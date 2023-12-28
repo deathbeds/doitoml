@@ -1,6 +1,6 @@
 {
-  "$id": "https://doitoml.rtfd.io/en/latest/schema/v0.schema.json",
-  "$ref": "#/definitions/config",
+  "$id": "https://doitoml.rtfd.io/en/latest/schema/v0.jspackage.schema.json#",
+  "$ref": "#/definitions/jspackage",
   "$schema": "http://json-schema.org/draft-07/schema#",
   "definitions": {
     "action": {
@@ -53,39 +53,87 @@
       "type": "array"
     },
     "config": {
+      "additionalProperties": false,
       "description": "schema for ``doitoml`` configuration",
       "properties": {
+        "config_paths": {
+          "description": "additional doitoml config files, which may use ``get``",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
         "env": {
           "$ref": "#/definitions/env",
           "description": "environment variables"
+        },
+        "fail_quietly": {
+          "description": "whether to ignore configuration errors",
+          "type": "boolean"
         },
         "paths": {
           "$ref": "#/definitions/paths",
           "description": "named paths"
         },
+        "prefix": {
+          "description": "a prefix to add to all tasks, tokens, and paths from this config file",
+          "type": "string"
+        },
         "tasks": {
           "$ref": "#/definitions/tasks",
           "description": "named tasks"
         },
+        "templates": {
+          "description": "extensible task generators",
+          "type": "object"
+        },
         "tokens": {
           "$ref": "#/definitions/tokens",
           "description": "named command tokens"
+        },
+        "validate": {
+          "description": "whether to apply schema validation before and after all transforms",
+          "type": "boolean"
         }
       },
-      "required": [
-        "tasks",
-        "tokens",
-        "env",
-        "paths"
-      ],
-      "title": "doitoml Schema",
+      "title": "doitoml schema",
       "type": "object"
+    },
+    "doitoml-log": {
+      "oneOf": [
+        {
+          "type": "string"
+        },
+        {
+          "items": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "type": "array"
+        }
+      ]
     },
     "env": {
       "additionalProperties": {
         "type": "string"
       },
+      "description": "environment variables shared among all tasks",
       "title": "environment variables",
+      "type": "object"
+    },
+    "jspackage": {
+      "description": "an npm-compatible package.json for a JS package",
+      "properties": {
+        "doitoml": {
+          "$ref": "#/definitions/config"
+        }
+      },
       "type": "object"
     },
     "meta": {
@@ -107,17 +155,7 @@
           "$ref": "#/definitions/env"
         },
         "log": {
-          "items": {
-            "oneOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "type": "array"
+          "$ref": "#/definitions/doitoml-log"
         },
         "skip": {
           "oneOf": [
@@ -134,16 +172,8 @@
               "type": "object"
             }
           ]
-        },
-        "source": {
-          "type": "string"
         }
       },
-      "required": [
-        "cwd",
-        "log",
-        "source"
-      ],
       "title": "doitoml Metadataa",
       "type": "object"
     },
@@ -151,6 +181,7 @@
       "additionalProperties": {
         "$ref": "#/definitions/array-of-paths"
       },
+      "description": "paths to expand and normalize, relative to the current working directory",
       "title": "path tokens",
       "type": "object"
     },
@@ -208,6 +239,7 @@
       "additionalProperties": {
         "$ref": "#/definitions/array-of-strings"
       },
+      "description": "command tokens which may be expanded as paths",
       "title": "command tokens",
       "type": "object"
     },
@@ -235,5 +267,5 @@
       "type": "array"
     }
   },
-  "description": "schema definitions for ``doitoml`` configuration"
+  "description": "``doitoml`` and ``doit`` configuration for ``package.json``"
 }

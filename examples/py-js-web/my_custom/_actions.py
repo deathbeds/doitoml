@@ -4,7 +4,15 @@ import subprocess
 from hashlib import sha256
 from pathlib import Path
 from pprint import pformat
-from typing import Generator, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Generator, List, Optional, Union
+
+try:
+    import tomllib
+except ImportError:
+    import tomli as tomllib
+
+if TYPE_CHECKING:
+    import referencing
 
 UTF8 = {"encoding": "utf-8"}
 
@@ -99,10 +107,6 @@ def hash_files(
 
 
 def toml2json(src_path: str, dest_path: str) -> None:
-    try:
-        import tomllib
-    except ImportError:
-        import tomli as tomllib
     src = Path(src_path)
     dest = Path(dest_path)
     dest.parent.mkdir(exist_ok=True, parents=True)
@@ -130,3 +134,76 @@ def replace_between(src: str, dest: str, sep: str) -> Optional[bool]:
         **UTF8,
     )
     return True
+
+
+def load_one(path: str) -> Any:
+    """Load a JSON-like data file."""
+    path_text = Path(path).read_text(**UTF8)
+    if path.endswith(".json"):
+        return json.loads(path_text)
+    if path.endswith(".toml"):
+        return tomllib.loads(path_text)
+    if path.endswith(".yaml"):
+        import yaml
+
+        return yaml.safe_load(path_text)
+    msg = f"can't parse {path}"
+    raise NotImplementedError(msg)
+
+
+def _get_registry(schema_dir: Path) -> "referencing.Registry":
+    from referencing import Registry, Resource
+
+    resources = {}
+
+    for schema_json in schema_dir.glob("*.schema.json"):
+        schema = load_one(str(schema_json))
+        resources[schema["$id"]] = Resource.from_contents(schema)
+
+    return Registry().with_resources(resources.items())
+
+
+def validate(instance: str, schema: str) -> bool:
+    """Validate an instance file in some format against a schema."""
+    instance_data = load_one(instance)
+    schema_data = load_one(schema)
+    registry = _get_registry(Path(schema).parent)
+    import jsonschema
+
+    validator = jsonschema.Draft7Validator(
+        schema_data,
+        format_checker=jsonschema.Draft7Validator.FORMAT_CHECKER,
+        registry=registry,
+    )
+    errors = [*validator.iter_errors(instance_data, schema_data)]
+    if not errors:
+        return True
+    import textwrap
+
+    cwd = Path.cwd()
+    print(f"!!! {len(errors)} errors in schema validation")
+    print(f"    schema:    {Path(schema).relative_to(cwd)}")
+    print(f"    instance:  {Path(instance).relative_to(cwd)}")
+    for error in errors:
+        indent = " " * 10
+        inst_text = json.dumps(error.instance, indent=2)[:120]
+        print("""     - data:""")
+        print(textwrap.indent(inst_text, indent))
+        print(f"""       schema path: #/{"/".join(error.relative_schema_path)}""")
+        print(f"""       path:        #/{"/".join(error.relative_path)}""")
+        print("""       message:""")
+        print(textwrap.indent(error.message, indent))
+    print(f"!!! schema validation failed {len(errors)}")
+    return False
+
+
+def template(src: str, dest: str, **context: Any) -> None:
+    import jinja2
+
+    template = jinja2.Template(Path(src).read_text(**UTF8))
+    dest_path = Path(dest)
+    dest_path.parent.mkdir(parents=True, exist_ok=True)
+    lines = template.render({k: v[0] for k, v in context.items()}).splitlines()
+    lines = [line for line in lines if line.strip() != "#"]
+    dest_path.write_text("\n".join(lines))
+    load_one(dest)

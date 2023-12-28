@@ -19,7 +19,11 @@ a custom action
 
 
 CommandTokens = Dict[str, List[str]]
-""" command tokens. """
+"""
+command tokens.
+
+command tokens which may be expanded as paths
+"""
 
 
 class DoitomlMetadataa(TypedDict, total=False):
@@ -27,55 +31,72 @@ class DoitomlMetadataa(TypedDict, total=False):
     """doitoml Metadataa."""
 
     cwd: Required[str]
-    """ Required property """
 
     env: "EnvironmentVariables"
-    """ environment variables. """
 
-    log: Required[List["_DoitomlMetadataaLogItem"]]
-    """ Required property """
+    log: Required[List["_DoitomlLogItem"]]
 
     skip: Union[str, Union[int, float], None, Dict[str, Any]]
-    """ Aggregation type: oneOf """
 
     source: Required[str]
+    """ Required property """
+    """
+    environment variables.
+
+    environment variables shared among all tasks
+    """
+    """ Required property """
+    """ Aggregation type: oneOf """
     """ Required property """
 
 
 class DoitomlSchema(TypedDict, total=False):
 
-    """doitoml Schema.
+    """doitoml schema.
 
     schema for ``doitoml`` configuration
     """
 
     env: Required["EnvironmentVariables"]
-    """
-    environment variables.
-
-    Required property
-    """
 
     paths: Required["PathTokens"]
-    """
-    path tokens.
-
-    Required property
-    """
 
     tasks: Required[Dict[str, "Task"]]
-    """ Required property """
+
+    templates: Dict[str, Any]
 
     tokens: Required["CommandTokens"]
     """
+    environment variables.
+
+    environment variables shared among all tasks
+
+    Required property
+    """
+    """
+    path tokens.
+
+    paths to expand and normalize, relative to the current working directory
+
+    Required property
+    """
+    """ Required property """
+    """ extensible task generators """
+    """
     command tokens.
+
+    command tokens which may be expanded as paths
 
     Required property
     """
 
 
 EnvironmentVariables = Dict[str, str]
-""" environment variables. """
+"""
+environment variables.
+
+environment variables shared among all tasks
+"""
 
 
 class Metadata(TypedDict, total=False):
@@ -87,7 +108,11 @@ class Metadata(TypedDict, total=False):
 
 
 PathTokens = Dict[str, List["_ArrayOfPathsItem"]]
-""" path tokens. """
+"""
+path tokens.
+
+paths to expand and normalize, relative to the current working directory
+"""
 
 
 ShellAction = str
@@ -103,7 +128,6 @@ class Task(TypedDict, total=False):
     doc: str
     file_dep: List["_ArrayOfPathsItem"]
     meta: "Metadata"
-    """ Metadata. """
 
     name: str
     targets: List["_ArrayOfPathsItem"]
@@ -111,6 +135,7 @@ class Task(TypedDict, total=False):
     uptodate: List["Uptodate"]
     verbosity: "_TaskVerbosity"
     watch: List["_ArrayOfPathsItem"]
+    """ Metadata. """
 
 
 TokenAction = List[str]
@@ -129,7 +154,7 @@ _ArrayOfPathsItem = str
 """ minLength: 1 """
 
 
-_DoitomlMetadataaLogItem = Union[str, None]
+_DoitomlLogItem = Union[str, None]
 """ Aggregation type: oneOf """
 
 

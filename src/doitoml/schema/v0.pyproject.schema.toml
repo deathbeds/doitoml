@@ -1,0 +1,41 @@
+"$id" = "https://doitoml.rtfd.io/en/latest/schema/v0.pyproject.schema.json#"
+"$ref" = "#/definitions/pyproject"
+"$schema" = "http://json-schema.org/draft-07/schema#"
+description = "a partial schema for pyproject.toml"
+
+[definitions.pyproject]
+description = "a minimal partial python project that uses doit and/or doitoml"
+type = "object"
+
+[definitions.pyproject.properties]
+tool = {"$ref" = "#/definitions/tool"}
+
+[definitions.tool]
+description = "the community namespace for non-build-related data"
+type = "object"
+
+[definitions.tool.properties]
+doit = {"$ref" = "#/definitions/tool-doit"}
+doitoml = {"$ref" = "#/definitions/tool-doitoml"}
+
+[definitions.tool-doit]
+description = "doit configuration"
+type = "object"
+
+[definitions.tool-doit.properties]
+backend = {type = "string"}
+verbosity = {type = "number", enum = [0, 1, 2]}
+par_type = {type = "string"}
+commands = {"$ref" = "#/definitions/tool-doit-commands"}
+
+[definitions.tool-doit-commands]
+type = "object"
+description = "future work should extract the _actual_ built-in doit option schema"
+
+[definitions.tool-doit-commands.properties.list]
+type = "object"
+status = {type = "boolean"}
+subtasks = {type = "boolean"}
+
+[definitions.tool-doitoml]
+"$ref" = "https://doitoml.rtfd.io/en/latest/schema/v0.schema.json#/definitions/config"

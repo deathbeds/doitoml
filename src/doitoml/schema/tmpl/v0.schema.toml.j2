@@ -1,0 +1,211 @@
+# {% set doit = state == "doit" %}
+# {% set ppt = state == "pyproject" %}
+# {% set pj = state == "jspackage" %}
+"$id" = "https://doitoml.rtfd.io/en/latest/schema/v0.{{ state }}.schema.json#"
+"$schema" = "http://json-schema.org/draft-07/schema#"
+
+# {%- if doit %}
+"$ref" = "#/definitions/config"
+description = "``doitoml`` configuration after full expansion"
+# {%- elif ppt %}
+"$ref" = "#/definitions/pyproject"
+description = "``doitoml`` and ``doit`` configuration for ``pyproject.toml``"
+# {%- elif pj %}
+"$ref" = "#/definitions/jspackage"
+description = "``doitoml`` and ``doit`` configuration for ``package.json``"
+# {%- endif %}
+
+[definitions.config]
+title = "doitoml schema"
+description = "schema for ``doitoml`` configuration"
+type = "object"
+additionalProperties = false
+# {% if doit %}
+required = [
+  "tasks",
+  "tokens",
+  "env",
+  "paths",
+]
+# {% endif %}
+
+[definitions.config.properties]
+tokens = {"$ref" = "#/definitions/tokens", description = "named command tokens"}
+env = {"$ref" = "#/definitions/env", description = "environment variables"}
+paths = {"$ref" = "#/definitions/paths", description = "named paths"}
+tasks = {"$ref" = "#/definitions/tasks", description = "named tasks"}
+templates = {type = "object", description = "extensible task generators"}
+# {% if not doit %}
+config_paths = {type = "array", items = {type = "string"}, description = "additional doitoml config files, which may use ``get``"}
+prefix = {type = "string", description = "a prefix to add to all tasks, tokens, and paths from this config file"}
+validate = {type = "boolean", description = "whether to apply schema validation before and after all transforms"}
+fail_quietly = {type = "boolean", description = "whether to ignore configuration errors"}
+# {% endif %}
+
+[definitions.array-of-strings]
+type = "array"
+items = {type = "string"}
+
+[definitions.array-of-paths]
+type = "array"
+items = {type = "string", minLength = 1}
+
+[definitions.tasks]
+type = "object"
+additionalProperties = {"$ref" = "#/definitions/task"}
+
+[definitions.task]
+title = "Task"
+type = "object"
+
+[definitions.task.properties]
+actions = {"$ref" = "#/definitions/actions"}
+calc_dep = {"$ref" = "#/definitions/array-of-paths"}
+doc = {type = "string"}
+file_dep = {"$ref" = "#/definitions/array-of-paths"}
+meta = {"$ref" = "#/definitions/meta"}
+name = {type = "string"}
+targets = {"$ref" = "#/definitions/array-of-paths"}
+title = {type = "string"}
+uptodate = {"$ref" = "#/definitions/uptodates"}
+verbosity = {type = "number", enum = [1, 2, 3]}
+watch = {"$ref" = "#/definitions/array-of-paths"}
+
+[definitions.meta]
+title = "Metadata"
+type = "object"
+properties = {doitoml = {"$ref" = "#/definitions/meta-doitoml"}}
+
+[definitions.meta-doitoml]
+title = "doitoml Metadataa"
+type = "object"
+additionalProperties = false
+# {% if doit %}
+required = ["cwd", "log", "source"]
+# {% endif %}
+
+[definitions.meta-doitoml.properties]
+cwd = {type = "string"}
+env = {"$ref" = "#/definitions/env"}
+skip = {oneOf = [
+  {type = "string"},
+  {type = "number"},
+  {type = "null"},
+  {type = "object"},
+]}
+# {% if doit %}
+source = {type = "string"}
+# {% endif %}
+log = {"$ref" = "#/definitions/doitoml-log"}
+
+[definitions.doitoml-log]
+# {% if doit %}
+type = "array"
+items = {oneOf = [{type = "string"}, {type = "null"}]}
+# {% else %}
+oneOf = [
+  {type="string"},
+  {type="array", items = {oneOf = [{type = "string"}, {type = "null"}]}}
+]
+# {% endif %}
+
+[definitions.actions]
+type = "array"
+items = {"$ref" = "#/definitions/action"}
+
+[definitions.action]
+title = "action"
+oneOf = [
+  {"$ref" = "#/definitions/action-shell"},
+  {"$ref" = "#/definitions/action-token"},
+  {"$ref" = "#/definitions/action-actor"},
+]
+
+[definitions.uptodates]
+type = "array"
+items = {"$ref" = "#/definitions/uptodate"}
+
+[definitions.uptodate]
+title = "uptodate"
+oneOf = [{type = "boolean"}, {type = "string"}, {type = "object"}, {type = "null"}]
+
+[definitions.action-token]
+title = "token action"
+type = "array"
+items = {type = "string"}
+
+[definitions.action-shell]
+title = "shell action"
+type = "string"
+
+[definitions.action-actor]
+title = "actor action"
+description = "a custom action"
+type = "object"
+
+[definitions.tokens]
+title = "command tokens"
+description = "command tokens which may be expanded as paths"
+type = "object"
+additionalProperties = {"$ref" = "#/definitions/array-of-strings"}
+
+[definitions.env]
+title = "environment variables"
+description = "environment variables shared among all tasks"
+type = "object"
+additionalProperties = {type = "string"}
+
+[definitions.paths]
+title = "path tokens"
+description = "paths to expand and normalize, relative to the current working directory"
+type = "object"
+additionalProperties = {"$ref" = "#/definitions/array-of-paths"}
+
+# {% if ppt %}
+[definitions.pyproject]
+description = "a minimal partial python project that uses doit and/or doitoml"
+type = "object"
+
+[definitions.pyproject.properties]
+tool = {"$ref" = "#/definitions/tool"}
+
+[definitions.tool]
+description = "the community namespace for non-build-related data"
+type = "object"
+
+[definitions.tool.properties]
+doit = {"$ref" = "#/definitions/tool-doit"}
+doitoml = {"$ref" = "#/definitions/tool-doitoml"}
+
+[definitions.tool-doit]
+description = "doit configuration"
+type = "object"
+
+[definitions.tool-doit.properties]
+backend = {type = "string"}
+verbosity = {type = "number", enum = [0, 1, 2]}
+par_type = {type = "string"}
+commands = {"$ref" = "#/definitions/tool-doit-commands"}
+
+[definitions.tool-doit-commands]
+type = "object"
+description = "future work should extract the _actual_ built-in doit option schema"
+
+[definitions.tool-doit-commands.properties.list]
+description = "customization for the ``doit list`` subcommand"
+type = "object"
+status = {type = "boolean"}
+subtasks = {type = "boolean"}
+
+[definitions.tool-doitoml]
+"$ref" = "#/definitions/config"
+# {% endif %}
+
+# {% if pj %}
+[definitions.jspackage]
+type = "object"
+description = "an npm-compatible package.json for a JS package"
+
+[definitions.jspackage.properties.doitoml]
+"$ref" = "#/definitions/config"
+# {% endif %}

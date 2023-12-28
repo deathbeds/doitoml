@@ -1,0 +1,141 @@
+"$id" = "https://doitoml.rtfd.io/en/latest/schema/v0.jspackage.schema.json#"
+"$schema" = "http://json-schema.org/draft-07/schema#"
+
+"$ref" = "#/definitions/jspackage"
+description = "``doitoml`` and ``doit`` configuration for ``package.json``"
+
+[definitions.config]
+title = "doitoml schema"
+description = "schema for ``doitoml`` configuration"
+type = "object"
+additionalProperties = false
+
+[definitions.config.properties]
+tokens = {"$ref" = "#/definitions/tokens", description = "named command tokens"}
+env = {"$ref" = "#/definitions/env", description = "environment variables"}
+paths = {"$ref" = "#/definitions/paths", description = "named paths"}
+tasks = {"$ref" = "#/definitions/tasks", description = "named tasks"}
+templates = {type = "object", description = "extensible task generators"}
+config_paths = {type = "array", items = {type = "string"}, description = "additional doitoml config files, which may use ``get``"}
+prefix = {type = "string", description = "a prefix to add to all tasks, tokens, and paths from this config file"}
+validate = {type = "boolean", description = "whether to apply schema validation before and after all transforms"}
+fail_quietly = {type = "boolean", description = "whether to ignore configuration errors"}
+
+[definitions.array-of-strings]
+type = "array"
+items = {type = "string"}
+
+[definitions.array-of-paths]
+type = "array"
+items = {type = "string", minLength = 1}
+
+[definitions.tasks]
+type = "object"
+additionalProperties = {"$ref" = "#/definitions/task"}
+
+[definitions.task]
+title = "Task"
+type = "object"
+
+[definitions.task.properties]
+actions = {"$ref" = "#/definitions/actions"}
+calc_dep = {"$ref" = "#/definitions/array-of-paths"}
+doc = {type = "string"}
+file_dep = {"$ref" = "#/definitions/array-of-paths"}
+meta = {"$ref" = "#/definitions/meta"}
+name = {type = "string"}
+targets = {"$ref" = "#/definitions/array-of-paths"}
+title = {type = "string"}
+uptodate = {"$ref" = "#/definitions/uptodates"}
+verbosity = {type = "number", enum = [1, 2, 3]}
+watch = {"$ref" = "#/definitions/array-of-paths"}
+
+[definitions.meta]
+title = "Metadata"
+type = "object"
+properties = {doitoml = {"$ref" = "#/definitions/meta-doitoml"}}
+
+[definitions.meta-doitoml]
+title = "doitoml Metadataa"
+type = "object"
+additionalProperties = false
+
+[definitions.meta-doitoml.properties]
+cwd = {type = "string"}
+env = {"$ref" = "#/definitions/env"}
+skip = {oneOf = [
+  {type = "string"},
+  {type = "number"},
+  {type = "null"},
+  {type = "object"},
+]}
+log = {"$ref" = "#/definitions/doitoml-log"}
+
+[definitions.doitoml-log]
+oneOf = [
+  {type = "string"},
+  {type = "array", items = {oneOf = [
+    {type = "string"},
+    {type = "null"},
+  ]}},
+]
+
+[definitions.actions]
+type = "array"
+items = {"$ref" = "#/definitions/action"}
+
+[definitions.action]
+title = "action"
+oneOf = [
+  {"$ref" = "#/definitions/action-shell"},
+  {"$ref" = "#/definitions/action-token"},
+  {"$ref" = "#/definitions/action-actor"},
+]
+
+[definitions.uptodates]
+type = "array"
+items = {"$ref" = "#/definitions/uptodate"}
+
+[definitions.uptodate]
+title = "uptodate"
+oneOf = [{type = "boolean"}, {type = "string"}, {type = "object"}, {type = "null"}]
+
+[definitions.action-token]
+title = "token action"
+type = "array"
+items = {type = "string"}
+
+[definitions.action-shell]
+title = "shell action"
+type = "string"
+
+[definitions.action-actor]
+title = "actor action"
+description = "a custom action"
+type = "object"
+
+[definitions.tokens]
+title = "command tokens"
+description = "command tokens which may be expanded as paths"
+type = "object"
+additionalProperties = {"$ref" = "#/definitions/array-of-strings"}
+
+[definitions.env]
+title = "environment variables"
+description = "environment variables shared among all tasks"
+type = "object"
+additionalProperties = {type = "string"}
+
+[definitions.paths]
+title = "path tokens"
+description = "paths to expand and normalize, relative to the current working directory"
+type = "object"
+additionalProperties = {"$ref" = "#/definitions/array-of-paths"}
+
+
+[definitions.jspackage]
+type = "object"
+description = "an npm-compatible package.json for a JS package"
+
+[definitions.jspackage.properties.doitoml]
+"$ref" = "#/definitions/config"
