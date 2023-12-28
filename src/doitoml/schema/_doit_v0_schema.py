@@ -26,9 +26,9 @@ command tokens which may be expanded as paths
 """
 
 
-class DoitomlMetadataa(TypedDict, total=False):
+class DoitomlMetadata(TypedDict, total=False):
 
-    """doitoml Metadataa."""
+    """doitoml Metadata."""
 
     cwd: Required[str]
 
@@ -103,8 +103,8 @@ class Metadata(TypedDict, total=False):
 
     """Metadata."""
 
-    doitoml: "DoitomlMetadataa"
-    """ doitoml Metadataa. """
+    doitoml: "DoitomlMetadata"
+    """ doitoml Metadata. """
 
 
 PathTokens = Dict[str, List["_DefinitionsArrayOfPathsItem"]]

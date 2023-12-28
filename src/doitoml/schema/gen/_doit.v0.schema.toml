@@ -53,7 +53,7 @@ type = "object"
 properties = {doitoml = {"$ref" = "#/definitions/meta-doitoml"}}
 
 [definitions.meta-doitoml]
-title = "doitoml Metadataa"
+title = "doitoml Metadata"
 type = "object"
 additionalProperties = false
 required = ["cwd", "log", "source"]
