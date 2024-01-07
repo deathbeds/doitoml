@@ -126,7 +126,7 @@ class Config:
                 "tokens": {":".join(k): v for k, v in self.tokens.items()},
                 "paths": {":".join(k): v for k, v in self.paths.items()},
                 "templates": self.templates,
-                "tasks": {":".join(k): v for k, v in self.tasks.items()},
+                "tasks": {":".join(map(str, k)): v for k, v in self.tasks.items()},
             },
         )
 

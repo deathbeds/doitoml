@@ -146,6 +146,7 @@ par_type = "thread"
 
 [tool.doit.commands.list]
 status = true
+subtasks = true
 
 [tool.ruff]
 ignore = [

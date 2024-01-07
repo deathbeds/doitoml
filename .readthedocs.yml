@@ -5,6 +5,7 @@ build:
     python: mambaforge-22.9
   jobs:
     pre_build:
+      - doit list
       - doit bootstrap
       - doit list
       - doit build:source_date_epoch
