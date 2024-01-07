@@ -4,6 +4,7 @@ typing-extensions
 # extras
 jsonschema[format]
 pyyaml
+jinja2
 # build
 build
 flit >=3.8,<4
