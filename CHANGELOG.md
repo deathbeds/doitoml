@@ -3,8 +3,10 @@
 ## 0.2.1 (unreleased)
 
 - [#15] normalizes path drive letters on windows
+- [#18] adds better support for writing `doitoml` in `pyproject.toml` and `package.json`
 
 [#15]: https://github.com/deathbeds/doitoml/issues/15
+[#18]: https://github.com/deathbeds/doitoml/issues/18
 
 ## 0.2.0
 
