@@ -9,7 +9,7 @@ from typing import Any, Dict, Literal, Optional
 
 from doitoml.constants import UTF8
 
-PARSER = ArgumentParser()
+PARSER = ArgumentParser("doitoml-schema-dump")
 PARSER.add_argument(
     "-t",
     "--type",

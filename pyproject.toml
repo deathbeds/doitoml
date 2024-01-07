@@ -244,6 +244,7 @@ SOURCE_DATE_EPOCH = ":get|0::json::build/source_date_epoch.json::SOURCE_DATE_EPO
 DOITOML_SKIP_CODEGEN = "0"
 COV_FAIL_UNDER = "100"
 JUPYTER_PLATFORM_DIRS = "1"
+PYDEVD_DISABLE_FILE_VALIDATION = "1"
 
 [tool.doitoml.tokens]
 sphinx_opts = ["-b", "html", "docs", "build/docs"]

@@ -1,7 +1,8 @@
 # {% set doit = state == "doit" %}
 # {% set ppt = state == "pyproject" %}
 # {% set pj = state == "jspackage" %}
-"$id" = "https://doitoml.rtfd.io/en/latest/schema/v0.{{ state }}.schema.json#"
+
+"$id" = "https://doitoml.rtfd.io/en/latest/schema/_{{ state }}v0.schema.json#"
 "$schema" = "https://json-schema.org/draft/2019-09/schema"
 
 # {%- if doit %}

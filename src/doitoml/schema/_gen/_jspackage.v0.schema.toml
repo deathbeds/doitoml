@@ -1,4 +1,5 @@
-"$id" = "https://doitoml.rtfd.io/en/latest/schema/v0.jspackage.schema.json#"
+
+"$id" = "https://doitoml.rtfd.io/en/latest/schema/_jspackagev0.schema.json#"
 "$schema" = "https://json-schema.org/draft/2019-09/schema"
 
 "$ref" = "#/definitions/jspackage"
