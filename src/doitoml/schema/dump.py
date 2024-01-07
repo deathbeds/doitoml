@@ -32,7 +32,7 @@ PARSER.add_argument(
     dest="format_",
 )
 
-GEN = Path(__file__).parent / "gen"
+GEN = Path(__file__).parent / "_gen"
 
 TYPE_SCHEMA_PATH = {
     "pyproject.toml": GEN / "_pyproject.v0.schema.json",
@@ -102,5 +102,5 @@ def main(args: DumpArgs) -> int:
     return 0
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     sys.exit(main(DumpArgs(**vars(PARSER.parse_args()))))
