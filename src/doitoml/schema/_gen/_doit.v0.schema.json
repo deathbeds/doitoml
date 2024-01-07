@@ -165,9 +165,11 @@
       "type": "object"
     },
     "task": {
+      "description": "a doit task",
       "properties": {
         "actions": {
-          "$ref": "#/definitions/actions"
+          "$ref": "#/definitions/actions",
+          "description": "actions to perform as strings, lists of tokens, or custom objects"
         },
         "calc_dep": {
           "$ref": "#/definitions/array-of-paths"
@@ -194,12 +196,7 @@
           "$ref": "#/definitions/uptodates"
         },
         "verbosity": {
-          "enum": [
-            1,
-            2,
-            3
-          ],
-          "type": "number"
+          "$ref": "#/definitions/verbosity"
         },
         "watch": {
           "$ref": "#/definitions/array-of-paths"
@@ -212,6 +209,7 @@
       "additionalProperties": {
         "$ref": "#/definitions/task"
       },
+      "description": "doit tasks",
       "type": "object"
     },
     "tokens": {
@@ -244,6 +242,15 @@
         "$ref": "#/definitions/uptodate"
       },
       "type": "array"
+    },
+    "verbosity": {
+      "description": "level of console output to show. 0 shows no output, 1 shows error output, 2 shows all output",
+      "enum": [
+        0,
+        1,
+        2
+      ],
+      "type": "number"
     }
   },
   "description": "``doitoml`` configuration after full expansion"

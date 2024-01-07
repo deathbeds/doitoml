@@ -38,7 +38,7 @@ class Version:
 
     def __init__(self, version: str) -> None:
         """Initialize a validator."""
-        self.path = HERE / f"gen/_doit.v{version}.schema.toml"
+        self.path = HERE / f"_gen/_doit.v{version}.schema.toml"
         self._schema = None
         self._validator = None
 

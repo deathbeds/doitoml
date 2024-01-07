@@ -1,14 +1,15 @@
-"$id" = "https://doitoml.rtfd.io/en/latest/schema/v0.pyproject.schema.json#"
+"$id" = "https://doitoml.rtfd.io/en/latest/schema/v0.doit.schema.json#"
 "$schema" = "https://json-schema.org/draft/2019-09/schema"
 
-"$ref" = "#/definitions/pyproject"
-description = "``doitoml`` and ``doit`` configuration for ``pyproject.toml``"
+"$ref" = "#/definitions/config"
+description = "``doitoml`` configuration after full expansion"
 
 [definitions.config]
 title = "doitoml schema"
 description = "schema for ``doitoml`` configuration"
 type = "object"
 additionalProperties = false
+required = ["tasks", "tokens", "env", "paths"]
 
 [definitions.config.properties]
 tokens = {"$ref" = "#/definitions/tokens", description = "named command tokens"}
@@ -16,10 +17,6 @@ env = {"$ref" = "#/definitions/env", description = "environment variables"}
 paths = {"$ref" = "#/definitions/paths", description = "named paths"}
 tasks = {"$ref" = "#/definitions/tasks", description = "named tasks"}
 templates = {type = "object", description = "extensible task generators"}
-config_paths = {type = "array", items = {type = "string"}, description = "additional doitoml config files, which may use ``get``"}
-prefix = {type = "string", description = "a prefix to add to all tasks, tokens, and paths from this config file"}
-validate = {type = "boolean", description = "whether to apply schema validation before and after all transforms"}
-fail_quietly = {type = "boolean", description = "whether to ignore configuration errors"}
 
 [definitions.array-of-strings]
 type = "array"
@@ -31,14 +28,16 @@ items = {type = "string", minLength = 1}
 
 [definitions.tasks]
 type = "object"
+description = "doit tasks"
 additionalProperties = {"$ref" = "#/definitions/task"}
 
 [definitions.task]
 title = "Task"
+description = "a doit task"
 type = "object"
 
 [definitions.task.properties]
-actions = {"$ref" = "#/definitions/actions"}
+actions = {"$ref" = "#/definitions/actions", description = "actions to perform as strings, lists of tokens, or custom objects"}
 calc_dep = {"$ref" = "#/definitions/array-of-paths"}
 doc = {type = "string"}
 file_dep = {"$ref" = "#/definitions/array-of-paths"}
@@ -47,7 +46,7 @@ name = {type = "string"}
 targets = {"$ref" = "#/definitions/array-of-paths"}
 title = {type = "string"}
 uptodate = {"$ref" = "#/definitions/uptodates"}
-verbosity = {type = "number", enum = [1, 2, 3]}
+verbosity = {"$ref" = "#/definitions/verbosity"}
 watch = {"$ref" = "#/definitions/array-of-paths"}
 
 [definitions.meta]
@@ -59,6 +58,7 @@ properties = {doitoml = {"$ref" = "#/definitions/meta-doitoml"}}
 title = "doitoml Metadata"
 type = "object"
 additionalProperties = false
+required = ["cwd", "log", "source"]
 
 [definitions.meta-doitoml.properties]
 cwd = {type = "string"}
@@ -69,16 +69,12 @@ skip = {oneOf = [
   {type = "null"},
   {type = "object"},
 ]}
+source = {type = "string"}
 log = {"$ref" = "#/definitions/doitoml-log"}
 
 [definitions.doitoml-log]
-oneOf = [
-  {type = "string"},
-  {type = "array", items = {oneOf = [
-    {type = "string"},
-    {type = "null"},
-  ]}},
-]
+type = "array"
+items = {oneOf = [{type = "string"}, {type = "null"}]}
 
 [definitions.actions]
 type = "array"
@@ -132,40 +128,7 @@ description = "paths to expand and normalize, relative to the current working di
 type = "object"
 additionalProperties = {"$ref" = "#/definitions/array-of-paths"}
 
-[definitions.pyproject]
-description = "a minimal partial python project that uses doit and/or doitoml"
-type = "object"
-
-[definitions.pyproject.properties]
-tool = {"$ref" = "#/definitions/tool"}
-
-[definitions.tool]
-description = "the community namespace for non-build-related data"
-type = "object"
-
-[definitions.tool.properties]
-doit = {"$ref" = "#/definitions/tool-doit"}
-doitoml = {"$ref" = "#/definitions/tool-doitoml"}
-
-[definitions.tool-doit]
-description = "doit configuration"
-type = "object"
-
-[definitions.tool-doit.properties]
-backend = {type = "string"}
-verbosity = {type = "number", enum = [0, 1, 2]}
-par_type = {type = "string"}
-commands = {"$ref" = "#/definitions/tool-doit-commands"}
-
-[definitions.tool-doit-commands]
-type = "object"
-description = "future work should extract the _actual_ built-in doit option schema"
-
-[definitions.tool-doit-commands.properties.list]
-description = "customization for the ``doit list`` subcommand"
-type = "object"
-status = {type = "boolean"}
-subtasks = {type = "boolean"}
-
-[definitions.tool-doitoml]
-"$ref" = "#/definitions/config"
+[definitions.verbosity]
+type = "number"
+description = "level of console output to show. 0 shows no output, 1 shows error output, 2 shows all output"
+enum = [0, 1, 2]

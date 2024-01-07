@@ -31,14 +31,16 @@ items = {type = "string", minLength = 1}
 
 [definitions.tasks]
 type = "object"
+description = "doit tasks"
 additionalProperties = {"$ref" = "#/definitions/task"}
 
 [definitions.task]
 title = "Task"
+description = "a doit task"
 type = "object"
 
 [definitions.task.properties]
-actions = {"$ref" = "#/definitions/actions"}
+actions = {"$ref" = "#/definitions/actions", description = "actions to perform as strings, lists of tokens, or custom objects"}
 calc_dep = {"$ref" = "#/definitions/array-of-paths"}
 doc = {type = "string"}
 file_dep = {"$ref" = "#/definitions/array-of-paths"}
@@ -47,7 +49,7 @@ name = {type = "string"}
 targets = {"$ref" = "#/definitions/array-of-paths"}
 title = {type = "string"}
 uptodate = {"$ref" = "#/definitions/uptodates"}
-verbosity = {type = "number", enum = [1, 2, 3]}
+verbosity = {"$ref" = "#/definitions/verbosity"}
 watch = {"$ref" = "#/definitions/array-of-paths"}
 
 [definitions.meta]
@@ -131,6 +133,11 @@ title = "path tokens"
 description = "paths to expand and normalize, relative to the current working directory"
 type = "object"
 additionalProperties = {"$ref" = "#/definitions/array-of-paths"}
+
+[definitions.verbosity]
+type = "number"
+description = "level of console output to show. 0 shows no output, 1 shows error output, 2 shows all output"
+enum = [0, 1, 2]
 
 
 [definitions.jspackage]

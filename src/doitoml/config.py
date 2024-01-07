@@ -37,7 +37,7 @@ from .errors import (
     UnresolvedError,
     UnsafePathError,
 )
-from .schema._doit_v0_schema import DoitomlSchema
+from .schema._gen._doit_v0_schema import DoitomlSchema
 from .sources._config import ConfigParser, ConfigSource
 from .sources._source import Source
 from .types import (

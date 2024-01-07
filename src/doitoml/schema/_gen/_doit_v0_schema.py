@@ -61,7 +61,7 @@ class DoitomlSchema(TypedDict, total=False):
 
     paths: Required["PathTokens"]
 
-    tasks: Required[Dict[str, "Task"]]
+    tasks: Required["_DefinitionsTasks"]
 
     templates: Dict[str, Any]
 
@@ -80,7 +80,11 @@ class DoitomlSchema(TypedDict, total=False):
 
     Required property
     """
-    """ Required property """
+    """
+    doit tasks
+
+    Required property
+    """
     """ extensible task generators """
     """
     command tokens.
@@ -121,7 +125,10 @@ ShellAction = str
 
 class Task(TypedDict, total=False):
 
-    """Task."""
+    """Task.
+
+    a doit task
+    """
 
     actions: List["Action"]
     calc_dep: List["_DefinitionsArrayOfPathsItem"]
@@ -133,9 +140,11 @@ class Task(TypedDict, total=False):
     targets: List["_DefinitionsArrayOfPathsItem"]
     title: str
     uptodate: List["Uptodate"]
-    verbosity: "_TaskVerbosity"
+    verbosity: "_DefinitionsVerbosity"
+
     watch: List["_DefinitionsArrayOfPathsItem"]
     """ Metadata. """
+    """ level of console output to show. 0 shows no output, 1 shows error output, 2 shows all output """
 
 
 TokenAction = List[str]
@@ -158,10 +167,15 @@ _DefinitionsDoitomlLogItem = Union[str, None]
 """ Aggregation type: oneOf """
 
 
-_TaskVerbosity = Union[Literal[1], Literal[2], Literal[3]]
-_TASKVERBOSITY_1: Literal[1] = 1
-"""The values for the '_TaskVerbosity' enum"""
-_TASKVERBOSITY_2: Literal[2] = 2
-"""The values for the '_TaskVerbosity' enum"""
-_TASKVERBOSITY_3: Literal[3] = 3
-"""The values for the '_TaskVerbosity' enum"""
+_DefinitionsTasks = Dict[str, "Task"]
+""" doit tasks """
+
+
+_DefinitionsVerbosity = Union[Literal[0], Literal[1], Literal[2]]
+""" level of console output to show. 0 shows no output, 1 shows error output, 2 shows all output """
+_DEFINITIONSVERBOSITY_0: Literal[0] = 0
+"""The values for the 'level of console output to show. 0 shows no output, 1 shows error output, 2 shows all output' enum"""
+_DEFINITIONSVERBOSITY_1: Literal[1] = 1
+"""The values for the 'level of console output to show. 0 shows no output, 1 shows error output, 2 shows all output' enum"""
+_DEFINITIONSVERBOSITY_2: Literal[2] = 2
+"""The values for the 'level of console output to show. 0 shows no output, 1 shows error output, 2 shows all output' enum"""

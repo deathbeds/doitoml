@@ -1,6 +1,6 @@
 {
-  "$id": "https://doitoml.rtfd.io/en/latest/schema/v0.pyproject.schema.json#",
-  "$ref": "#/definitions/pyproject",
+  "$id": "https://doitoml.rtfd.io/en/latest/schema/v0.jspackage.schema.json#",
+  "$ref": "#/definitions/jspackage",
   "$schema": "https://json-schema.org/draft/2019-09/schema",
   "definitions": {
     "action": {
@@ -127,6 +127,15 @@
       "title": "environment variables",
       "type": "object"
     },
+    "jspackage": {
+      "description": "an npm-compatible package.json for a JS package",
+      "properties": {
+        "doitoml": {
+          "$ref": "#/definitions/config"
+        }
+      },
+      "type": "object"
+    },
     "meta": {
       "properties": {
         "doitoml": {
@@ -176,19 +185,12 @@
       "title": "path tokens",
       "type": "object"
     },
-    "pyproject": {
-      "description": "a minimal partial python project that uses doit and/or doitoml",
-      "properties": {
-        "tool": {
-          "$ref": "#/definitions/tool"
-        }
-      },
-      "type": "object"
-    },
     "task": {
+      "description": "a doit task",
       "properties": {
         "actions": {
-          "$ref": "#/definitions/actions"
+          "$ref": "#/definitions/actions",
+          "description": "actions to perform as strings, lists of tokens, or custom objects"
         },
         "calc_dep": {
           "$ref": "#/definitions/array-of-paths"
@@ -215,12 +217,7 @@
           "$ref": "#/definitions/uptodates"
         },
         "verbosity": {
-          "enum": [
-            1,
-            2,
-            3
-          ],
-          "type": "number"
+          "$ref": "#/definitions/verbosity"
         },
         "watch": {
           "$ref": "#/definitions/array-of-paths"
@@ -233,6 +230,7 @@
       "additionalProperties": {
         "$ref": "#/definitions/task"
       },
+      "description": "doit tasks",
       "type": "object"
     },
     "tokens": {
@@ -242,60 +240,6 @@
       "description": "command tokens which may be expanded as paths",
       "title": "command tokens",
       "type": "object"
-    },
-    "tool": {
-      "description": "the community namespace for non-build-related data",
-      "properties": {
-        "doit": {
-          "$ref": "#/definitions/tool-doit"
-        },
-        "doitoml": {
-          "$ref": "#/definitions/tool-doitoml"
-        }
-      },
-      "type": "object"
-    },
-    "tool-doit": {
-      "description": "doit configuration",
-      "properties": {
-        "backend": {
-          "type": "string"
-        },
-        "commands": {
-          "$ref": "#/definitions/tool-doit-commands"
-        },
-        "par_type": {
-          "type": "string"
-        },
-        "verbosity": {
-          "enum": [
-            0,
-            1,
-            2
-          ],
-          "type": "number"
-        }
-      },
-      "type": "object"
-    },
-    "tool-doit-commands": {
-      "description": "future work should extract the _actual_ built-in doit option schema",
-      "properties": {
-        "list": {
-          "description": "customization for the ``doit list`` subcommand",
-          "status": {
-            "type": "boolean"
-          },
-          "subtasks": {
-            "type": "boolean"
-          },
-          "type": "object"
-        }
-      },
-      "type": "object"
-    },
-    "tool-doitoml": {
-      "$ref": "#/definitions/config"
     },
     "uptodate": {
       "oneOf": [
@@ -319,7 +263,16 @@
         "$ref": "#/definitions/uptodate"
       },
       "type": "array"
+    },
+    "verbosity": {
+      "description": "level of console output to show. 0 shows no output, 1 shows error output, 2 shows all output",
+      "enum": [
+        0,
+        1,
+        2
+      ],
+      "type": "number"
     }
   },
-  "description": "``doitoml`` and ``doit`` configuration for ``pyproject.toml``"
+  "description": "``doitoml`` and ``doit`` configuration for ``package.json``"
 }

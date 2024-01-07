@@ -1,4 +1,4 @@
-"$schema" = "file://./src/doitoml/schema/gen/_pyproject.v0.schema.json"
+"$schema" = "file://./src/doitoml/schema/_gen/_pyproject.v0.schema.json"
 
 [build-system]
 build-backend = "flit_core.buildapi"
@@ -146,7 +146,6 @@ par_type = "thread"
 
 [tool.doit.commands.list]
 status = true
-subtasks = true
 
 [tool.ruff]
 ignore = [
@@ -228,7 +227,7 @@ select = [
 "jinja2.py" = ["ARG002"]
 "test/**/*.py" = ["S101", "T201", "T203"]
 "lite/*.py" = ["D205", "INP001", "E402", "ANN201", "D103", "T201", "ANN001", "D100"]
-"_*schema.py" = ["PYI030"]
+"_*schema.py" = ["PYI030", "E501"]
 
 [tool.doitoml]
 prefix = ""
@@ -301,8 +300,8 @@ all_pj = [
   ":glob::lite/playground-examples::*/package.json",
 ]
 all_schema_toml_j2 = [":rglob::src/doitoml/schema/tmpl::*.schema.toml.j2"]
-all_schema_toml = [":rglob::src/doitoml/schema/gen::*.schema.toml"]
-all_schema_json = [":rglob::src/doitoml/schema/gen::*.schema.json"]
+all_schema_toml = [":rglob::src/doitoml/schema/_gen::*.schema.toml"]
+all_schema_json = [":rglob::src/doitoml/schema/_gen::*.schema.json"]
 all_demo_toml = [":rglob::lite::*.toml::!.ipynb_checkpoints"]
 all_toml = ["::all_ppt", "::all_schema_toml", "::all_demo_toml"]
 all_py_dist = ["::ppt", "::py_src", "README.md", "LICENSE.txt"]
@@ -319,11 +318,11 @@ all_md = [":glob::.::*.md", ":rglob::docs::*.md::!ipynb_checkpoints"]
 docs_buildinfo = ["build/docs/.buildinfo"]
 bootstrap_txt = ["build/bootstrap.txt"]
 schema_dir = ["src/doitoml/schema"]
-schema_ppt_json = ["src/doitoml/schema/gen/_pyproject.v0.schema.json"]
-schema_pj_json = ["src/doitoml/schema/gen/_jspackage.v0.schema.json"]
-schema_toml = ["src/doitoml/schema/gen/_doit.v0.schema.toml"]
-schema_json = ["src/doitoml/schema/gen/_doit.v0.schema.json"]
-schema_py = ["src/doitoml/schema/_doit_v0_schema.py"]
+schema_ppt_json = ["src/doitoml/schema/_gen/_pyproject.v0.schema.json"]
+schema_pj_json = ["src/doitoml/schema/_gen/_jspackage.v0.schema.json"]
+schema_toml = ["src/doitoml/schema/_gen/_doit.v0.schema.toml"]
+schema_json = ["src/doitoml/schema/_gen/_doit.v0.schema.json"]
+schema_py = ["src/doitoml/schema/_gen/_doit_v0_schema.py"]
 source_date_epoch = ["build/source_date_epoch.json"]
 env_binder = [".binder/environment.yml"]
 env_docs = ["docs/environment.yml"]
@@ -491,7 +490,7 @@ yaml = """
 {% for schema_toml_j2 in paths[":all_schema_toml_j2"] %}
 {% set stem = schema_toml_j2.split("/")[-1].replace(".toml.j2", "") %}
 {% for state in ["doit", "pyproject", "jspackage"] %}
-{% set schema_toml = paths[":schema_dir"][0] ~ "/gen/_" ~ state ~ "." ~ stem ~ ".toml" %}
+{% set schema_toml = paths[":schema_dir"][0] ~ "/_gen/_" ~ state ~ "." ~ stem ~ ".toml" %}
 {{ state }}.{{ stem }}:
     meta: {doitoml: {skip: "${DOITOML_SKIP_CODEGEN}"}}
     doc: generate the TOML schema for {{ stem.split(".") | sort(False) | join(" ") }} {{ state }}
@@ -514,7 +513,7 @@ yaml = """
 yaml = """
 {% for schema_toml in paths[":all_schema_toml"] %}
 {% set stem = schema_toml.split("/")[-1].replace(".toml", "") %}
-{% set schema_json = paths[":schema_dir"][0] ~ "/gen/" ~ stem ~ ".json" %}
+{% set schema_json = paths[":schema_dir"][0] ~ "/_gen/" ~ stem ~ ".json" %}
 {{ stem }}:
     meta: {doitoml: {skip: "${DOITOML_SKIP_CODEGEN}"}}
     doc: generate the JSON schema for {{ stem.split(".") | sort(False) | join(" ") }}
