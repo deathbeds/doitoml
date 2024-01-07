@@ -31,22 +31,22 @@ class DoitomlMetadata(TypedDict, total=False):
     """doitoml Metadata."""
 
     cwd: Required[str]
+    """ Required property """
 
     env: "EnvironmentVariables"
-
-    log: Required[List["_DefinitionsDoitomlLogItem"]]
-
-    skip: Union[str, Union[int, float], None, Dict[str, Any]]
-
-    source: Required[str]
-    """ Required property """
     """
     environment variables.
 
     environment variables shared among all tasks
     """
+
+    log: Required[List["_DefinitionsDoitomlLogItem"]]
     """ Required property """
+
+    skip: Union[str, Union[int, float], None, Dict[str, Any]]
     """ Aggregation type: oneOf """
+
+    source: Required[str]
     """ Required property """
 
 
@@ -58,14 +58,6 @@ class DoitomlSchema(TypedDict, total=False):
     """
 
     env: Required["EnvironmentVariables"]
-
-    paths: Required["PathTokens"]
-
-    tasks: Required["_DefinitionsTasks"]
-
-    templates: Dict[str, Any]
-
-    tokens: Required["CommandTokens"]
     """
     environment variables.
 
@@ -73,6 +65,8 @@ class DoitomlSchema(TypedDict, total=False):
 
     Required property
     """
+
+    paths: Required["PathTokens"]
     """
     path tokens.
 
@@ -80,12 +74,18 @@ class DoitomlSchema(TypedDict, total=False):
 
     Required property
     """
+
+    tasks: Required["_DefinitionsTasks"]
     """
     doit tasks
 
     Required property
     """
+
+    templates: Dict[str, Any]
     """ extensible task generators """
+
+    tokens: Required["CommandTokens"]
     """
     command tokens.
 
@@ -135,16 +135,16 @@ class Task(TypedDict, total=False):
     doc: str
     file_dep: List["_DefinitionsArrayOfPathsItem"]
     meta: "Metadata"
+    """ Metadata. """
 
     name: str
     targets: List["_DefinitionsArrayOfPathsItem"]
     title: str
     uptodate: List["Uptodate"]
     verbosity: "_DefinitionsVerbosity"
+    """ level of console output to show. 0 shows no output, 1 shows error output, 2 shows all output """
 
     watch: List["_DefinitionsArrayOfPathsItem"]
-    """ Metadata. """
-    """ level of console output to show. 0 shows no output, 1 shows error output, 2 shows all output """
 
 
 TokenAction = List[str]
