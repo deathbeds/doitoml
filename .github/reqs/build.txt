@@ -3,6 +3,7 @@ doit[toml]
 typing-extensions
 # extras
 jsonschema[format]
+pyyaml
 # build
 build
 flit >=3.8,<4
