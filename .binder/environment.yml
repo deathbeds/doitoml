@@ -18,6 +18,8 @@ dependencies:
   # build deps
   - flit >=3.8
   - jsonschema-gentypes
+  - ruff
+  - taplo
   # build deps
   # publish deps
   - twine
@@ -27,9 +29,7 @@ dependencies:
   - nbqa
   - nbstripout
   - nodejs >=20,<21
-  - ruff
   - ssort
-  - taplo
   - types-jinja2
   - types-jsonschema
   - types-pyyaml

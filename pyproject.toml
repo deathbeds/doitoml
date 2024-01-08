@@ -612,6 +612,11 @@ actions = [
     "::env_docs",
     "# demo deps",
   ]}}},
+  {py = {"_actions:replace_between" = {args = [
+    "::env_binder",
+    "::env_docs",
+    "# optional deps",
+  ]}}},
 ]
 
 [tool.doitoml.tasks.env.test]
