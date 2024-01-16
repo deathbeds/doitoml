@@ -7,7 +7,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, Literal, Optional
 
-from doitoml.constants import UTF8
+from doitoml.constants import ENTRY_POINTS, UTF8
+from doitoml.entry_points import EntryPoints
 
 PARSER = ArgumentParser("doitoml-schema-dump")
 PARSER.add_argument(
@@ -40,6 +41,10 @@ TYPE_SCHEMA_PATH = {
     "root": GEN / "_root.v0.schema.json",
 }
 
+ENTRY_POINT_APPEND_TO = {
+    ENTRY_POINTS.ACTOR: lambda schema: schema["definitions"]["action-actor"]["anyOf"]
+}
+
 TSchemaType = Literal["package.json", "pyproject.toml"]
 TSchemaFormat = Literal["json", "toml", "yaml"]
 
@@ -63,7 +68,19 @@ def get_schema_dict(type_: TSchemaType) -> Dict[str, Any]:
         raise ValueError(msg)
 
     schema_text = schema_path.read_text(encoding=UTF8)
-    return dict(json.loads(schema_text))
+    schema = dict(json.loads(schema_text))
+
+    for group, append_to in ENTRY_POINT_APPEND_TO.items():
+        raw_eps = EntryPoints.raw_entry_points(group)
+        for name, entry_point in raw_eps.items():
+            ep_schema = entry_point.schema()
+            if not ep_schema:  # pragma: no cover
+                continue
+            ref = f"{group}-{name}"
+            schema["definitions"][ref] = ep_schema
+            append_to(schema).append({"$ref": ref})
+
+    return schema
 
 
 def get_formatted_schema(schema: Dict[str, Any], format_: TSchemaFormat) -> str:

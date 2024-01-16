@@ -1,5 +1,5 @@
 {
-  "$id": "https://doitoml.rtfd.io/en/latest/schema/v0.doit.schema.json#",
+  "$id": "https://doitoml.rtfd.io/en/latest/schema/_doitv0.schema.json#",
   "$ref": "#/definitions/config",
   "$schema": "https://json-schema.org/draft/2019-09/schema",
   "definitions": {
@@ -18,6 +18,12 @@
       "title": "action"
     },
     "action-actor": {
+      "anyOf": [
+        {
+          "description": "a custom action provided by an entry_point",
+          "type": "object"
+        }
+      ],
       "description": "a custom action",
       "title": "actor action",
       "type": "object"

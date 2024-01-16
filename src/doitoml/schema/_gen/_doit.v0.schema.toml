@@ -110,6 +110,7 @@ type = "string"
 title = "actor action"
 description = "a custom action"
 type = "object"
+anyOf = [{description = "a custom action provided by an entry_point", type = "object"}]
 
 [definitions.tokens]
 title = "command tokens"

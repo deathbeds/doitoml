@@ -22,6 +22,54 @@ RE_PY_DOT_FUNC = re.compile(
 )
 
 
+def base_py_schema(description: str) -> Dict[str, Any]:
+    """Generate the base schema for a custom python config section."""
+    arg_base_type = [
+        {"type": "string"},
+        {"type": "number"},
+        {"type": "boolean"},
+    ]
+    full_arg = {
+        "oneOf": [
+            *arg_base_type,
+            {"type": "list", "items": {"oneOf": arg_base_type}},
+        ]
+    }
+    args = {
+        "description": "call a python function",
+        "type": "object",
+        "additionalProperties": False,
+        "properties": {
+            "args": {
+                "description": "positional arguments",
+                "type": "array",
+                "items": {"oneOf": arg_base_type},
+            },
+            "kwargs": {
+                "type": "object",
+                "additionalProperties": full_arg,
+            },
+        },
+    }
+
+    py = {
+        "description": (
+            "a dotted importable name, with optional function, "
+            "seperated by a semicolon"
+        ),
+        "type": "object",
+        "patternProperties": {r"^(([^:]+?):)?(([^:]+?):)(([^:]+?))$": args},
+    }
+
+    return {
+        "type": "object",
+        "description": description,
+        "required": ["py"],
+        "properties": {"py": py},
+        "additionalProperties": False,
+    }
+
+
 def resolve_one_py_kwarg(
     doitoml: "DoiTOML",
     source: "ConfigSource",
