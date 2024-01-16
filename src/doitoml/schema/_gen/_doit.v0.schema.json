@@ -1,7 +1,7 @@
 {
-  "$id": "https://doitoml.rtfd.io/en/latest/schema/v0.schema.json",
+  "$id": "https://doitoml.rtfd.io/en/latest/schema/_doitv0.schema.json#",
   "$ref": "#/definitions/config",
-  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
   "definitions": {
     "action": {
       "oneOf": [
@@ -18,6 +18,12 @@
       "title": "action"
     },
     "action-actor": {
+      "anyOf": [
+        {
+          "description": "a custom action provided by an entry_point",
+          "type": "object"
+        }
+      ],
       "description": "a custom action",
       "title": "actor action",
       "type": "object"
@@ -53,6 +59,7 @@
       "type": "array"
     },
     "config": {
+      "additionalProperties": false,
       "description": "schema for ``doitoml`` configuration",
       "properties": {
         "env": {
@@ -67,6 +74,10 @@
           "$ref": "#/definitions/tasks",
           "description": "named tasks"
         },
+        "templates": {
+          "description": "extensible task generators",
+          "type": "object"
+        },
         "tokens": {
           "$ref": "#/definitions/tokens",
           "description": "named command tokens"
@@ -78,13 +89,27 @@
         "env",
         "paths"
       ],
-      "title": "doitoml Schema",
+      "title": "doitoml schema",
       "type": "object"
+    },
+    "doitoml-log": {
+      "items": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "type": "array"
     },
     "env": {
       "additionalProperties": {
         "type": "string"
       },
+      "description": "environment variables shared among all tasks",
       "title": "environment variables",
       "type": "object"
     },
@@ -107,17 +132,7 @@
           "$ref": "#/definitions/env"
         },
         "log": {
-          "items": {
-            "oneOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "type": "array"
+          "$ref": "#/definitions/doitoml-log"
         },
         "skip": {
           "oneOf": [
@@ -144,20 +159,23 @@
         "log",
         "source"
       ],
-      "title": "doitoml Metadataa",
+      "title": "doitoml Metadata",
       "type": "object"
     },
     "paths": {
       "additionalProperties": {
         "$ref": "#/definitions/array-of-paths"
       },
+      "description": "paths to expand and normalize, relative to the current working directory",
       "title": "path tokens",
       "type": "object"
     },
     "task": {
+      "description": "a doit task",
       "properties": {
         "actions": {
-          "$ref": "#/definitions/actions"
+          "$ref": "#/definitions/actions",
+          "description": "actions to perform as strings, lists of tokens, or custom objects"
         },
         "calc_dep": {
           "$ref": "#/definitions/array-of-paths"
@@ -184,12 +202,7 @@
           "$ref": "#/definitions/uptodates"
         },
         "verbosity": {
-          "enum": [
-            1,
-            2,
-            3
-          ],
-          "type": "number"
+          "$ref": "#/definitions/verbosity"
         },
         "watch": {
           "$ref": "#/definitions/array-of-paths"
@@ -202,12 +215,14 @@
       "additionalProperties": {
         "$ref": "#/definitions/task"
       },
+      "description": "doit tasks",
       "type": "object"
     },
     "tokens": {
       "additionalProperties": {
         "$ref": "#/definitions/array-of-strings"
       },
+      "description": "command tokens which may be expanded as paths",
       "title": "command tokens",
       "type": "object"
     },
@@ -233,7 +248,16 @@
         "$ref": "#/definitions/uptodate"
       },
       "type": "array"
+    },
+    "verbosity": {
+      "description": "level of console output to show. 0 shows no output, 1 shows error output, 2 shows all output",
+      "enum": [
+        0,
+        1,
+        2
+      ],
+      "type": "number"
     }
   },
-  "description": "schema definitions for ``doitoml`` configuration"
+  "description": "``doitoml`` configuration after full expansion"
 }

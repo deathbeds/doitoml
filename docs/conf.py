@@ -101,8 +101,10 @@ templates_path = ["_templates"]
 html_static_path = [
     "../build/lite",
     "../dist",
+    "../src/doitoml/schema/_gen",
     "_static",
 ]
+exclude_patterns = ["__init__.py", "_doit_*schema.py"]
 html_theme = "pydata_sphinx_theme"
 html_logo = "_static/img/logo.svg"
 html_favicon = "_static/img/logo.svg"

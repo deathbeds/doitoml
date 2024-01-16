@@ -1,3 +1,5 @@
+"$schema" = "file://./src/doitoml/schema/_gen/_pyproject.v0.schema.json"
+
 [build-system]
 build-backend = "flit_core.buildapi"
 requires = ["flit_core<4,>=3.7.1"]
@@ -15,6 +17,7 @@ classifiers = [
   "Programming Language :: Python :: 3",
 ]
 dependencies = ["doit >=0.36.0", "typing_extensions", "tomli ; python_version<\"3.11\""]
+
 [project.optional-dependencies]
 all = ["doitoml[json-e]", "doitoml[jinja2]", "doitoml[jsonschema]", "doitoml[pyyaml]"]
 json-e = ["json-e >=4"]
@@ -30,35 +33,44 @@ test = [
   "pytest-xdist",
   "tomli-w",
 ]
+
 [project.urls]
 "Bug Tracker" = "https://github.com/deathbeds/doitoml/issues"
 "Changelog" = "https://github.com/deathbeds/doitoml/blob/main/CHANGELOG.md"
 "Documentation" = "https://doitoml.rtfd.io"
 "PyPI" = "https://pypi.org/project/doitoml"
 "Source" = "https://github.com/deathbeds/doitoml/tree/main"
+
 [project.entry-points."doit.LOADER"]
 doitoml = "doitoml.loaders:DoitomlLoader"
+
 [project.entry-points."doitoml.actor.v0"]
 py = "doitoml.actors.py:PyActor"
+
 [project.entry-points."doitoml.config-parser.v0"]
 doitoml-package-json = "doitoml.sources.json.package:PackageJsonParser"
 doitoml-pyproject-toml = "doitoml.sources.toml.pyproject:PyprojectTomlParser"
+
 [project.entry-points."doitoml.dsl.v0"]
 doitoml-colon-colon-path = "doitoml.dsl:PathRef"
 doitoml-colon-get = "doitoml.dsl:Getter"
 doitoml-colon-glob = "doitoml.dsl:Globber"
 doitoml-dollar-env = "doitoml.dsl:EnvReplacer"
+
 [project.entry-points."doitoml.parser.v0"]
 json = "doitoml.sources.json._json:JsonParser"
 toml = "doitoml.sources.toml._toml:TomlParser"
 yaml = "doitoml.sources.yaml._yaml:YamlParser"
+
 [project.entry-points."doitoml.templater.v0"]
 json-e = "doitoml.templaters.jsone:JsonE"
 jinja2 = "doitoml.templaters.jinja2:Jinja2"
+
 [project.entry-points."doitoml.updater.v0"]
 config_changed = "doitoml.updaters.doit_tools:ConfigChanged"
 run_once = "doitoml.updaters.doit_tools:RunOnce"
 py = "doitoml.updaters.py:PyUpdater"
+
 [project.entry-points."doitoml.skipper.v0"]
 any = "doitoml.skippers.bools:Any_"
 all = "doitoml.skippers.bools:All"
@@ -216,7 +228,7 @@ select = [
 "jinja2.py" = ["ARG002"]
 "test/**/*.py" = ["S101", "T201", "T203"]
 "lite/*.py" = ["D205", "INP001", "E402", "ANN201", "D103", "T201", "ANN001", "D100"]
-"_v*.py" = ["PYI030"]
+"_*schema.py" = ["PYI030", "E501"]
 
 [tool.doitoml]
 prefix = ""
@@ -233,6 +245,7 @@ SOURCE_DATE_EPOCH = ":get|0::json::build/source_date_epoch.json::SOURCE_DATE_EPO
 DOITOML_SKIP_CODEGEN = "0"
 COV_FAIL_UNDER = "100"
 JUPYTER_PLATFORM_DIRS = "1"
+PYDEVD_DISABLE_FILE_VALIDATION = "1"
 
 [tool.doitoml.tokens]
 sphinx_opts = ["-b", "html", "docs", "build/docs"]
@@ -267,8 +280,8 @@ docs_etc = [":rglob::docs/_static::*.*", ":rglob::docs/_templates::*.*"]
 all_misc_py = ["dodo.py", "_actions.py", "::all_py_test", "::docs_py"]
 demo_py = [":glob::lite::*.py"]
 all_py = ["::all_py_src", "::all_misc_py"]
-all_ssort = ["::py_src", "::all_misc_py", "::demo_py"]
-py_src = [":rglob::src::*.py::!/_v0*"]
+all_ssort = ["::all_misc_py", "::demo_py", ":rglob::src::*.py::!_gen"]
+py_src = [":rglob::src::*.py::!/_*v0*"]
 all_py_src = [":rglob::src::*.py"]
 docs_logo = ["docs/_static/img/logo.svg"]
 all_ipynb = [
@@ -277,8 +290,20 @@ all_ipynb = [
 ]
 all_py_test = [":rglob::test::*.py"]
 ppt = ["pyproject.toml"]
-all_ppt = ["::ppt", ":glob::examples::*/pyproject.toml", "lite/pyproject.toml"]
-all_schema_toml = [":rglob::src/doitoml::*.toml"]
+all_ppt = [
+  "::ppt",
+  ":glob::examples::*/pyproject.toml",
+  "lite/pyproject.toml",
+  ":glob::lite/playground-examples::*/pyproject.toml",
+]
+all_pj = [
+  "js/package.json",
+  ":glob::examples::*/package.json",
+  ":glob::lite/playground-examples::*/package.json",
+]
+all_schema_toml_j2 = [":rglob::src/doitoml/schema/tmpl::*.schema.toml.j2"]
+all_schema_toml = [":rglob::src/doitoml/schema/_gen::*.schema.toml"]
+all_schema_json = [":rglob::src/doitoml/schema/_gen::*.schema.json"]
 all_demo_toml = [":rglob::lite::*.toml::!.ipynb_checkpoints"]
 all_toml = ["::all_ppt", "::all_schema_toml", "::all_demo_toml"]
 all_py_dist = ["::ppt", "::py_src", "README.md", "LICENSE.txt"]
@@ -294,9 +319,12 @@ all_examples = [
 all_md = [":glob::.::*.md", ":rglob::docs::*.md::!ipynb_checkpoints"]
 docs_buildinfo = ["build/docs/.buildinfo"]
 bootstrap_txt = ["build/bootstrap.txt"]
-schema_toml = ["src/doitoml/schema/v0.schema.toml"]
-schema_json = ["src/doitoml/schema/_v0.schema.json"]
-schema_py = ["src/doitoml/schema/_v0_schema.py"]
+schema_dir = ["src/doitoml/schema"]
+schema_ppt_json = ["src/doitoml/schema/_gen/_pyproject.v0.schema.json"]
+schema_pj_json = ["src/doitoml/schema/_gen/_jspackage.v0.schema.json"]
+schema_toml = ["src/doitoml/schema/_gen/_doit.v0.schema.toml"]
+schema_json = ["src/doitoml/schema/_gen/_doit.v0.schema.json"]
+schema_py = ["src/doitoml/schema/_gen/_doit_v0_schema.py"]
 source_date_epoch = ["build/source_date_epoch.json"]
 env_binder = [".binder/environment.yml"]
 env_docs = ["docs/environment.yml"]
@@ -459,13 +487,74 @@ doc = "Watch docs, rebuild on changes"
 file_dep = ["::docs_buildinfo"]
 actions = [["sphinx-autobuild", "::sphinx_opts", "--no-initial", "--watch=src"]]
 
-# these will get templated
-[tool.doitoml.tasks.gen.schema]
-meta = {doitoml = {skip = "${DOITOML_SKIP_CODEGEN}"}}
-doc = "build JSON Schema from TOML Schema"
-file_dep = ["::schema_toml"]
-targets = ["::schema_json"]
-actions = [{py = {"_actions:toml2json" = {args = ["::schema_toml", "::schema_json"]}}}]
+[tool.doitoml.templates.jinja2.tasks.schema_template]
+yaml = """
+{% for schema_toml_j2 in paths[":all_schema_toml_j2"] %}
+{% set stem = schema_toml_j2.split("/")[-1].replace(".toml.j2", "") %}
+{% for state in ["doit", "pyproject", "jspackage"] %}
+{% set schema_toml = paths[":schema_dir"][0] ~ "/_gen/_" ~ state ~ "." ~ stem ~ ".toml" %}
+{{ state }}.{{ stem }}:
+    meta: {doitoml: {skip: "${DOITOML_SKIP_CODEGEN}"}}
+    doc: generate the TOML schema for {{ stem.split(".") | sort(False) | join(" ") }} {{ state }}
+    file_dep: [{{ schema_toml_j2 }}]
+    targets: [{{ schema_toml }}]
+    actions:
+        - py:
+            _actions:template:
+                args:
+                  - {{ schema_toml_j2 }}
+                  - {{ schema_toml }}
+                kwargs:
+                  state: {{ state }}
+        - ["taplo", "fmt", "::taplo_opts", "{{ schema_toml }}"]
+{% endfor %}
+{% endfor %}
+"""
+
+[tool.doitoml.templates.jinja2.tasks.schema_gen]
+yaml = """
+{% for schema_toml in paths[":all_schema_toml"] %}
+{% set stem = schema_toml.split("/")[-1].replace(".toml", "") %}
+{% set schema_json = paths[":schema_dir"][0] ~ "/_gen/" ~ stem ~ ".json" %}
+{{ stem }}:
+    meta: {doitoml: {skip: "${DOITOML_SKIP_CODEGEN}"}}
+    doc: generate the JSON schema for {{ stem.split(".") | sort(False) | join(" ") }}
+    file_dep: [{{ schema_toml }}]
+    targets: [{{ schema_json }}]
+    actions:
+        - py:
+            _actions:toml2json:
+                args: [{{ schema_toml }}, {{ schema_json }}]
+{% endfor %}
+"""
+
+[tool.doitoml.templates.jinja2.tasks.lint_ppt]
+yaml = """
+{% for ppt in paths[":all_ppt"] %}
+{% set stem = ppt.split("/")[-2] %}
+{{ stem }}:
+    doc: validate the pyproject.toml for {{ stem }}
+    file_dep: [{{ ppt }}, "::all_schema_json"]
+    actions:
+      - py:
+          _actions:validate:
+              args: [{{ ppt }}, "::schema_ppt_json"]
+{% endfor %}
+"""
+
+[tool.doitoml.templates.jinja2.tasks.lint_pj]
+yaml = """
+{% for pj in paths[":all_pj"] %}
+{% set stem = pj.split("/")[-2] %}
+{{ stem }}:
+    doc: validate the package.json for {{ stem }}
+    file_dep: [{{ pj }}, "::all_schema_json"]
+    actions:
+      - py:
+          _actions:validate:
+              args: [{{ pj }}, "::schema_pj_json"]
+{% endfor %}
+"""
 
 [tool.doitoml.tasks.gen.types]
 meta = {doitoml = {skip = "${DOITOML_SKIP_CODEGEN}"}}
@@ -522,6 +611,11 @@ actions = [
     "::env_binder",
     "::env_docs",
     "# demo deps",
+  ]}}},
+  {py = {"_actions:replace_between" = {args = [
+    "::env_binder",
+    "::env_docs",
+    "# optional deps",
   ]}}},
 ]
 

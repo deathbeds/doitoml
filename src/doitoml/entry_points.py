@@ -1,6 +1,7 @@
 """Loads entry points."""
 import sys
-from typing import TYPE_CHECKING, Any, Dict, Tuple, Union
+from functools import lru_cache
+from typing import TYPE_CHECKING, Any, Dict, List, Tuple, Union
 
 from doitoml.errors import EntryPointError, MissingDependencyError
 
@@ -39,6 +40,22 @@ class EntryPoints:
         """Create a new collection of loaded ``entry_points``."""
         self.doitoml = doitoml
 
+    @staticmethod
+    @lru_cache(1)
+    def raw_entry_points(
+        group: str,
+    ) -> Tuple[Dict[str, Any], List[Tuple[str, str, str]]]:
+        """Load and cache raw entry points."""
+        raw_eps = {}
+        logs: List[Tuple[str, str, str]] = []
+        for entry_point in entry_points(group=group):
+            try:
+                raw_eps[entry_point.name] = entry_point.load()
+            except Exception as err:  # pragma: no cover
+                logs.append((group, entry_point.name, str(err)))
+
+        return dict(sorted(raw_eps.items())), sorted(logs)
+
     def initialize(self) -> None:
         """Load all ``entry_points``."""
         # load the parsers
@@ -55,21 +72,19 @@ class EntryPoints:
         """Find and load ``entry_points`` from installed packages."""
         eps = {}
 
-        for entry_point in entry_points(group=group):
+        raw_eps, logs = self.raw_entry_points(group)
+
+        for name, entry_point in raw_eps.items():
             try:
-                eps[entry_point.name] = entry_point.load()(self.doitoml)
+                eps[name] = entry_point(self.doitoml)
             except MissingDependencyError as err:
-                self.doitoml.log.info(
-                    "%s %s is missing a dependency: %s",
-                    group,
-                    entry_point.name,
-                    err,
-                )
+                logs.append((group, name, str(err)))
             except Exception as err:  # pragma: no cover
-                message = (
-                    f"{group} {entry_point.name} unexpectedly failed to load {err}"
-                )
+                message = f"{group} {name} unexpectedly failed to load {err}"
                 raise EntryPointError(message) from err
+
+        for log in sorted(logs):  # pragma: no cover
+            self.doitoml.log.info("%s %s is missing a dependency: %s", *log)
 
         return dict(sorted(eps.items(), key=self.rank_key))
 

@@ -1,0 +1,339 @@
+{
+  "$id": "https://doitoml.rtfd.io/en/latest/schema/_pyprojectv0.schema.json#",
+  "$ref": "#/definitions/pyproject",
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
+  "definitions": {
+    "action": {
+      "oneOf": [
+        {
+          "$ref": "#/definitions/action-shell"
+        },
+        {
+          "$ref": "#/definitions/action-token"
+        },
+        {
+          "$ref": "#/definitions/action-actor"
+        }
+      ],
+      "title": "action"
+    },
+    "action-actor": {
+      "anyOf": [
+        {
+          "description": "an uncharacterized custom action provided by an entry_point",
+          "type": "object"
+        }
+      ],
+      "description": "a custom action",
+      "title": "actor action",
+      "type": "object"
+    },
+    "action-shell": {
+      "title": "shell action",
+      "type": "string"
+    },
+    "action-token": {
+      "items": {
+        "type": "string"
+      },
+      "title": "token action",
+      "type": "array"
+    },
+    "actions": {
+      "items": {
+        "$ref": "#/definitions/action"
+      },
+      "type": "array"
+    },
+    "array-of-paths": {
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "array-of-strings": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "config": {
+      "additionalProperties": false,
+      "description": "schema for ``doitoml`` configuration",
+      "properties": {
+        "config_paths": {
+          "description": "additional doitoml config files, which may use ``get``",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "env": {
+          "$ref": "#/definitions/env",
+          "description": "environment variables"
+        },
+        "fail_quietly": {
+          "description": "whether to ignore configuration errors",
+          "type": "boolean"
+        },
+        "paths": {
+          "$ref": "#/definitions/paths",
+          "description": "named paths"
+        },
+        "prefix": {
+          "description": "a prefix to add to all tasks, tokens, and paths from this config file",
+          "type": "string"
+        },
+        "tasks": {
+          "$ref": "#/definitions/tasks",
+          "description": "named tasks"
+        },
+        "templates": {
+          "description": "extensible task generators",
+          "type": "object"
+        },
+        "tokens": {
+          "$ref": "#/definitions/tokens",
+          "description": "named command tokens"
+        },
+        "validate": {
+          "description": "whether to apply schema validation before and after all transforms",
+          "type": "boolean"
+        }
+      },
+      "title": "doitoml schema",
+      "type": "object"
+    },
+    "doitoml-log": {
+      "oneOf": [
+        {
+          "type": "string"
+        },
+        {
+          "items": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "type": "array"
+        }
+      ]
+    },
+    "env": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "description": "environment variables shared among all tasks",
+      "title": "environment variables",
+      "type": "object"
+    },
+    "meta": {
+      "properties": {
+        "doitoml": {
+          "$ref": "#/definitions/meta-doitoml"
+        }
+      },
+      "title": "Metadata",
+      "type": "object"
+    },
+    "meta-doitoml": {
+      "additionalProperties": false,
+      "properties": {
+        "cwd": {
+          "type": "string"
+        },
+        "env": {
+          "$ref": "#/definitions/env"
+        },
+        "log": {
+          "$ref": "#/definitions/doitoml-log"
+        },
+        "skip": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            },
+            {
+              "type": "object"
+            }
+          ]
+        }
+      },
+      "title": "doitoml Metadata",
+      "type": "object"
+    },
+    "paths": {
+      "additionalProperties": {
+        "$ref": "#/definitions/array-of-paths"
+      },
+      "description": "paths to expand and normalize, relative to the current working directory",
+      "title": "path tokens",
+      "type": "object"
+    },
+    "pyproject": {
+      "description": "a minimal partial python project that uses doit and/or doitoml",
+      "properties": {
+        "tool": {
+          "$ref": "#/definitions/tool"
+        }
+      },
+      "type": "object"
+    },
+    "task": {
+      "description": "a doit task",
+      "properties": {
+        "actions": {
+          "$ref": "#/definitions/actions",
+          "description": "actions to perform as strings, lists of tokens, or custom objects"
+        },
+        "calc_dep": {
+          "$ref": "#/definitions/array-of-paths"
+        },
+        "doc": {
+          "type": "string"
+        },
+        "file_dep": {
+          "$ref": "#/definitions/array-of-paths"
+        },
+        "meta": {
+          "$ref": "#/definitions/meta"
+        },
+        "name": {
+          "type": "string"
+        },
+        "targets": {
+          "$ref": "#/definitions/array-of-paths"
+        },
+        "title": {
+          "type": "string"
+        },
+        "uptodate": {
+          "$ref": "#/definitions/uptodates"
+        },
+        "verbosity": {
+          "$ref": "#/definitions/verbosity"
+        },
+        "watch": {
+          "$ref": "#/definitions/array-of-paths"
+        }
+      },
+      "title": "Task",
+      "type": "object"
+    },
+    "tasks": {
+      "additionalProperties": {
+        "$ref": "#/definitions/task"
+      },
+      "description": "doit tasks",
+      "type": "object"
+    },
+    "tokens": {
+      "additionalProperties": {
+        "$ref": "#/definitions/array-of-strings"
+      },
+      "description": "command tokens which may be expanded as paths",
+      "title": "command tokens",
+      "type": "object"
+    },
+    "tool": {
+      "description": "the community namespace for non-build-related data",
+      "properties": {
+        "doit": {
+          "$ref": "#/definitions/tool-doit"
+        },
+        "doitoml": {
+          "$ref": "#/definitions/tool-doitoml"
+        }
+      },
+      "type": "object"
+    },
+    "tool-doit": {
+      "description": "doit configuration",
+      "properties": {
+        "backend": {
+          "description": "on-disk storage name for doit dependency data like file hashes",
+          "type": "string"
+        },
+        "commands": {
+          "$ref": "#/definitions/tool-doit-commands"
+        },
+        "par_type": {
+          "description": "the parallel approach for ``doit -n2`` or greater",
+          "type": "string"
+        },
+        "verbosity": {
+          "$ref": "#/definitions/verbosity"
+        }
+      },
+      "type": "object"
+    },
+    "tool-doit-commands": {
+      "description": "configuration for built-in and custom doit subcommands",
+      "properties": {
+        "list": {
+          "description": "customization for the ``doit list`` subcommand",
+          "properties": {
+            "status": {
+              "description": "whether to show the single-letter status code for a task",
+              "type": "boolean"
+            },
+            "subtasks": {
+              "description": "whether to show all subtasks (prefixed by ``:``)",
+              "type": "boolean"
+            }
+          },
+          "type": "object"
+        }
+      },
+      "type": "object"
+    },
+    "tool-doitoml": {
+      "$ref": "#/definitions/config"
+    },
+    "uptodate": {
+      "oneOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "string"
+        },
+        {
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "uptodate"
+    },
+    "uptodates": {
+      "items": {
+        "$ref": "#/definitions/uptodate"
+      },
+      "type": "array"
+    },
+    "verbosity": {
+      "description": "level of console output to show. 0 shows no output, 1 shows error output, 2 shows all output",
+      "enum": [
+        0,
+        1,
+        2
+      ],
+      "type": "number"
+    }
+  },
+  "description": "``doitoml`` and ``doit`` configuration for ``pyproject.toml``"
+}

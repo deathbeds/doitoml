@@ -168,7 +168,7 @@ class DoiTOML:
 
     def build_subtask(self, task_name: Tuple[str, ...], raw_task: Task) -> Task:
         """Build a single generated ``doit`` task."""
-        name = ":".join(task_name)
+        name = ":".join(map(str, task_name))
         task: Task = {"name": name}
         task.update(raw_task)
 

@@ -1,19 +1,26 @@
-"$id" = "https://doitoml.rtfd.io/en/latest/schema/v0.schema.json"
-"$ref" = "#/definitions/config"
-"$schema" = "http://json-schema.org/draft-07/schema#"
-description = "schema definitions for ``doitoml`` configuration"
+
+"$id" = "https://doitoml.rtfd.io/en/latest/schema/_jspackagev0.schema.json#"
+"$schema" = "https://json-schema.org/draft/2019-09/schema"
+
+"$ref" = "#/definitions/jspackage"
+description = "``doitoml`` and ``doit`` configuration for ``package.json``"
 
 [definitions.config]
-title = "doitoml Schema"
+title = "doitoml schema"
 description = "schema for ``doitoml`` configuration"
 type = "object"
-required = ["tasks", "tokens", "env", "paths"]
+additionalProperties = false
 
 [definitions.config.properties]
 tokens = {"$ref" = "#/definitions/tokens", description = "named command tokens"}
 env = {"$ref" = "#/definitions/env", description = "environment variables"}
 paths = {"$ref" = "#/definitions/paths", description = "named paths"}
 tasks = {"$ref" = "#/definitions/tasks", description = "named tasks"}
+templates = {type = "object", description = "extensible task generators"}
+config_paths = {type = "array", items = {type = "string"}, description = "additional doitoml config files, which may use ``get``"}
+prefix = {type = "string", description = "a prefix to add to all tasks, tokens, and paths from this config file"}
+validate = {type = "boolean", description = "whether to apply schema validation before and after all transforms"}
+fail_quietly = {type = "boolean", description = "whether to ignore configuration errors"}
 
 [definitions.array-of-strings]
 type = "array"
@@ -25,14 +32,16 @@ items = {type = "string", minLength = 1}
 
 [definitions.tasks]
 type = "object"
+description = "doit tasks"
 additionalProperties = {"$ref" = "#/definitions/task"}
 
 [definitions.task]
 title = "Task"
+description = "a doit task"
 type = "object"
 
 [definitions.task.properties]
-actions = {"$ref" = "#/definitions/actions"}
+actions = {"$ref" = "#/definitions/actions", description = "actions to perform as strings, lists of tokens, or custom objects"}
 calc_dep = {"$ref" = "#/definitions/array-of-paths"}
 doc = {type = "string"}
 file_dep = {"$ref" = "#/definitions/array-of-paths"}
@@ -41,7 +50,7 @@ name = {type = "string"}
 targets = {"$ref" = "#/definitions/array-of-paths"}
 title = {type = "string"}
 uptodate = {"$ref" = "#/definitions/uptodates"}
-verbosity = {type = "number", enum = [1, 2, 3]}
+verbosity = {"$ref" = "#/definitions/verbosity"}
 watch = {"$ref" = "#/definitions/array-of-paths"}
 
 [definitions.meta]
@@ -50,22 +59,29 @@ type = "object"
 properties = {doitoml = {"$ref" = "#/definitions/meta-doitoml"}}
 
 [definitions.meta-doitoml]
-title = "doitoml Metadataa"
+title = "doitoml Metadata"
 type = "object"
 additionalProperties = false
-required = ["cwd", "log", "source"]
 
 [definitions.meta-doitoml.properties]
 cwd = {type = "string"}
 env = {"$ref" = "#/definitions/env"}
-log = {type = "array", items = {oneOf = [{type = "string"}, {type = "null"}]}}
 skip = {oneOf = [
   {type = "string"},
   {type = "number"},
   {type = "null"},
   {type = "object"},
 ]}
-source = {type = "string"}
+log = {"$ref" = "#/definitions/doitoml-log"}
+
+[definitions.doitoml-log]
+oneOf = [
+  {type = "string"},
+  {type = "array", items = {oneOf = [
+    {type = "string"},
+    {type = "null"},
+  ]}},
+]
 
 [definitions.actions]
 type = "array"
@@ -101,17 +117,37 @@ title = "actor action"
 description = "a custom action"
 type = "object"
 
+[[definitions.action-actor.anyOf]]
+description = "an uncharacterized custom action provided by an entry_point"
+type = "object"
+
 [definitions.tokens]
 title = "command tokens"
+description = "command tokens which may be expanded as paths"
 type = "object"
 additionalProperties = {"$ref" = "#/definitions/array-of-strings"}
 
 [definitions.env]
 title = "environment variables"
+description = "environment variables shared among all tasks"
 type = "object"
 additionalProperties = {type = "string"}
 
 [definitions.paths]
 title = "path tokens"
+description = "paths to expand and normalize, relative to the current working directory"
 type = "object"
 additionalProperties = {"$ref" = "#/definitions/array-of-paths"}
+
+[definitions.verbosity]
+type = "number"
+description = "level of console output to show. 0 shows no output, 1 shows error output, 2 shows all output"
+enum = [0, 1, 2]
+
+
+[definitions.jspackage]
+type = "object"
+description = "an npm-compatible package.json for a JS package"
+
+[definitions.jspackage.properties.doitoml]
+"$ref" = "#/definitions/config"

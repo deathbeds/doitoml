@@ -2,7 +2,12 @@
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional
 
 from doitoml.types import ExecutionContext
-from doitoml.utils.py import make_py_function, parse_dotted_py, resolve_py_args
+from doitoml.utils.py import (
+    base_py_schema,
+    make_py_function,
+    parse_dotted_py,
+    resolve_py_args,
+)
 
 if TYPE_CHECKING:
     from doitoml.sources._config import ConfigSource
@@ -30,7 +35,7 @@ class PyActor(Actor):
         action: Dict[str, Any],
     ) -> List[Dict[str, Any]]:
         """Expand a dict containing `py`."""
-        path_dotted_func, args_kwargs = list(action["py"].items())[0]
+        args_kwargs = list(action["py"].items())[0][1]
         args, kwargs = resolve_py_args(
             self.doitoml,
             source,
@@ -52,3 +57,8 @@ class PyActor(Actor):
         return [
             make_py_function(path_dotted_func, args, kwargs, execution_context),
         ]
+
+    @staticmethod
+    def schema() -> Dict[str, Any]:
+        """Describe the structure of an at-rest ``py`` action."""
+        return base_py_schema(description="a custom python action")

@@ -18,6 +18,8 @@ dependencies:
   # build deps
   - flit >=3.8
   - jsonschema-gentypes
+  - ruff
+  - taplo
   # build deps
   # demo deps
   - ipylab

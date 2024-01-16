@@ -44,3 +44,11 @@ class Actor:
         execution_context: ExecutionContext,
     ) -> List[CallableAction]:
         """Build a function that will fully resolve the action during task building."""
+
+    @staticmethod
+    def schema() -> Optional[Dict[str, Any]]:  # pragma: no cover
+        """Provide the ``doitoml`` schema to reflect this action's structure.
+
+        In a future version, this will become required.
+        """
+        return None

@@ -37,7 +37,7 @@ from .errors import (
     UnresolvedError,
     UnsafePathError,
 )
-from .schema._v0_schema import DoitomlSchema
+from .schema._gen._doit_v0_schema import DoitomlSchema
 from .sources._config import ConfigParser, ConfigSource
 from .sources._source import Source
 from .types import (
@@ -126,7 +126,7 @@ class Config:
                 "tokens": {":".join(k): v for k, v in self.tokens.items()},
                 "paths": {":".join(k): v for k, v in self.paths.items()},
                 "templates": self.templates,
-                "tasks": {":".join(k): v for k, v in self.tasks.items()},
+                "tasks": {":".join(map(str, k)): v for k, v in self.tasks.items()},
             },
         )
 
@@ -187,25 +187,25 @@ class Config:
     def maybe_validate(self) -> None:
         """Validate if requested, or."""
         if self.validate is False:
-            return
+            return None
+
+        jsonschema_error = None
 
         try:
             from .schema.validator import latest
 
-            has_jsonschema = True
-            jsonschema_error = None
+            return latest.validate(self.to_dict())
+
         except MissingDependencyError as err:
-            has_jsonschema = False
             jsonschema_error = str(err)
 
-        if not has_jsonschema:  # pragma: no cover
+        if jsonschema_error:  # pragma: no cover
             message = (
                 f"Validation was requested, but cannot validate: {jsonschema_error}"
             )
             warnings.warn(message, stacklevel=1)
-            return
 
-        latest.validate(self.to_dict())
+        return None  # pragma: no cover
 
     def find_config_sources(self) -> ConfigSources:
         """Find all directly and referenced configuration sources."""
@@ -605,7 +605,7 @@ class Config:
         """Get the new actions (and unresolved paths) for a task."""
         new_actions: List[Action] = []
 
-        for action in task[DOIT_TASK.ACTIONS]:
+        for action in task.get(DOIT_TASK.ACTIONS, []):
             action_actions, unresolved_specs = self.resolve_one_action(source, action)
             if unresolved_specs:
                 return unresolved_specs
