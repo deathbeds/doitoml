@@ -71,7 +71,7 @@ def get_schema_dict(type_: TSchemaType) -> Dict[str, Any]:
     schema = dict(json.loads(schema_text))
 
     for group, append_to in ENTRY_POINT_APPEND_TO.items():
-        raw_eps = EntryPoints.raw_entry_points(group)
+        raw_eps = EntryPoints.raw_entry_points(group)[0]
         for name, entry_point in raw_eps.items():
             ep_schema = entry_point.schema()
             if not ep_schema:  # pragma: no cover
