@@ -83,7 +83,7 @@ class EntryPoints:
                 message = f"{group} {name} unexpectedly failed to load {err}"
                 raise EntryPointError(message) from err
 
-        for log in sorted(logs):
+        for log in sorted(logs):  # pragma: no cover
             self.doitoml.log.info("%s %s is missing a dependency: %s", *log)
 
         return dict(sorted(eps.items(), key=self.rank_key))
